@@ -68,3 +68,29 @@ export interface UpdateAdminBody {
     email?: string;
     password?: string;
 }
+
+export interface CreateInstitutionBody {
+    name: string;
+    email: string;
+    secondaryEmail?: string;
+    phoneNumber: string;
+    secondaryPhoneNumber?: string;
+    address: string;
+    pinCode: string;
+    tagline: string;
+    websiteLink: string;
+    loginPassword: string;
+}
+
+export interface UpdateInstitutionBody {
+    name?: string;
+    email?: string;
+    secondaryEmail?: string;
+    phoneNumber?: string;
+    secondaryPhoneNumber?: string;
+    address?: string;
+    pinCode?: string;
+    tagline?: string;
+    websiteLink?: string;
+    loginPassword?: string;
+}
