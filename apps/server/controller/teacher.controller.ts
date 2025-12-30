@@ -11,7 +11,6 @@ class TeacherController {
             const data: CreateTeacherBody = req.body;
             if (!data) throw new Error("please provide all required fields");
 
-            const userId = req.user.id;
 
 
             if (req.user.type !== "INSTITUTION" && req.user.type !== "VENDOR") {

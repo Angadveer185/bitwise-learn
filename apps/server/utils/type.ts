@@ -197,3 +197,23 @@ export interface UpdateBatchBody {
   branch?: string;
   batchEndYear?: string;
 }
+export interface CreateVendorBody {
+  name: string;
+  email: string;
+  secondaryEmail?: string;
+  tagline: string;
+  phoneNumber: string;
+  secondaryPhoneNumber?: string;
+  websiteLink: string;
+  loginPassword: string;
+}
+export interface UpdateVendorBody {
+  name?: string;
+  email?: string;
+  secondaryEmail?: string;
+  tagline?: string;
+  phoneNumber?: string;
+  secondaryPhoneNumber?: string;
+  websiteLink?: string;
+  loginPassword?: string;
+}
