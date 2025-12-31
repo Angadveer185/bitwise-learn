@@ -12,6 +12,11 @@ problemsRouter.get(
   dsaQuestionController.getDsaProblemById
 );
 problemsRouter.get(
+  "/admin/get-dsa-problem/:id",
+  dsaQuestionController.getAdminDsaProblemById
+);
+
+problemsRouter.get(
   "/get-dsa-problems-by-tag",
   dsaQuestionController.getDsaProblemByTag
 );
