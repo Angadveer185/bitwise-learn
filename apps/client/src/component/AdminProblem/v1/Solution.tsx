@@ -26,8 +26,8 @@ function Solution() {
       <MDEditor
         height={600}
         //@ts-ignore
-        value={solution.solution as string}
-        onChange={() => {}}
+        value={(solution?.solution as string) || ""}
+        onChange={(e) => {}}
         preview="live"
         hideToolbar={false}
         spellCheck
@@ -35,7 +35,7 @@ function Solution() {
       <div className="relative mt-32 aspect-video rounded-md overflow-hidden bg-slate-900">
         <iframe
           //@ts-ignore
-          src={solution.videoSolution}
+          src={solution?.videoSolution || "https://youtube.com"}
           className="absolute inset-0 w-full h-full border-0"
           allowFullScreen
         />

@@ -1,9 +1,10 @@
 "use client";
 import { createProblem } from "@/api/problems/create-admin-problem";
 import MarkdownEditor from "@/component/ui/MarkDownEditor";
+import { X } from "lucide-react";
 import { useState } from "react";
 
-function ProblemSubmissionForm() {
+function ProblemSubmissionForm({ setOpen }: any) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState(`# Problem Statement
 
@@ -51,12 +52,17 @@ Output:
             </p>
           </div>
 
-          <button
-            onClick={handleSubmit}
-            className="rounded-lg bg-primaryBlue px-5 py-2 text-sm font-medium text-white shadow-md hover:opacity-90"
-          >
-            Submit Problem
-          </button>
+          <div className="flex gap-3">
+            <button onClick={() => setOpen(false)}>
+              <X className="text-white" size={24} />
+            </button>
+            <button
+              onClick={handleSubmit}
+              className="rounded-lg bg-primaryBlue px-5 py-2 text-sm font-medium text-white shadow-md hover:opacity-90"
+            >
+              Submit Problem
+            </button>
+          </div>
         </div>
 
         {/* Scrollable Content */}
@@ -80,6 +86,7 @@ Output:
                 value={description}
                 setValue={setDescription}
                 mode={"live"}
+                hideToolbar={false}
               />
             </div>
           </div>

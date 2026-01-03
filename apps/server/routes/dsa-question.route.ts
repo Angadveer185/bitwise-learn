@@ -116,5 +116,15 @@ problemsRouter.delete(
   adminMiddleware,
   dsaQuestionController.removeProblemSolution
 );
+problemsRouter.get(
+  "/get-user-solved-questions/",
+  adminMiddleware,
+  dsaQuestionController.getAllQuestionInfoById
+);
+problemsRouter.get(
+  "/admin/get-user-solved-questions",
+  adminMiddleware,
+  dsaQuestionController.getAllQuestionInfo
+);
 
 export default problemsRouter;

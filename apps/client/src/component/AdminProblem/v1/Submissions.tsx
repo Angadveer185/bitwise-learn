@@ -1,82 +1,243 @@
-"use client";
+import MDEditor from "@uiw/react-md-editor";
+import { useState } from "react";
 
-import { getAllProblemSubmission } from "@/api/problems/get-all-submission";
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
-
-type Submission = {
-  id: string;
-  status: string;
-  language: string;
-  runtime?: string;
-  createdAt: string;
+type SubmissionsProps = {
+  content: any;
 };
 
-function Submissions() {
-  const params = useParams();
-  const problemId = params.id as string;
+function Submissions({ content }: SubmissionsProps) {
+  if (!content) return null;
 
-  const [data, setData] = useState<Submission[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    if (!problemId) return;
+  const [name, setName] = useState(content.name);
+  const [description, setDescription] = useState(content.description);
+  const [difficulty, setDifficulty] = useState(content.difficulty);
+  const [hints, setHints] = useState<string[]>(content.hints || []);
+  const [topics, setTopics] = useState<string[]>(
+    content.problemTopics?.[0]?.tagName || []
+  );
+  const [newTopic, setNewTopic] = useState("");
 
-    setLoading(true);
-    getAllProblemSubmission(setData, problemId).finally(() =>
-      setLoading(false)
-    );
-  }, [problemId]);
+  /* ---------------- HELPERS ---------------- */
+  const resetChanges = () => {
+    setName(content.name);
+    setDescription(content.description);
+    setDifficulty(content.difficulty);
+    setHints(content.hints || []);
+    setTopics(content.problemTopics?.[0]?.tagName || []);
+  };
 
-  if (loading) {
-    return <div className="p-4 text-slate-400">Loading submissions...</div>;
-  }
+  const updateHint = (index: number, value: string) => {
+    const updated = [...hints];
+    updated[index] = value;
+    setHints(updated);
+  };
 
-  if (data.length === 0) {
-    return <div className="p-4 text-slate-400">No submissions yet.</div>;
-  }
+  const addHint = () => setHints([...hints, ""]);
+  const removeHint = (index: number) =>
+    setHints(hints.filter((_, i) => i !== index));
+
+  const addTopic = () => {
+    if (!newTopic.trim() || topics.includes(newTopic.trim())) return;
+    setTopics([...topics, newTopic.trim()]);
+    setNewTopic("");
+  };
+
+  const removeTopic = (tag: string) =>
+    setTopics(topics.filter((t) => t !== tag));
+
+  const handleSave = () => {
+    setIsSaving(true);
+
+    const updatedData = {
+      ...content,
+      name,
+      description,
+      difficulty,
+      hints,
+      problemTopics: [
+        {
+          ...content.problemTopics?.[0],
+          tagName: topics,
+        },
+      ],
+    };
+
+    console.log("Saved Data:", updatedData);
+
+    setTimeout(() => {
+      setIsSaving(false);
+      setIsEditing(false);
+    }, 500);
+  };
 
   return (
-    <div className="p-4">
-      <h2 className="mb-4 text-lg font-semibold text-white">Submissions</h2>
+    <div className="max-w-4xl mx-auto p-6 text-white space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        {isEditing ? (
+          <input
+            className="text-3xl font-bold bg-transparent border-b border-gray-600 focus:outline-none"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        ) : (
+          <h1 className="text-3xl font-bold">{name}</h1>
+        )}
 
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-sm">
-          <thead>
-            <tr className="border-b border-slate-700 text-left text-slate-400">
-              <th className="py-2">Status</th>
-              <th className="py-2">Language</th>
-              <th className="py-2">Runtime</th>
-              <th className="py-2">Submitted</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((submission) => (
-              <tr
-                key={submission.id}
-                className="border-b border-slate-800 text-white"
-              >
-                <td className="py-2">
-                  <span
-                    className={`font-medium ${
-                      submission.status === "Accepted"
-                        ? "text-green-400"
-                        : "text-red-400"
-                    }`}
-                  >
-                    {submission.status}
-                  </span>
-                </td>
-                <td className="py-2">{submission.language}</td>
-                <td className="py-2">{submission.runtime ?? "-"}</td>
-                <td className="py-2 text-slate-400">
-                  {new Date(submission.createdAt).toLocaleString()}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="flex gap-3 items-center">
+          {isEditing ? (
+            <select
+              value={difficulty}
+              onChange={(e) => setDifficulty(e.target.value)}
+              className="bg-gray-800 px-3 py-1 rounded-md"
+            >
+              <option value="EASY">EASY</option>
+              <option value="MEDIUM">MEDIUM</option>
+              <option value="HARD">HARD</option>
+            </select>
+          ) : (
+            <span className="bg-gray-700 px-3 py-1 rounded-full text-sm">
+              {difficulty}
+            </span>
+          )}
+
+          {!isEditing && (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="bg-blue-600 px-4 py-1 rounded-md"
+            >
+              Edit
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* Description */}
+      <section>
+        <h2 className="text-xl font-semibold mb-2">Description</h2>
+        {isEditing ? (
+          <MDEditor
+            height={300}
+            //@ts-ignore
+            value={description as string}
+            onChange={(e: any) => setDescription(e.target.value as string)}
+            preview="live"
+            hideToolbar={false}
+            spellCheck
+          />
+        ) : (
+          <p className="text-gray-200 whitespace-pre-line">{description}</p>
+        )}
+      </section>
+
+      {/* Topics */}
+      <section>
+        <h2 className="text-xl font-semibold mb-2">Topics</h2>
+
+        <div className="flex flex-wrap gap-2 mb-3">
+          {topics.map((tag) => (
+            <span
+              key={tag}
+              className="bg-gray-700 px-3 py-1 rounded-full text-sm flex items-center gap-2"
+            >
+              {tag}
+              {isEditing && (
+                <button
+                  onClick={() => removeTopic(tag)}
+                  className="text-red-400"
+                >
+                  ✕
+                </button>
+              )}
+            </span>
+          ))}
+        </div>
+
+        {isEditing && (
+          <div className="flex gap-2">
+            <input
+              value={newTopic}
+              onChange={(e) => setNewTopic(e.target.value)}
+              placeholder="Add topic"
+              className="bg-gray-800 px-3 py-1 rounded-md flex-1"
+            />
+            <button
+              onClick={addTopic}
+              className="bg-blue-600 px-4 py-1 rounded-md"
+            >
+              Add
+            </button>
+          </div>
+        )}
+      </section>
+
+      {/* Hints */}
+      <section>
+        <h2 className="text-xl font-semibold mb-2">Hints</h2>
+
+        {isEditing ? (
+          <>
+            {hints.map((hint, index) => (
+              <div key={index} className="flex gap-2 mb-2">
+                <input
+                  value={hint}
+                  onChange={(e) => updateHint(index, e.target.value)}
+                  className="flex-1 bg-gray-900 p-2 rounded-md"
+                />
+                <button
+                  onClick={() => removeHint(index)}
+                  className="text-red-400"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+
+            <button onClick={addHint} className="text-blue-400 hover:underline">
+              + Add Hint
+            </button>
+          </>
+        ) : (
+          <ul className="list-disc list-inside text-gray-300 space-y-1">
+            {hints.map((hint, i) => (
+              <li key={i}>{hint}</li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {/* Footer */}
+      <footer className="pt-4 border-t border-gray-700 flex justify-between items-center">
+        <div className="text-sm text-gray-400">
+          <p>Created: {new Date(content.createdAt).toLocaleString()}</p>
+          <p>Last Updated: {new Date(content.updatedAt).toLocaleString()}</p>
+        </div>
+
+        {isEditing && (
+          <div className="flex gap-3">
+            <button
+              onClick={() => {
+                resetChanges();
+                setIsEditing(false);
+              }}
+              className="bg-gray-600 px-4 py-2 rounded-md"
+            >
+              Cancel
+            </button>
+
+            <button
+              onClick={handleSave}
+              disabled={isSaving}
+              className="bg-green-600 px-6 py-2 rounded-md font-semibold"
+            >
+              {isSaving ? "Saving..." : "Save"}
+            </button>
+          </div>
+        )}
+      </footer>
     </div>
   );
 }

@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import axiosInstance from "@/lib/axios";
 
-export async function GET(
+export async function POST(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await context.params;
+    const data = await req.json();
 
     const backendUrl = process.env.BACKEND_URL;
     if (!backendUrl) {
@@ -16,8 +17,9 @@ export async function GET(
       );
     }
 
-    const response = await axiosInstance.get(
-      `${backendUrl}/api/v1/problems/admin/get-dsa-problem/${id}`
+    const response = await axiosInstance.post(
+      `${backendUrl}/api/v1/problems/admin/add-testcase-to-problem/${id}`,
+      data
     );
 
     return NextResponse.json(response.data.data, { status: 200 });

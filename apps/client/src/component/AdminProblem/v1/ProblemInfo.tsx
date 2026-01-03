@@ -4,11 +4,12 @@ import Solution from "./Solution";
 import Submissions from "./Submissions";
 import Templates from "./Templates";
 
-function ProblemInfo() {
+function ProblemInfo({ content }: any) {
   return (
     <div className="text-white w-full">
-      <Tabs defaultValue="solution" className="flex flex-col h-full">
+      <Tabs defaultValue="general" className="flex flex-col h-full">
         <TabsList className="border-b w-full border-neutral-700 bg-neutral-900 px-4">
+          <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="solution">Solution</TabsTrigger>
           <TabsTrigger value="testcases" className="">
             Testcases
@@ -16,7 +17,6 @@ function ProblemInfo() {
           <TabsTrigger value="templates" className="">
             Templates
           </TabsTrigger>
-          <TabsTrigger value="general">General</TabsTrigger>
         </TabsList>
 
         <div
@@ -35,7 +35,7 @@ function ProblemInfo() {
             <Solution />
           </TabsContent>
           <TabsContent value="general">
-            <Submissions />
+            <Submissions content={content} />
           </TabsContent>
           <TabsContent value="templates">
             <Templates />

@@ -24,38 +24,66 @@ const LANGUAGE_MAP: Record<string, string> = {
 
 function Templates() {
   const param = useParams();
+
   const [templates, setTemplates] = useState<Template[]>([]);
-  const [selectedLang, setSelectedLang] = useState("");
+  const [selectedLang, setSelectedLang] = useState<string | null>(null);
   const [currentDisplay, setCurrentDisplay] = useState<
     "defaultCode" | "functionBody"
   >("defaultCode");
-  const [showTemplateFrom, setShowTemplateForm] = useState(false);
-  /** user editable code per language */
+
+  const [showTemplateForm, setShowTemplateForm] = useState(false);
+
+  /** user editable default code per language */
   const [codeMap, setCodeMap] = useState<Record<string, string>>({});
 
+  /* ---------------- FETCH ---------------- */
   useEffect(() => {
     getAllProblemTemplate((res: Template[]) => {
       setTemplates(res);
 
-      if (res.length > 0) {
-        setSelectedLang(res[0].language);
+      if (res.length === 0) return;
 
-        const initialCode: Record<string, string> = {};
-        res.forEach((t) => {
-          initialCode[t.language] = t.defaultCode;
-        });
-        setCodeMap(initialCode);
-      }
+      const initialLang = res[0].language;
+      setSelectedLang(initialLang);
+
+      const initialCode: Record<string, string> = {};
+      res.forEach((t) => {
+        initialCode[t.language] = t.defaultCode;
+      });
+      setCodeMap(initialCode);
     }, param.id as string);
   }, [param.id]);
 
+  /* ---------------- MAP ---------------- */
   const templateMap = useMemo(() => {
     const map: Record<string, Template> = {};
     templates.forEach((t) => {
       map[t.language] = t;
     });
     return map;
-  }, [templates, currentDisplay]);
+  }, [templates]);
+
+  if (!selectedLang) {
+    return (
+      <div className="h-screen w-full flex flex-col items-center justify-center text-gray-400">
+        {showTemplateForm && (
+          <ShowAddTemplateForm
+            onClose={() => setShowTemplateForm(false)}
+            onSave={(data) => createProblemTemplate(param.id as string, data)}
+          />
+        )}
+        No templates available
+        <button
+          onClick={() => setShowTemplateForm(true)}
+          className="rounded-md bg-blue-600 mt-3 px-4 py-2 text-sm font-medium text-white
+                     hover:bg-blue-700 focus:outline-none focus:ring-2
+                     focus:ring-blue-500 focus:ring-offset-2"
+        >
+          + Add New Template
+        </button>
+      </div>
+    );
+  }
 
   const activeTemplate = templateMap[selectedLang];
   const monacoLanguage = LANGUAGE_MAP[selectedLang] || "plaintext";
@@ -65,43 +93,53 @@ function Templates() {
       ? (codeMap[selectedLang] ?? "")
       : (activeTemplate?.functionBody ?? "");
 
+  /* ---------------- UI ---------------- */
   return (
     <div className="h-screen flex flex-col bg-neutral-900 text-gray-300">
-      {showTemplateFrom && <ShowAddTemplateForm />}
-      <div className="w-full p-3 flex justify-end">
+      {showTemplateForm && (
+        <ShowAddTemplateForm
+          onClose={() => setShowTemplateForm(false)}
+          onSave={(data) => createProblemTemplate(param.id as string, data)}
+        />
+      )}
+
+      {/* Top Action */}
+      <div className="w-full p-3 gap-3 flex justify-end">
         <button
           onClick={() => setShowTemplateForm(true)}
-          className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white
-               shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2
-               focus:ring-blue-500 focus:ring-offset-2"
+          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white
+                     hover:bg-blue-700 focus:outline-none focus:ring-2
+                     focus:ring-blue-500 focus:ring-offset-2"
         >
           + Add New Template
+        </button>
+        <button
+          onClick={() => setShowTemplateForm(true)}
+          className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white
+                     hover:bg-green-700 focus:outline-none focus:ring-2
+                     focus:ring-green-500 focus:ring-offset-2"
+        >
+          Save
         </button>
       </div>
 
       {/* Tabs */}
       <div className="flex border-b border-neutral-700">
-        <button
-          onClick={() => setCurrentDisplay("defaultCode")}
-          className={`px-4 py-2 text-sm font-medium transition ${
-            currentDisplay === "defaultCode"
-              ? "text-white border-b-2 border-indigo-500"
-              : "text-gray-400 hover:text-white"
-          }`}
-        >
-          Default Code
-        </button>
-
-        <button
-          onClick={() => setCurrentDisplay("functionBody")}
-          className={`px-4 py-2 text-sm font-medium transition ${
-            currentDisplay === "functionBody"
-              ? "text-white border-b-2 border-indigo-500"
-              : "text-gray-400 hover:text-white"
-          }`}
-        >
-          Function Body
-        </button>
+        {["defaultCode", "functionBody"].map((tab) => (
+          <button
+            key={tab}
+            onClick={() =>
+              setCurrentDisplay(tab as "defaultCode" | "functionBody")
+            }
+            className={`px-4 py-2 text-sm font-medium transition ${
+              currentDisplay === tab
+                ? "text-white border-b-2 border-indigo-500"
+                : "text-gray-400 hover:text-white"
+            }`}
+          >
+            {tab === "defaultCode" ? "Default Code" : "Function Body"}
+          </button>
+        ))}
       </div>
 
       {/* Header */}
@@ -113,7 +151,7 @@ function Templates() {
         <select
           value={selectedLang}
           onChange={(e) => setSelectedLang(e.target.value)}
-          className="bg-neutral-800 border border-neutral-700 text-gray-300 text-sm px-3 py-1.5 rounded-md outline-none focus:ring-1 focus:ring-indigo-500"
+          className="bg-neutral-800 border border-neutral-700 px-3 py-1.5 rounded-md"
         >
           {Object.keys(templateMap).map((lang) => (
             <option key={lang} value={lang}>
@@ -127,6 +165,7 @@ function Templates() {
       <div className="flex-1">
         {activeTemplate && (
           <Editor
+            key={`${selectedLang}-${currentDisplay}`} // 🔑 CRITICAL FIX
             language={monacoLanguage}
             value={editorValue}
             theme="vs-dark"
@@ -134,7 +173,7 @@ function Templates() {
               if (currentDisplay === "defaultCode") {
                 setCodeMap((prev) => ({
                   ...prev,
-                  [selectedLang]: value || "",
+                  [selectedLang]: value ?? "",
                 }));
               }
             }}

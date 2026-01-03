@@ -12,13 +12,12 @@ function V1AdminProblem() {
   useEffect(() => {
     if (param) {
       getAdminProblemData(setData, param.id as string);
-      console.log(data);
     }
   }, []);
   return (
     <div className="flex h-screen gap-4">
       <ProblemDescrption data={data} />
-      <ProblemInfo />
+      <ProblemInfo content={data} />
     </div>
   );
 }

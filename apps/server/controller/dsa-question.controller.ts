@@ -10,6 +10,7 @@ import type {
   UpdateProblemTemplate,
 } from "../utils/type";
 import prismaClient from "../utils/prisma";
+import type { ElementWithComputedPropertyName } from "typescript";
 /**
  * ProblemTestCase Problem
  */
@@ -876,6 +877,101 @@ class DsaQuestionController {
       return res.status(200).json(apiResponse(200, "data fetched", problems));
     } catch (error: any) {
       console.log(error);
+      return res.status(200).json(apiResponse(500, error.message, null));
+    }
+  }
+
+  async getAllQuestionInfo(req: Request, res: Response) {
+    try {
+      const grouped = await prismaClient.problem.groupBy({
+        by: ["difficulty"],
+        _count: {
+          _all: true,
+        },
+      });
+
+      const counts = {
+        EASY: 0,
+        MEDIUM: 0,
+        HARD: 0,
+      };
+
+      grouped.forEach((item) => {
+        counts[item.difficulty] = item._count._all;
+      });
+
+      const easy = counts.EASY;
+      const medium = counts.MEDIUM;
+      const hard = counts.HARD;
+
+      return res.status(200).json(
+        apiResponse(200, "data fetched", {
+          easy,
+          medium,
+          hard,
+          totalQuestion: easy + medium + hard,
+        })
+      );
+    } catch (error: any) {
+      console.error(error);
+      return res.status(200).json(apiResponse(500, error.message, null));
+    }
+  }
+
+  async getAllQuestionInfoById(req: Request, res: Response) {
+    try {
+      const userId = req.user?.id;
+
+      if (!userId) {
+        return res.status(401).json(apiResponse(401, "Unauthorized", null));
+      }
+
+      const dbStudent = await prismaClient.students.findFirst({
+        where: { id: userId },
+      });
+
+      if (!dbStudent) throw new Error("user not found!");
+
+      const grouped = await prismaClient.problemSubmission.groupBy({
+        by: ["problemId"],
+        where: {
+          studentId: userId,
+          status: "SUCCESS",
+        },
+      });
+
+      const solvedProblemIds = grouped.map((g) => g.problemId);
+
+      const difficultyCounts = await prismaClient.problem.groupBy({
+        by: ["difficulty"],
+        where: {
+          id: { in: solvedProblemIds },
+        },
+        _count: {
+          _all: true,
+        },
+      });
+
+      const counts = {
+        EASY: 0,
+        MEDIUM: 0,
+        HARD: 0,
+      };
+
+      difficultyCounts.forEach((item) => {
+        counts[item.difficulty] = item._count._all;
+      });
+
+      return res.status(200).json(
+        apiResponse(200, "data fetched", {
+          easy: counts.EASY,
+          medium: counts.MEDIUM,
+          hard: counts.HARD,
+          totalSolved: counts.EASY + counts.MEDIUM + counts.HARD,
+        })
+      );
+    } catch (error: any) {
+      console.error(error);
       return res.status(200).json(apiResponse(500, error.message, null));
     }
   }
