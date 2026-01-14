@@ -248,6 +248,17 @@ class TeacherController {
 
             const teacher = await prismaClient.teacher.findFirst({
                 where: { id: teacherId },
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    phoneNumber: true,
+                    instituteId: true,
+                    batchId: true,
+                    vendorId: true,
+                    createdAt: true,
+                    updatedAt: true,
+                },
             });
             if (!teacher) throw new Error("teacher not found");
 
@@ -271,6 +282,47 @@ class TeacherController {
             return res
                 .status(200)
                 .json(apiResponse(200, "teacher fetched successfully", teacher));
+        } catch (error: any) {
+            console.log(error);
+            return res.status(200).json(apiResponse(200, error.message, null));
+        }
+    }
+    async getTeacherByInstitute(req: Request, res: Response) {
+        try {
+            if (!req.user) throw new Error("user not authenticated");
+            const userId = req.user.id;
+            const instituteId = req.params.id;
+
+            if (!instituteId) throw new Error("institute id is required");
+
+
+            const teachers = await prismaClient.teacher.findMany({
+                where: { instituteId: instituteId },
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    phoneNumber: true,
+                    instituteId: true,
+                    batchId: true,
+                    vendorId: true,
+                    createdAt: true,
+                    updatedAt: true,
+                },
+            });
+            if (!teachers) throw new Error("teachers not found");
+
+            if (
+                req.user.type !== "SUPERADMIN" &&
+                req.user.type !== "ADMIN"
+
+            ) {
+                throw new Error("not authorized");
+            }
+
+            return res
+                .status(200)
+                .json(apiResponse(200, "institute teachers fetched successfully", teachers));
         } catch (error: any) {
             console.log(error);
             return res.status(200).json(apiResponse(200, error.message, null));

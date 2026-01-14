@@ -40,7 +40,7 @@ class BatchController {
     async updateBatch(req: Request, res: Response) {
         try {
             const batchId = req.params.id;
-
+            if (!batchId) throw new Error("Batch id is required");
             if (!req.user) throw new Error("user is not authenticated");
             const data: UpdateBatchBody = req.body;
 
@@ -52,6 +52,8 @@ class BatchController {
             const batch = await prismaClient.batch.findFirst({
                 where: { id: batchId },
             });
+            if (!batch) throw new Error("Batch not found");
+
             if (batch.institutionId !== institutionId) {
                 throw new Error("this batch does not belongs to this institution");
             }
@@ -89,7 +91,9 @@ class BatchController {
             const batch = await prismaClient.batch.findFirst({
                 where: { id: batchId },
             });
-            if (batch.institutionId !== institutionId) {
+            if (!batch) throw new Error("Batch not found");
+
+            if (req.user.type == "INSTITUTION" && batch.institutionId !== institutionId) {
                 throw new Error("this batch does not belongs to this institution");
             }
 
@@ -159,7 +163,9 @@ class BatchController {
                     updatedAt: true,
                 },
             });
-            if (batch.institutionId !== institutionId) {
+            if (!batch) throw new Error("Batch not found");
+
+            if (req.user.type === "INSTITUTION" && batch.institutionId !== institutionId) {
                 throw new Error("this batch does not belong to this institution");
             }
 
