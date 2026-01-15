@@ -24,8 +24,7 @@ export default function SideBar() {
     const handleMouseMove = (e: MouseEvent) => {
       if (!isResizing.current || !sidebarRef.current) return;
 
-      const sidebarLeft =
-        sidebarRef.current.getBoundingClientRect().left;
+      const sidebarLeft = sidebarRef.current.getBoundingClientRect().left;
       const newWidth = e.clientX - sidebarLeft;
 
       if (newWidth >= MIN_WIDTH && newWidth <= MAX_WIDTH) {
@@ -81,6 +80,12 @@ export default function SideBar() {
       {/* Navigation */}
       <nav className="px-2 py-4 space-y-1">
         <NavLink
+          href="/admin-dashboard"
+          icon={<LayoutDashboard size={20} />}
+          label="Dashboard"
+          collapsed={isCollapsed}
+        />
+        <NavLink
           href="/admin-dashboard/courses"
           icon={<NotebookPen size={20} />}
           label="Courses"
@@ -90,12 +95,6 @@ export default function SideBar() {
           href="/admin-dashboard/problems"
           icon={<Code2 size={20} />}
           label="Problems"
-          collapsed={isCollapsed}
-        />
-        <NavLink
-          href="/admin-dashboard"
-          icon={<LayoutDashboard size={20} />}
-          label="Dashboard"
           collapsed={isCollapsed}
         />
         <NavLink
@@ -137,7 +136,6 @@ export default function SideBar() {
     </aside>
   );
 }
-
 
 function NavLink({
   href,

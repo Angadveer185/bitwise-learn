@@ -17,7 +17,7 @@ function V1AllBatches() {
   return (
     <div className="flex">
       {addNew && <VendorForm openForm={setAddNew} />}
-      <div>
+      <div className="h-screen">
         <SideBar />
       </div>
 

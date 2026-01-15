@@ -25,7 +25,7 @@ function DashboardInfo({ data }: Props) {
   const router = useRouter();
 
   const handleSeeDetails = (institutionId: string) => {
-    router.push(`/institutionInfo?id=${institutionId}`);
+    router.push(`/admin-dashboard/institutions/${institutionId}`);
   };
 
   if (!Array.isArray(data) || data.length === 0) {
@@ -39,7 +39,15 @@ function DashboardInfo({ data }: Props) {
   return (
     <>
       {/* Table Container */}
-      <div className="w-full overflow-x-auto border border-white/10 bg-divBg shadow-lg">
+      <div
+        className="w-full overflow-y-auto overflow-x-hidden border border-white/10 bg-divBg shadow-lg"
+        style={{
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+          //@ts-ignore
+          WebkitScrollbar: { display: "none" },
+        }}
+      >
         <table className="w-full border-collapse">
           {/* Header */}
           <thead className="bg-black/30">

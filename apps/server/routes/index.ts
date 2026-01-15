@@ -5,7 +5,7 @@ import batchRouter from "./batch.routes";
 import authRouter from "./auth.routes";
 import vendorRouter from "./vendor.routes";
 import studentRouter from "./student.routes";
-
+import courseRouter from "./course.route";
 export {
   adminRouter,
   institutionRouter,
@@ -14,4 +14,5 @@ export {
   teacherRouter,
   authRouter,
   studentRouter,
+  courseRouter,
 };

@@ -17,7 +17,7 @@ function V1AllVendors() {
   return (
     <div className="flex">
       {addNew && <VendorForm openForm={setData} />}
-      <div>
+      <div className="h-screen">
         <SideBar />
       </div>
 

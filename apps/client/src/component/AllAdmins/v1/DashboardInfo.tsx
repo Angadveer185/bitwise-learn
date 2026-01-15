@@ -43,7 +43,15 @@ function DashboardInfo({ data }: Props) {
   return (
     <>
       {/* Table */}
-      <div className="w-full overflow-x-auto border  bg-divBg shadow-lg">
+      <div
+        className="w-full overflow-y-auto border  bg-divBg shadow-lg"
+        style={{
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+          //@ts-ignore
+          WebkitScrollbar: { display: "none" },
+        }}
+      >
         <table className="w-full ">
           <thead className="bg-black/30">
             <tr className="text-left text-[11px] font-semibold uppercase tracking-wide text-white/40">
