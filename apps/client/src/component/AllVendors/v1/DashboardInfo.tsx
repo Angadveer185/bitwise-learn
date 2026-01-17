@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { X, Pencil, Trash2 } from "lucide-react";
+import { deleteEntity, updateEntity } from "@/api/institutions/entity";
 
 type CompanyData = {
   id: string;
@@ -43,27 +44,54 @@ function formatValue(value: any) {
 
 export default function DashboardInfo({ data, onUpdate, onDelete }: Props) {
   const [selected, setSelected] = useState<CompanyData | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState<CompanyData | null>(null);
 
   /* ------------------ HANDLERS ------------------ */
 
-  const handleUpdate = () => {
+  const handleEdit = () => {
     if (!selected) return;
-
-    onUpdate({
-      entity: "vendor",
-      data: selected,
-    });
+    setFormData(selected);
+    setIsEditing(true);
   };
 
-  const handleDelete = () => {
+  const handleCancel = () => {
+    setIsEditing(false);
+    setFormData(null);
+  };
+
+  const handleSubmit = async () => {
+    if (!formData) return;
+    await updateEntity(
+      formData.id,
+      {
+        entity: "vendor",
+        data: formData,
+      },
+      null,
+    );
+
+    setSelected(formData);
+    setIsEditing(false);
+  };
+
+  const handleDelete = async () => {
     if (!selected) return;
-
-    onDelete({
-      entity: "vendor",
-      id: selected.id,
-    });
-
+    await deleteEntity(
+      selected.id,
+      {
+        entity: "vendor",
+        data: "",
+      },
+      null,
+    );
     setSelected(null);
+    setIsEditing(false);
+  };
+
+  const handleChange = (key: keyof CompanyData, value: string) => {
+    if (!formData) return;
+    setFormData({ ...formData, [key]: value });
   };
 
   /* ---------------------------------------------- */
@@ -107,7 +135,10 @@ export default function DashboardInfo({ data, onUpdate, onDelete }: Props) {
                 </td>
                 <td className="px-6 py-4 text-right">
                   <button
-                    onClick={() => setSelected(company)}
+                    onClick={() => {
+                      setSelected(company);
+                      setIsEditing(false);
+                    }}
                     className="rounded-md border border-primaryBlue/40 px-3 py-1.5 text-xs font-medium text-primaryBlue transition hover:bg-primaryBlue/20"
                   >
                     See details
@@ -132,7 +163,7 @@ export default function DashboardInfo({ data, onUpdate, onDelete }: Props) {
             </button>
 
             {/* Header */}
-            <div className="mb-6 mt-6 flex  items-start justify-between gap-4">
+            <div className="mb-6 mt-6 flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-xl font-semibold text-white">
                   Company Details
@@ -142,36 +173,76 @@ export default function DashboardInfo({ data, onUpdate, onDelete }: Props) {
 
               {/* Actions */}
               <div className="flex gap-2">
-                <button
-                  onClick={handleUpdate}
-                  className="flex items-center gap-1 rounded-md border border-primaryBlue/40 px-3 py-1.5 text-xs font-medium text-primaryBlue transition hover:bg-primaryBlue/20"
-                >
-                  <Pencil size={14} />
-                  Edit
-                </button>
+                {isEditing ? (
+                  <>
+                    <button
+                      onClick={handleSubmit}
+                      className="rounded-md bg-primaryBlue px-4 py-1.5 text-xs font-semibold text-white hover:opacity-90"
+                    >
+                      Save
+                    </button>
 
-                <button
-                  onClick={handleDelete}
-                  className="flex items-center gap-1 rounded-md border border-red-500/40 px-3 py-1.5 text-xs font-medium text-red-400 transition hover:bg-red-500/20"
-                >
-                  <Trash2 size={14} />
-                  Delete
-                </button>
+                    <button
+                      onClick={handleCancel}
+                      className="rounded-md border border-white/20 px-4 py-1.5 text-xs text-white/70 hover:bg-white/10"
+                    >
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={handleEdit}
+                      className="flex items-center gap-1 rounded-md border border-primaryBlue/40 px-3 py-1.5 text-xs font-medium text-primaryBlue transition hover:bg-primaryBlue/20"
+                    >
+                      <Pencil size={14} />
+                      Edit
+                    </button>
+                    <button
+                      onClick={handleDelete}
+                      className="flex items-center gap-1 rounded-md border border-red-500/40 px-3 py-1.5 text-xs font-medium text-red-400 transition hover:bg-red-500/20"
+                    >
+                      <Trash2 size={14} />
+                      Delete
+                    </button>
+                  </>
+                )}
               </div>
             </div>
 
             {/* Content */}
             <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
-              {Object.entries(selected).map(([key, value]) => (
-                <div key={key}>
-                  <p className="mb-1 mt-2 text-[11px] uppercase tracking-wide text-primaryBlue">
-                    {key.replace(/_/g, " ")}
-                  </p>
-                  <p className="break-words text-sm text-white">
-                    {formatValue(value)}
-                  </p>
-                </div>
-              ))}
+              {Object.entries(isEditing ? formData! : selected).map(
+                ([key, value]) => {
+                  const isReadonly =
+                    key === "id" || key === "createdAt" || key === "updatedAt";
+
+                  return (
+                    <div key={key}>
+                      <p className="mb-1 mt-2 text-[11px] uppercase tracking-wide text-primaryBlue">
+                        {key.replace(/_/g, " ")}
+                      </p>
+
+                      {isEditing && !isReadonly ? (
+                        <input
+                          value={(formData as any)[key] ?? ""}
+                          onChange={(e) =>
+                            handleChange(
+                              key as keyof CompanyData,
+                              e.target.value,
+                            )
+                          }
+                          className="w-full rounded-md border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-primaryBlue"
+                        />
+                      ) : (
+                        <p className="break-words text-sm text-white">
+                          {formatValue(value)}
+                        </p>
+                      )}
+                    </div>
+                  );
+                },
+              )}
             </div>
           </div>
         </div>

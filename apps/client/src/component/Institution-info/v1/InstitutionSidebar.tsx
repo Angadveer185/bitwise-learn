@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Pencil, Save, X, Trash } from "lucide-react";
 import InfoBlock from "./InfoBlock";
+import { deleteEntity, updateEntity } from "@/api/institutions/entity";
 
 type InstitutionSidebarProps = {
   institution: any;
@@ -76,14 +77,28 @@ const InstitutionSidebar = ({
     }));
   };
 
-  const handleSave = () => {
-    onUpdate?.(formData);
+  const handleSave = async () => {
+    await updateEntity(
+      formData.id,
+      {
+        entity: "institution",
+        data: formData,
+      },
+      null,
+    );
     setIsEditing(false);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (confirm("Are you sure you want to delete this institution?")) {
-      onDelete?.(institution.id);
+      await deleteEntity(
+        formData.id,
+        {
+          entity: "institution",
+          data: "",
+        },
+        null,
+      );
     }
   };
 

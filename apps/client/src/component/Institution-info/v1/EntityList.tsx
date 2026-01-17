@@ -7,6 +7,7 @@ import { X, Pencil, Save, Trash } from "lucide-react";
 import { getAllTeachers } from "@/api/teachers/get-all-teachers";
 import { getAllBatches } from "@/api/batches/get-all-batches";
 import { getAllVendors } from "@/api/vendors/get-all-vendors";
+import { deleteEntity, updateEntity } from "@/api/institutions/entity";
 
 type EntityListProps = {
   type: string;
@@ -125,16 +126,16 @@ export const EntityList = ({ type }: EntityListProps) => {
   const handleUpdate = async () => {
     if (!backendEntityType) return;
 
-    // await updateEntity({
-    //   entity: backendEntityType,
-    // id: selectedEntity.id || selectedEntity._id,
-    //   data: editData,
-    // });
+    await updateEntity(
+      selectedEntity.id || selectedEntity._id,
+      { entity: backendEntityType, data: editData },
+      null,
+    );
 
     setEntities((prev) =>
       prev.map((e) =>
-        (e.id || e._id) === (editData.id || editData._id) ? editData : e
-      )
+        (e.id || e._id) === (editData.id || editData._id) ? editData : e,
+      ),
     );
 
     setSelectedEntity(editData);
@@ -147,15 +148,16 @@ export const EntityList = ({ type }: EntityListProps) => {
     const ok = confirm("Are you sure you want to delete?");
     if (!ok) return;
 
-    // await deleteEntity({
-    //   entity: backendEntityType,
-    //   id: selectedEntity.id || selectedEntity._id,
-    // });
+    await deleteEntity(
+      selectedEntity.id || selectedEntity._id,
+      { entity: backendEntityType, data: "" },
+      null,
+    );
 
     setEntities((prev) =>
       prev.filter(
-        (e) => (e.id || e._id) !== (selectedEntity.id || selectedEntity._id)
-      )
+        (e) => (e.id || e._id) !== (selectedEntity.id || selectedEntity._id),
+      ),
     );
 
     setSelectedEntity(null);
