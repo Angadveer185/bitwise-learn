@@ -1,26 +1,77 @@
 "use client";
 
+import { deleteCourseById } from "@/api/courses/delete-course-by-id";
+import { getCourseById } from "@/api/courses/get-course-by-id";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { Trash2 } from "lucide-react";
+import toast from "react-hot-toast";
 
 import AddAssignment from "../../add-assignment/AddAssignment";
 import AddSection from "../../add-section/v1/AddSectionV1";
-import { getCourseById } from "@/api/courses/get-course-by-id";
+
 type Props = {
-  courseId : string;
-}
+  courseId: string;
+};
 
-const CourseBuilderV1 = ({courseId}:Props) => {
+/* ---------------- Delete Confirmation Modal ---------------- */
 
+const ConfirmDeleteModal = ({
+  open,
+  onClose,
+  onConfirm,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}) => {
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="w-full max-w-sm rounded-2xl bg-slate-900 border border-slate-800 p-6">
+        <h2 className="text-lg font-semibold text-white">
+          Delete this course?
+        </h2>
+
+        <p className="mt-2 text-sm text-slate-400">
+          This action is permanent and cannot be undone.
+        </p>
+
+        <div className="mt-6 flex justify-end gap-3">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition"
+          >
+            Cancel
+          </button>
+
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-500 transition"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ---------------- Main Component ---------------- */
+
+const CourseBuilderV1 = ({ courseId }: Props) => {
+  const router = useRouter();
   const [course, setCourse] = useState<any>(null);
   const [blocks, setBlocks] = useState<any[]>([]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (!courseId) return;
 
     const fetchCourse = async () => {
-      const res = await getCourseById(courseId as string);
-      console.log("COURSE RESPONSE : ",res);
+      const res = await getCourseById(courseId);
+      console.log("COURSE RESPONSE : ", res);
       setCourse(res.data);
     };
 
@@ -36,17 +87,11 @@ const CourseBuilderV1 = ({courseId}:Props) => {
   const sections = course.courseSections || [];
 
   const addSection = () => {
-    setBlocks((prev) => [
-      ...prev,
-      { id: Date.now(), type: "section" },
-    ]);
+    setBlocks((prev) => [...prev, { id: Date.now(), type: "section" }]);
   };
 
   const addAssignment = () => {
-    setBlocks((prev) => [
-      ...prev,
-      { id: Date.now(), type: "assignment" },
-    ]);
+    setBlocks((prev) => [...prev, { id: Date.now(), type: "assignment" }]);
   };
 
   return (
@@ -58,33 +103,21 @@ const CourseBuilderV1 = ({courseId}:Props) => {
         </h1>
 
         <div className="flex gap-3 mt-4">
-          <button
-            className="px-3 py-1.5 text-sm rounded-md
-              border border-slate-700 text-sky-300
-              hover:border-sky-500 transition"
-          >
+          <button className="px-3 py-1.5 text-sm rounded-md border border-slate-700 text-sky-300 hover:border-sky-500 transition">
             Upload Certificate
           </button>
 
-          <button
-            className="px-3 py-1.5 text-sm rounded-md
-              border border-slate-700 text-sky-300
-              hover:border-sky-500 transition"
-          >
+          <button className="px-3 py-1.5 text-sm rounded-md border border-slate-700 text-sky-300 hover:border-sky-500 transition">
             Upload Thumbnail
           </button>
 
-          <button
-            className="px-4 py-1.5 text-sm rounded-md
-              bg-sky-600 text-black font-medium
-              hover:bg-sky-500 transition"
-          >
+          <button className="px-4 py-1.5 text-sm rounded-md bg-sky-600 text-black font-medium hover:bg-sky-500 transition">
             Publish
           </button>
         </div>
       </div>
 
-      {/* course creation section */}
+      {/* course sections */}
       <div className="mt-10 space-y-8">
         {sections.map((section: any, index: number) => (
           <AddSection
@@ -112,7 +145,7 @@ const CourseBuilderV1 = ({courseId}:Props) => {
         })}
       </div>
 
-      {/* section/assignment buttons */}
+      {/* add buttons */}
       <div className="flex gap-3 mt-6">
         <button
           onClick={addSection}
@@ -131,9 +164,7 @@ const CourseBuilderV1 = ({courseId}:Props) => {
 
       {/* Floating Delete Button */}
       <button
-        onClick={() => {
-          console.log("Delete clicked");
-        }}
+        onClick={() => setShowDeleteConfirm(true)}
         className="
           fixed bottom-6 right-6
           flex items-center gap-2
@@ -151,6 +182,24 @@ const CourseBuilderV1 = ({courseId}:Props) => {
         <Trash2 size={18} />
         Delete
       </button>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmDeleteModal
+        open={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={async () => {
+          try {
+            const res = await deleteCourseById(courseId);
+            router.push("/admin-dashboard/courses");
+            toast.success("Course deleted successfully");
+          } catch (error) {
+            console.error(error);
+            toast.error("Failed to delete course");
+          } finally {
+            setShowDeleteConfirm(false);
+          }
+        }}
+      />
     </div>
   );
 };
