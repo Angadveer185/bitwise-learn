@@ -1,7 +1,7 @@
 "use client";
 
-import { deleteCourseById } from "@/api/courses/delete-course-by-id";
-import { getCourseById } from "@/api/courses/get-course-by-id";
+import { deleteCourseById } from "@/api/courses/course/delete-course-by-id";
+import { getCourseById } from "@/api/courses/course/get-course-by-id";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { Trash2 } from "lucide-react";

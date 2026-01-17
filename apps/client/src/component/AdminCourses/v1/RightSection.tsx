@@ -5,7 +5,7 @@ import CourseCard, { Course } from "./CourseCard";
 import { useState, useEffect } from "react";
 import { Search, BookAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { getAllCourses } from "@/api/courses/get-all-courses";
+import { getAllCourses } from "@/api/courses/course/get-all-courses";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useRef } from "react";
 import CourseForm from "@/component/(admin-course-pages)/course-form/CourseForm";

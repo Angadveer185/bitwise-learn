@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useState } from "react";
-import { createCourse } from "@/api/courses/create-course";
+import { createCourse } from "@/api/courses/course/create-course";
 import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 type CourseFormData = {
