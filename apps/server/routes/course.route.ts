@@ -14,120 +14,133 @@ router.post(
   "/upload-thumbnail/:id",
   authMiddleware,
   upload.single("thumbnail"),
-  courseController.uploadThumbnail
+  courseController.uploadThumbnail,
 );
 router.post(
   "/upload-completion-certificate/:id",
   authMiddleware,
   upload.single("certificate"),
-  courseController.uploadCompletionCertificate
+  courseController.uploadCompletionCertificate,
 );
 router.put(
   "/change-publish-status/:id",
   authMiddleware,
-  courseController.changePublishStatus
+  courseController.changePublishStatus,
 );
 router.put("/update-course/:id", authMiddleware, courseController.updateCourse);
 router.get(
   "/get-all-courses-by-admin",
   authMiddleware,
-  courseController.getAllCoursesByAdmin
+  courseController.getAllCoursesByAdmin,
 );
-router.get("/get-course-by-id/:id", authMiddleware,courseController.getCourseById);
-router.get("/get-all-sections-by-course/:id",authMiddleware,courseController.getAllSectionsByCourse);
+router.get(
+  "/get-course-by-id/:id",
+  authMiddleware,
+  courseController.getCourseById,
+);
+router.get(
+  "/get-all-sections-by-course/:id",
+  authMiddleware,
+  courseController.getAllSectionsByCourse,
+);
 router.delete(
   "/delete-course/:id",
   authMiddleware,
-  courseController.removeCourse
+  courseController.removeCourse,
 );
 
 // course individual section
+router.get(
+  "/get-course-section/:id",
+  authMiddleware,
+  courseController.getCourseSectionContent,
+);
 router.post(
   "/add-course-section/:id",
   authMiddleware,
-  courseController.addCourseSection
+  courseController.addCourseSection,
 );
 router.put(
   "/update-course-section/:id",
   authMiddleware,
-  courseController.updateCourseSection
+  courseController.updateCourseSection,
 );
-router.delete(
+router.put(
   "/delete-course-section/:id",
   authMiddleware,
-  courseController.removeCourseSection
+  courseController.removeCourseSection,
 );
 
 //course content
 router.post(
   "/add-content-to-section",
   authMiddleware,
-  courseContentController.addContentToSection
+  courseContentController.addContentToSection,
 );
 router.delete(
   "/delete-content/:id",
   authMiddleware,
-  courseContentController.deleteContentFromSection
+  courseContentController.deleteContentFromSection,
 );
 router.put(
   "/update-content-to-section/:id",
   authMiddleware,
-  courseContentController.updateContentToSection
+  courseContentController.updateContentToSection,
 );
 router.post(
   "/upload-file-in-content/:id",
   authMiddleware,
   upload.single("content"),
-  courseContentController.uploadFileToContent
+  courseContentController.uploadFileToContent,
 );
 router.delete(
   "/remove-file-in-content/:id",
   authMiddleware,
-  courseContentController.removeFileFromContent
+  courseContentController.removeFileFromContent,
 );
 
 // course-assignment
 router.post(
   "/add-assignment-to-section/",
   authMiddleware,
-  courseAssignmentController.addAssignmentToSection
+  courseAssignmentController.addAssignmentToSection,
 );
 router.put(
   "/update-assignment-to-section/:id",
   authMiddleware,
-  courseAssignmentController.updateAssignmentToSection
+  courseAssignmentController.updateAssignmentToSection,
 );
 router.delete(
   "/remove-assignment-from-section/:id",
   authMiddleware,
-  courseAssignmentController.removeAssignmentFromSection
+  courseAssignmentController.removeAssignmentFromSection,
 );
 router.get(
   "/get-assignment-by-id/:id",
   authMiddleware,
-  courseAssignmentController.getAssignmentById
+  courseAssignmentController.getAssignmentById,
 );
 
 // course-assignment-question
 router.post(
   "/add-assignment-question/:id",
   authMiddleware,
-  courseAssignmentController.addCourseAssignemntQuestion
+  courseAssignmentController.addCourseAssignemntQuestion,
 );
 router.put(
   "/update-assignment-question/:id",
   authMiddleware,
-  courseAssignmentController.updateCourseAssignemntQuestion
+  courseAssignmentController.updateCourseAssignemntQuestion,
 );
 router.delete(
   "/remove-assignment-question/:id",
   authMiddleware,
-  courseAssignmentController.removeCourseAssignemntQuestion
+  courseAssignmentController.removeCourseAssignemntQuestion,
 );
 router.get(
   "/get-all-section-assignments/:id",
   authMiddleware,
-  courseAssignmentController.getAllAssignmentFromSection
+  courseAssignmentController.getAllAssignmentFromSection,
 );
 
 //course-grade
@@ -135,38 +148,38 @@ router.get(
 router.get(
   "/get-all-assignment-marks/",
   authMiddleware,
-  courseGradeController.getAllAssignmentMarks
+  courseGradeController.getAllAssignmentMarks,
 );
 router.get(
   "/get-all-assignment-marks-by-courseId/:id",
   authMiddleware,
-  courseGradeController.getAssignmentMarksByCourseId
+  courseGradeController.getAssignmentMarksByCourseId,
 );
 router.post(
   "/submit-course-assignment/",
   authMiddleware,
-  courseGradeController.submitCourseAssignment
+  courseGradeController.submitCourseAssignment,
 );
 
 //course-progress
 router.post(
   "/mark-content-as-done/:id",
   authMiddleware,
-  courseProgressController.markAsDone
+  courseProgressController.markAsDone,
 );
 router.put(
   "/unmark-content-as-done/:id",
   authMiddleware,
-  courseProgressController.unMarksAsDone
+  courseProgressController.unMarksAsDone,
 );
 router.get(
   "/get-all-course-progress/",
   authMiddleware,
-  courseProgressController.getAllCourseProgress
+  courseProgressController.getAllCourseProgress,
 );
 router.get(
   "/get-individual-course-progress/:id",
   authMiddleware,
-  courseProgressController.getCourseProgressById
+  courseProgressController.getCourseProgressById,
 );
 export default router;

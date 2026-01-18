@@ -77,7 +77,7 @@ class CoursesController {
       const fileLink = await cloudinaryService.uploadFile(
         req.file,
         "thumbnail",
-        uniqueFilename
+        uniqueFilename,
       );
       if (!fileLink) throw new Error("file upload failed");
 
@@ -126,7 +126,7 @@ class CoursesController {
       const fileLink = await cloudinaryService.uploadFile(
         req.file,
         "certificate",
-        uniqueFilename
+        uniqueFilename,
       );
       if (!fileLink) throw new Error("file upload failed");
 
@@ -373,7 +373,7 @@ class CoursesController {
       return res
         .status(200)
         .json(
-          apiResponse(200, "new section has been added", createdCourseSection)
+          apiResponse(200, "new section has been added", createdCourseSection),
         );
     } catch (error: any) {
       console.log(error);
@@ -413,7 +413,7 @@ class CoursesController {
       return res
         .status(200)
         .json(
-          apiResponse(200, "section has been updated", updatedCourseSection)
+          apiResponse(200, "section has been updated", updatedCourseSection),
         );
     } catch (error: any) {
       console.log(error);
@@ -452,61 +452,80 @@ class CoursesController {
       return res
         .status(200)
         .json(
-          apiResponse(200, "section has been removed", removedCourseSection)
+          apiResponse(200, "section has been removed", removedCourseSection),
         );
     } catch (error: any) {
       console.log(error);
       return res.status(200).json(apiResponse(500, error.message, null));
     }
   }
-
-  async getAllSectionsByCourse(req:Request, res:Response){
+  async getAllSectionsByCourse(req: Request, res: Response) {
     try {
-      if(!req.user) throw new Error("User not Authenticated");
-
+      if (!req.user) throw new Error("user not authenticated");
       const userId = req.user.id;
       const courseId = req.params.id;
-
-      if(!userId) throw new Error("UserId is Required");
-      if(!courseId) throw new Error("CourseId is Required");
+      if (!userId) throw new Error("userId is required");
+      if (!courseId) throw new Error("courseId is required");
 
       const dbAdmin = await prismaClient.user.findFirst({
-        where:{id:userId},
+        where: { id: userId },
       });
 
-      if(!dbAdmin) throw new Error("No User Found");
+      if (!dbAdmin) throw new Error("no such user found!");
 
-      const dbCourse = await prismaClient.course.findFirst({
-        where:{
-          id:courseId,
-          createdBy: dbAdmin.id,
-        },
+      const dbCourse = await prismaClient.course.findUnique({
+        where: { id: courseId },
       });
 
-      if(!dbCourse) throw new Error("No Course Found for this User");
-      
+      if (!dbCourse) throw new Error("no course found!");
+
       const sections = await prismaClient.courseSections.findMany({
-        where:{
-          courseId:dbCourse.id,
-          creatorId:dbAdmin.id,
+        where: { courseId: courseId },
+        include: {
+          courseAssignemnts: true,
+          courseLearningContents: true,
         },
-        include:{
-          courseLearningContents:true,
-          courseAssignemnts:true,
-        },
-        orderBy:{
-          createdAt:"asc",
+        orderBy: {
+          createdAt: "asc",
         },
       });
 
-      return res.status(200).json(
-        apiResponse(200,"Sections Fetched SuccessFully",sections)
-      );
-    } catch (error:any) {
+      return res
+        .status(200)
+        .json(apiResponse(200, "sections fetched successfully", sections));
+    } catch (error: any) {
       console.log(error);
-      return res.status(200).json(
-        apiResponse(500,error.message,null)
-      );
+      return res.status(200).json(apiResponse(500, error.message, null));
+    }
+  }
+  async getCourseSectionContent(req: Request, res: Response) {
+    try {
+      if (!req.user) throw new Error("user not authenticated");
+      const userId = req.user.id;
+      const sectionId = req.params.id;
+      if (!userId) throw new Error("userId is required");
+      if (!sectionId) throw new Error("courseId is required");
+      const dbAdmin = await prismaClient.user.findFirst({
+        where: { id: userId },
+      });
+
+      if (!dbAdmin) throw new Error("no such user found!");
+      const dbSection = await prismaClient.courseSections.findUnique({
+        where: { id: sectionId },
+      });
+
+      if (!dbSection) throw new Error("no course found!");
+
+      const courses = await prismaClient.courseLearningContent.findMany({
+        where: { sectionId: dbSection.id },
+      });
+
+      return res
+        .status(200)
+        .json(apiResponse(200, "data fetched successfully", courses));
+    } catch (error: any) {
+      console.log(error);
+      return res.status(200).json(apiResponse(500, error.message, null));
     }
   }
 }

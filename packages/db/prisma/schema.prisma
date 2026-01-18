@@ -201,9 +201,9 @@ model CourseLearningContent {
   creator          User             @relation(references: [id], fields: [creatorId])
   sectionId        String           @db.ObjectId
   section          CourseSections   @relation(references: [id], fields: [sectionId])
-  videoUrl         String
-  transcript       String?
-  file             String?
+  videoUrl         String           @default("")
+  transcript       String?          @default("")
+  file             String?          @default("")
   courseProgresses CourseProgress[]
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt

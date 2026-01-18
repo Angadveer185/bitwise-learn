@@ -3,11 +3,13 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context : { params: { id: string } }
 ) {
   try {
-    const { id } = params;
+    const { id } = await context.params;
     const body = await req.json();
+
+    const token = req.headers.get("authorization")
 
     const response = await axiosInstance.post(
       `${process.env.BACKEND_URL}/api/v1/courses/add-course-section/${id}`,
@@ -15,6 +17,7 @@ export async function POST(
       {
         headers: {
           "Content-Type": "application/json",
+          Authorization: token || "",
         },
       }
     );

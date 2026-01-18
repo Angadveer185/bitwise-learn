@@ -11,6 +11,7 @@ class CouseContentController {
       const userId = req.user.id;
       const data: CourseContentBody = req.body;
 
+      // console.log(data);
       const dbAdmin = await prismaClient.user.findFirst({
         where: { id: userId },
       });
@@ -23,6 +24,16 @@ class CouseContentController {
 
       if (!dbSection) throw new Error("invalid section id");
 
+      console.log(
+        {
+          name: data.name,
+          description: data.description,
+          sectionId: data.sectionId,
+          transcript: data.transcript,
+          videoUrl: data.videoUrl,
+          creatorId: dbAdmin.id,
+        },
+      )
       const addedContent = await prismaClient.courseLearningContent.create({
         data: {
           name: data.name,
