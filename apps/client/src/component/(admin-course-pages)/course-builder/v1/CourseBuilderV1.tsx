@@ -7,12 +7,14 @@ import React, { useEffect, useState, useRef } from "react";
 import { Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import AddAssignment from "../../add-assignment/AddAssignment";
-import AddSection from "../../add-section/v1/AddSectionV1";
+import AddSection from "../../add-section/v2/AddSectionV2";
 import { uploadThumbnail } from "@/api/courses/course/upload-thumbnail";
 import { uploadCertificate } from "@/api/courses/course/upload-certificate";
 import { FileText, FileImage } from "lucide-react";
 import PublishCourse from "../../publish-course/PublishCourse";
 import { publishCourse } from "@/api/courses/course/publish-course";
+import { createSection } from "@/api/courses/section/create-section";
+import { getSections } from "@/api/courses/section/get-section";
 
 type Props = {
   courseId: string;
@@ -96,13 +98,91 @@ const ConfirmDeleteModal = ({
 };
 
 
+
+/* ---------------- Create Section Modal ---------------- */
+
+type CreateSectionModalProps = {
+  open: boolean;
+  onClose: () => void;
+  onSubmit: (sectionName: string) => void;
+}
+
+const CreateSectionModal = ({
+  open,
+  onClose,
+  onSubmit,
+}: CreateSectionModalProps) => {
+  const [sectionName, setSectionName] = useState("");
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="w-full max-w-sm rounded-2xl bg-slate-900 border border-slate-800 p-6">
+        {/* Header */}
+        <h2 className="text-lg font-semibold text-white">
+          Create new section
+        </h2>
+
+        {/* Input */}
+        <div className="mt-4">
+          <label className="text-sm text-slate-400">
+            Section name
+          </label>
+          <input
+            type="text"
+            value={sectionName}
+            onChange={(e) => setSectionName(e.target.value)}
+            placeholder="e.g. Introduction"
+            className="
+              mt-2 w-full rounded-lg
+              bg-slate-800 border border-slate-700
+              px-3 py-2 text-sm text-white
+              placeholder:text-slate-500
+              focus:outline-none focus:border-sky-500
+            "
+            autoFocus
+          />
+        </div>
+
+        {/* Actions */}
+        <div className="mt-6 flex justify-end gap-3">
+          <button
+            onClick={() => {
+              setSectionName("");
+              onClose();
+            }}
+            className="px-4 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition"
+          >
+            Cancel
+          </button>
+
+          <button
+            onClick={() => {
+              if (!sectionName.trim()) return;
+              onSubmit(sectionName.trim());
+              setSectionName("");
+            }}
+            className="px-4 py-2 rounded-lg bg-sky-600 text-black font-medium hover:bg-sky-500 transition"
+          >
+            Create
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+
 /* ---------------- Main Component ---------------- */
 
 const CourseBuilderV1 = ({ courseId }: Props) => {
   const router = useRouter();
   const [course, setCourse] = useState<any>(null);
-  const [blocks, setBlocks] = useState<any[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showCreateSection, setShowCreateSection] = useState(false);
+  const [sections, setSections] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const certificateInputRef = useRef<HTMLInputElement | null>(null);
   const [certificateFileName, setCertificateFileName] = useState<string | null>(
@@ -125,22 +205,36 @@ const CourseBuilderV1 = ({ courseId }: Props) => {
     fetchCourse();
   }, [courseId]);
 
+
+  useEffect(() => {
+    if (!courseId) return;
+
+    const fetchSections = async () => {
+      const res = await getSections(courseId);
+      console.log("SECTIONS: ", res);
+      setSections(res.data);
+    };
+
+    fetchSections();
+  }, [courseId]);
+
+  
   const CourseBuilderSkeleton = () => {
-  return (
-    <div className="p-4 pt-0 animate-pulse">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="h-7 w-64 bg-slate-800 rounded" />
+    return (
+      <div className="p-4 pt-0 animate-pulse">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="h-7 w-64 bg-slate-800 rounded" />
 
-        <div className="flex gap-3 mt-4">
-          <div className="h-9 w-36 bg-slate-800 rounded-md" />
-          <div className="h-9 w-36 bg-slate-800 rounded-md" />
-          <div className="h-9 w-24 bg-slate-800 rounded-md" />
+          <div className="flex gap-3 mt-4">
+            <div className="h-9 w-36 bg-slate-800 rounded-md" />
+            <div className="h-9 w-36 bg-slate-800 rounded-md" />
+            <div className="h-9 w-24 bg-slate-800 rounded-md" />
+          </div>
         </div>
-      </div>
 
-      {/* Section */}
-      <div className="mt-10 space-y-8">
+        {/* Section */}
+        <div className="mt-10 space-y-8">
           <div
             className="rounded-xl border border-slate-800 p-5 space-y-4"
           >
@@ -148,19 +242,19 @@ const CourseBuilderV1 = ({ courseId }: Props) => {
             <div className="h-4 w-full bg-slate-800 rounded" />
             <div className="h-4 w-5/6 bg-slate-800 rounded" />
           </div>
-      </div>
+        </div>
 
-      {/* Add buttons */}
-      <div className="flex gap-3 mt-6">
-        <div className="h-9 w-32 bg-slate-800 rounded-md" />
-        <div className="h-9 w-40 bg-slate-800 rounded-md" />
-      </div>
+        {/* Add buttons */}
+        <div className="flex gap-3 mt-6">
+          <div className="h-9 w-32 bg-slate-800 rounded-md" />
+          <div className="h-9 w-40 bg-slate-800 rounded-md" />
+        </div>
 
-      {/* Floating delete button */}
-      <div className="fixed bottom-6 right-6 h-12 w-28 bg-slate-800 rounded-full" />
-    </div>
-  );
-};
+        {/* Floating delete button */}
+        <div className="fixed bottom-6 right-6 h-12 w-28 bg-slate-800 rounded-full" />
+      </div>
+    );
+  };
 
 
   if (!course) {
@@ -169,15 +263,10 @@ const CourseBuilderV1 = ({ courseId }: Props) => {
 
   const courseName = course.name;
   const instructorName = course.instructorName;
-  const sections = course.courseSections || [];
+  // const sections = course.courseSections || [];
 
-  const addSection = () => {
-    setBlocks((prev) => [...prev, { id: Date.now(), type: "section" }]);
-  };
 
-  const addAssignment = () => {
-    setBlocks((prev) => [...prev, { id: Date.now(), type: "assignment" }]);
-  };
+
 
   const handleThumbnailUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -256,28 +345,28 @@ const CourseBuilderV1 = ({ courseId }: Props) => {
   };
 
   const publishRequirements = [
-  {
-    label: "Course name added",
-    satisfied: Boolean(course?.name?.trim()),
-  },
-  {
-    label: "Instructor name added",
-    satisfied: Boolean(course?.instructorName?.trim()),
-  },
-  {
-    label: "At least one section Needed",
-    satisfied: Array.isArray(course?.courseSections) && 
-    course.courseSections.length>0,
-  },
-  {
-    label: "Thumbnail uploaded",
-    satisfied: Boolean(course?.thumbnail),
-  },
-  {
-    label: "Certificate uploaded",
-    satisfied: Boolean(course?.certificate),
-  },
-];
+    {
+      label: "Course name added",
+      satisfied: Boolean(course?.name?.trim()),
+    },
+    {
+      label: "Instructor name added",
+      satisfied: Boolean(course?.instructorName?.trim()),
+    },
+    {
+      label: "At least one section Needed",
+      satisfied: Array.isArray(course?.courseSections) &&
+        course.courseSections.length > 0,
+    },
+    {
+      label: "Thumbnail uploaded",
+      satisfied: Boolean(course?.thumbnail),
+    },
+    {
+      label: "Certificate uploaded",
+      satisfied: Boolean(course?.certificate),
+    },
+  ];
 
 
   return (
@@ -307,7 +396,7 @@ const CourseBuilderV1 = ({ courseId }: Props) => {
         }}
       />
       {/* top nav */}
-      <div className="sticky top-0 z-40 bg-[#0f1010]/80 backdrop-blur border-b border-slate-800 px-4 py-3 flex items-center justify-between">
+      <div className="sticky top-0 z-40 backdrop-blur border-b border-slate-800 px-4 py-3 flex items-center justify-between">
         <h1 className="text-white text-2xl">
           {courseName} by {instructorName}
         </h1>
@@ -353,41 +442,27 @@ const CourseBuilderV1 = ({ courseId }: Props) => {
       </div>
 
       {/* course sections */}
-      <div className="mt-10 space-y-8">
-        {course.courseSections?.map((section: any, index: number) => (
+      <div className="mt-10 space-y-6">
+        {sections.map((section, index) => (
           <AddSection
             key={section.id}
+            sectionId={section.id}
             sectionNumber={index + 1}
             sectionData={section}
           />
         ))}
-
-        {blocks.map((block) => {
-          if (block.type === "section") {
-            return (
-              <AddSection key={block.id} sectionNumber={sections.length + 1} />
-            );
-          }
-
-          if (block.type === "assignment") {
-            return <AddAssignment key={block.id} />;
-          }
-
-          return null;
-        })}
       </div>
 
       {/* add buttons */}
       <div className="flex gap-3 mt-6">
         <button
-          onClick={addSection}
+          onClick={() => setShowCreateSection(true)}
           className="px-3 py-1.5 text-sm rounded-md bg-slate-800 text-sky-300 hover:bg-slate-700 transition"
         >
           + Add Section
         </button>
 
         <button
-          onClick={addAssignment}
           className="px-3 py-1.5 text-sm rounded-md bg-slate-800 text-sky-300 hover:bg-slate-700 transition"
         >
           + Add Assignment
@@ -431,11 +506,35 @@ const CourseBuilderV1 = ({ courseId }: Props) => {
           }
         }}
       />
+
+      {/* publish course modal  */}
       <PublishCourse
         open={showPublishModal}
         onClose={() => setShowPublishModal(false)}
         onConfirm={handlePublishCourse}
         requirements={publishRequirements}
+      />
+
+
+      {/* create section modal  */}
+      <CreateSectionModal
+        open={showCreateSection}
+        onClose={() => setShowCreateSection(false)}
+        onSubmit={async (name) => {
+          try {
+            await createSection(courseId, name);
+            toast.success("Section created!");
+
+            const res = await getSections(courseId);
+            setSections(res.data);
+          } catch (error) {
+            console.log(error);
+            toast.error("Unable to create section");
+          }
+          finally {
+            setShowCreateSection(false);
+          }
+        }}
       />
     </div>
   );
