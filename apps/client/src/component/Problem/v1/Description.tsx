@@ -4,6 +4,7 @@ import { useState } from "react";
 import MarkdownComponent from "./MarkdownComponent";
 import { ChevronRight } from "lucide-react";
 import TestCaseSection from "./TestcaseSection";
+import MarkdownEditor from "@/component/ui/MarkDownEditor";
 
 function Description({ content }: { content: any }) {
   if (!content) return null;
@@ -16,7 +17,13 @@ function Description({ content }: { content: any }) {
       <h1 className="text-xl font-semibold text-white">{name}</h1>
 
       {/* Problem Description */}
-      <MarkdownComponent content={description} />
+      <MarkdownEditor
+        height={550}
+        value={description}
+        mode={"preview"}
+        hideToolbar={true}
+        theme="dark"
+      />
       <TestCaseSection testCases={testCases} />
 
       {/* Topics */}

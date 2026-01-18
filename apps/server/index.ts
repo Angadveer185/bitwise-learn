@@ -23,6 +23,7 @@ import {
   authRouter,
   studentRouter,
   courseRouter,
+  codeRouter,
 } from "./routes";
 dotenv.config({ path: "../.env" });
 
@@ -57,7 +58,7 @@ app.use(
       "Origin",
       "Accept",
     ],
-  })
+  }),
 );
 app.get("/", (req, res) => {
   res.status(200).json({
@@ -98,12 +99,13 @@ app.use("/api/v1/batches", batchRouter);
 app.use("/api/v1/vendors", vendorRouter);
 app.use("/api/v1/problems", problemsRouter);
 app.use("/api/v1/courses", courseRouter);
+app.use("/api/v1/code", codeRouter);
 
 const errorHandler = (
   error: any,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   console.log({
     error: error,

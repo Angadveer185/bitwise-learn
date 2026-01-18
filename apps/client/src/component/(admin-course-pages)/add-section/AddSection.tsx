@@ -1,11 +1,19 @@
-import AddSectionV1 from "./v1/AddSectionV1"
+"use client";
 
-const AddSection = () => {
+import AddSectionV2 from "./v2/AddSectionV2";
+
+type Props = {
+  sectionNumber: number;
+  sectionData: any;
+};
+
+const AddSection = ({ sectionNumber, sectionData }: Props) => {
   return (
-    <div>
-        <AddSectionV1 />
-    </div>
-  )
-}
+    <AddSectionV2
+      sectionNumber={sectionNumber}
+      sectionData={sectionData}
+    />
+  );
+};
 
-export default AddSection
+export default AddSection;

@@ -23,7 +23,10 @@ class CodeExecution {
         version: VERSION_MAP[language] as string,
         files: [
           {
-            name: Date.now().toString() + EXTENSION_MAP,
+            name:
+              language === "java"
+                ? "CodeRunner.java"
+                : Date.now().toString() + EXTENSION_MAP,
             content: code,
           },
         ],
@@ -43,7 +46,7 @@ class CodeExecution {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       return result.data;
@@ -83,7 +86,7 @@ class CodeExecution {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
       return result;
     } catch (error) {

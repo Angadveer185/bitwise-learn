@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import AddSolution from "./AddSolution";
 import { updateSolution } from "@/api/problems/update-solution";
-
+import { THEME_MAP } from "@/component/ui/MarkDownEditor";
 type SolutionType = {
   id: string;
   solution: string;

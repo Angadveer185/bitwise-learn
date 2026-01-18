@@ -394,7 +394,7 @@ class DsaQuestionController {
       if (!dbProblem) throw new Error("problem doesn't exists");
 
       const dbTemplate = await prismaClient.problemTemplate.findFirst({
-        where: { problemId: dbProblem.id },
+        where: { problemId: dbProblem.id, language: data.language as any },
       });
 
       if (dbTemplate) throw new Error("db Template already exists");
@@ -421,11 +421,11 @@ class DsaQuestionController {
   async updateQuestionTemplate(req: Request, res: Response) {
     try {
       const userId = req.user?.id;
-      const problemId = req.params.id;
+      const templateId = req.params.id;
       const data: UpdateProblemTemplate = req.body;
 
       if (!userId) throw new Error("kindly Login");
-      if (!problemId) throw new Error("problemId is required");
+      if (!templateId) throw new Error("templateId is required");
       if (!data) throw new Error("data is required");
 
       const dbAdmin = await prismaClient.user.findUnique({
@@ -433,16 +433,8 @@ class DsaQuestionController {
       });
       if (!dbAdmin) throw new Error("no such admin found!");
 
-      const dbProblem = await prismaClient.problem.findFirst({
-        where: { id: problemId },
-        include: {
-          problemTopics: true,
-        },
-      });
-      if (!dbProblem) throw new Error("problem doesn't exists");
-
       const dbTemplate = await prismaClient.problemTemplate.findFirst({
-        where: { problemId: dbProblem.id },
+        where: { id: templateId },
       });
 
       if (!dbTemplate) throw new Error("db Template doesn't exists");
@@ -461,7 +453,7 @@ class DsaQuestionController {
       return res
         .status(200)
         .json(
-          apiResponse(200, "template updated successfully", updatedTemplate)
+          apiResponse(200, "template updated successfully", updatedTemplate),
         );
     } catch (error: any) {
       console.log(error);
@@ -504,7 +496,7 @@ class DsaQuestionController {
       return res
         .status(200)
         .json(
-          apiResponse(200, "template deleted successfully", deletedTemplate)
+          apiResponse(200, "template deleted successfully", deletedTemplate),
         );
     } catch (error: any) {
       console.log(error);
@@ -539,7 +531,7 @@ class DsaQuestionController {
       return res
         .status(200)
         .json(
-          apiResponse(200, "test template fetched successfully", testcases)
+          apiResponse(200, "test template fetched successfully", testcases),
         );
     } catch (error: any) {
       console.log(error);
@@ -588,7 +580,7 @@ class DsaQuestionController {
       return res
         .status(200)
         .json(
-          apiResponse(200, "test cases added successfully", createdTestCases)
+          apiResponse(200, "test cases added successfully", createdTestCases),
         );
     } catch (error: any) {
       console.log(error);
@@ -912,7 +904,7 @@ class DsaQuestionController {
           medium,
           hard,
           totalQuestion: easy + medium + hard,
-        })
+        }),
       );
     } catch (error: any) {
       console.error(error);
@@ -928,7 +920,7 @@ class DsaQuestionController {
         return res.status(401).json(apiResponse(401, "Unauthorized", null));
       }
 
-      const dbStudent = await prismaClient.students.findFirst({
+      const dbStudent = await prismaClient.student.findFirst({
         where: { id: userId },
       });
 
@@ -970,7 +962,7 @@ class DsaQuestionController {
           medium: counts.MEDIUM,
           hard: counts.HARD,
           totalSolved: counts.EASY + counts.MEDIUM + counts.HARD,
-        })
+        }),
       );
     } catch (error: any) {
       console.error(error);

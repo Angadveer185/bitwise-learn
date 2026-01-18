@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { ChevronRight } from "lucide-react";
 import TestCaseSection from "@/component/Problem/v1/TestcaseSection";
-import MarkdownEditor from "@/component/ui/MarkDownEditor";
+import MarkdownEditor, { THEME_MAP } from "@/component/ui/MarkDownEditor";
 
 function ProblemDescrption({ data }: { data: any }) {
   if (!data) return null;
@@ -56,7 +56,6 @@ function ProblemDescrption({ data }: { data: any }) {
       {/* Problem Title */}
       <h1 className="text-xl font-semibold text-white">{name}</h1>
       {/* Problem Description */}
-      //@ts-ignore
       <MarkdownEditor
         height={550}
         value={description}

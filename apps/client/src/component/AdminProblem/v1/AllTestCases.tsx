@@ -7,6 +7,7 @@ import { X } from "lucide-react";
 import { deleteTestCase } from "@/api/problems/delete-testcase";
 import TestCaseForm from "./TestCaseForm";
 import { createTestCase } from "@/api/problems/create-testcase";
+import { updateProblemTestcase } from "@/api/problems/update-testcase";
 
 type TestCase = {
   id: string;
@@ -24,7 +25,7 @@ export default function AllTestCases() {
 
   const [data, setData] = useState<TestCase[]>([]);
   const [selectedTestCase, setSelectedTestCase] = useState<TestCase | null>(
-    null
+    null,
   );
   const [showTestCaseForm, setShowTestCaseForm] = useState(false);
 
@@ -40,8 +41,9 @@ export default function AllTestCases() {
     setShowTestCaseForm(false);
   };
 
-  const handleUpdate = (updated: TestCase) => {
+  const handleUpdate = async (updated: TestCase) => {
     setData((prev) => prev.map((tc) => (tc.id === updated.id ? updated : tc)));
+    await updateProblemTestcase(updated.id, updated);
     setSelectedTestCase(updated);
   };
 
@@ -150,7 +152,7 @@ function EditableTestCaseSidebar({
     Object.entries(parsedInput).map(([k, v]) => ({
       key: k,
       value: Array.isArray(v) ? JSON.stringify(v) : String(v),
-    }))
+    })),
   );
 
   const [output, setOutput] = useState(testCase.output);
@@ -195,8 +197,8 @@ function EditableTestCaseSidebar({
               onChange={(e) =>
                 setInputFields((prev) =>
                   prev.map((x, idx) =>
-                    idx === i ? { ...x, key: e.target.value } : x
-                  )
+                    idx === i ? { ...x, key: e.target.value } : x,
+                  ),
                 )
               }
               className="w-1/3 bg-neutral-800 p-2 rounded"
@@ -207,8 +209,8 @@ function EditableTestCaseSidebar({
               onChange={(e) =>
                 setInputFields((prev) =>
                   prev.map((x, idx) =>
-                    idx === i ? { ...x, value: e.target.value } : x
-                  )
+                    idx === i ? { ...x, value: e.target.value } : x,
+                  ),
                 )
               }
               className="flex-1 bg-neutral-800 p-2 rounded font-mono"

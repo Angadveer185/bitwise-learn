@@ -1,5 +1,6 @@
 "use client";
 
+import { runCode, submitCode } from "@/api/problems/run-code";
 import { Editor } from "@monaco-editor/react";
 import React, { useEffect, useMemo, useState } from "react";
 
@@ -13,7 +14,15 @@ const languageOptions = [
 
 const normalizeLanguage = (lang: string) => lang.toLowerCase();
 
-export default function CodeEditor({ template }: { template: any[] }) {
+export default function CodeEditor({
+  template,
+  questionId,
+  output: setOutput,
+}: {
+  template: any[];
+  questionId: string;
+  output: any;
+}) {
   /* Map backend templates by language */
   const templatesByLanguage = useMemo(() => {
     const map: Record<string, any> = {};
@@ -33,6 +42,26 @@ export default function CodeEditor({ template }: { template: any[] }) {
   const [code, setCode] = useState(defaultCode);
 
   /* Load defaultCode first, fallback to functionBody */
+  const handleRun = async () => {
+    const runLang = language;
+    const currentCode = code;
+    const res = await runCode({
+      language: runLang,
+      code: currentCode,
+      questionId,
+    });
+    setOutput(res.testCases);
+  };
+
+  const handleSubmit = async () => {
+    const runLang = language;
+    const currentCode = code;
+    const res = await submitCode({
+      language: runLang,
+      code: currentCode,
+      questionId,
+    });
+  };
   useEffect(() => {
     const tpl = templatesByLanguage[language];
     if (!tpl) return;
@@ -57,10 +86,16 @@ export default function CodeEditor({ template }: { template: any[] }) {
         <span className="text-sm font-semibold text-gray-300">Code</span>
 
         <div className="flex">
-          <button className="px-3 ml-3 rounded-sm bg-secondary-bg text-md font-semibold">
+          <button
+            onClick={handleRun}
+            className="px-3 ml-3 rounded-sm bg-secondary-bg text-md font-semibold"
+          >
             Run
           </button>
-          <button className="px-3 ml-3 rounded-sm bg-secondary-hero text-md font-semibold">
+          <button
+            onClick={handleSubmit}
+            className="px-3 ml-3 rounded-sm bg-secondary-hero text-md font-semibold"
+          >
             Submit
           </button>
         </div>

@@ -2,6 +2,8 @@
 
 import { deleteCourseById } from "@/api/courses/course/delete-course-by-id";
 import { getCourseById } from "@/api/courses/course/get-course-by-id";
+import { createSection } from "@/api/courses/section/create-section";
+
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState, useRef } from "react";
 import { Trash2 } from "lucide-react";
@@ -95,13 +97,70 @@ const ConfirmDeleteModal = ({
   );
 };
 
+/* ---------------- Create Section Modal ---------------- */
+
+const CreateSectionModal = ({
+  open,
+  onClose,
+  onSubmit,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onSubmit: (sectionName: string) => void;
+}) => {
+  const [sectionName, setSectionName] = useState("");
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="w-full max-w-sm rounded-2xl bg-slate-900 border border-slate-800 p-6">
+        <h2 className="text-lg font-semibold text-white">
+          Create new section
+        </h2>
+
+        <div className="mt-4">
+          <label className="text-sm text-slate-400">
+            Section name
+          </label>
+          <input
+            type="text"
+            value={sectionName}
+            onChange={(e) => setSectionName(e.target.value)}
+            placeholder="e.g. Introduction"
+            className="mt-2 w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-500"
+          />
+        </div>
+
+        <div className="mt-6 flex justify-end gap-3">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition"
+          >
+            Cancel
+          </button>
+
+          <button
+            onClick={() => {
+              if (!sectionName.trim()) return;
+              onSubmit(sectionName);
+              setSectionName("");
+            }}
+            className="px-4 py-2 rounded-lg bg-sky-600 text-black font-medium hover:bg-sky-500 transition"
+          >
+            Create
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 /* ---------------- Main Component ---------------- */
 
 const CourseBuilderV1 = ({ courseId }: Props) => {
   const router = useRouter();
   const [course, setCourse] = useState<any>(null);
-  const [blocks, setBlocks] = useState<any[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const certificateInputRef = useRef<HTMLInputElement | null>(null);
@@ -115,13 +174,6 @@ const CourseBuilderV1 = ({ courseId }: Props) => {
 
   useEffect(() => {
     if (!courseId) return;
-
-    const fetchCourse = async () => {
-      const res = await getCourseById(courseId);
-      console.log("COURSE RESPONSE : ", res);
-      setCourse(res.data);
-    };
-
     fetchCourse();
   }, [courseId]);
 
@@ -167,8 +219,6 @@ const CourseBuilderV1 = ({ courseId }: Props) => {
     return <CourseBuilderSkeleton />;
   }
 
-  const courseName = course.name;
-  const instructorName = course.instructorName;
   const sections = course.courseSections || [];
 
   const addSection = () => {
@@ -309,7 +359,7 @@ const CourseBuilderV1 = ({ courseId }: Props) => {
       {/* top nav */}
       <div className="sticky top-0 z-40 bg-[#0f1010]/80 backdrop-blur border-b border-slate-800 px-4 py-3 flex items-center justify-between">
         <h1 className="text-white text-2xl">
-          {courseName} by {instructorName}
+          {course.name} by {course.instructorName}
         </h1>
 
         <div className="flex gap-3 mt-4">
@@ -380,21 +430,31 @@ const CourseBuilderV1 = ({ courseId }: Props) => {
       {/* add buttons */}
       <div className="flex gap-3 mt-6">
         <button
-          onClick={addSection}
+          onClick={() => setShowCreateSection(true)}
           className="px-3 py-1.5 text-sm rounded-md bg-slate-800 text-sky-300 hover:bg-slate-700 transition"
         >
           + Add Section
         </button>
 
         <button
-          onClick={addAssignment}
           className="px-3 py-1.5 text-sm rounded-md bg-slate-800 text-sky-300 hover:bg-slate-700 transition"
         >
           + Add Assignment
         </button>
       </div>
 
-      {/* Floating Delete Button */}
+      {/* SECTIONS LIST */}
+      <div className="mt-10 space-y-8">
+        {sections.map((section: any, index: number) => (
+          <AddSection
+            key={section.id}
+            sectionNumber={index + 1}
+            sectionData={section}
+          />
+        ))}
+      </div>
+
+      {/* FLOATING DELETE */}
       <button
         onClick={() => setShowDeleteConfirm(true)}
         className="
@@ -415,11 +475,20 @@ const CourseBuilderV1 = ({ courseId }: Props) => {
         Delete
       </button>
 
-      {/* Delete Confirmation Modal */}
       <ConfirmDeleteModal
         open={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
         onConfirm={async () => {
+          await deleteCourseById(courseId);
+          toast.success("Course deleted");
+          router.push("/admin-dashboard/courses");
+        }}
+      />
+
+      <CreateSectionModal
+        open={showCreateSection}
+        onClose={() => setShowCreateSection(false)}
+        onSubmit={async (sectionName) => {
           try {
             await deleteCourseById(courseId);
             router.push("/admin-dashboard/courses");

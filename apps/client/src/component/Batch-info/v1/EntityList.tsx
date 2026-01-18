@@ -2,10 +2,9 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { Pencil, Trash2, X } from "lucide-react";
-import { getAllStudents } from "@/api/students/get-all-students";
 import { getStudentsByBatch } from "@/api/students/get-students-by-batch";
-import { getAllTeachers } from "@/api/teachers/get-all-teachers";
 import { getTeachersByBatch } from "@/api/teachers/get-teachers-by-batch";
+import { deleteEntity, updateEntity } from "@/api/institutions/entity";
 // import { getAllAssessments } from "@/api/vendors/get-all-vendors";
 
 type EntityListProps = {
@@ -37,10 +36,10 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
     const handleSave = async () => {
         try {
             // TODO: UPDATE STUDENT API CALL GOES HERE
-            // await updateStudentApi(
-            //     editedEntity.id || editedEntity._id,
-            //     editedEntity
-            // )
+            await updateEntity(
+                editedEntity.id || editedEntity._id,
+                {data:editedEntity,entity:type},null
+            )
 
             setIsEditing(false)
             setSelectedEntity(editedEntity) // update UI after success
@@ -53,7 +52,10 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
         try {
             // TODO:  DELETE STUDENT API CALL GOES HERE
             // await deleteStudentApi(selectedEntity.id || selectedEntity._id)
-
+            await deleteEntity(
+                editedEntity.id || editedEntity._id,
+                {data:"",entity:type},null
+            )
             setShowDeleteConfirm(false)
             setSelectedEntity(null)
         } catch (error) {

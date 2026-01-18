@@ -70,7 +70,7 @@ export const EXTENSION_MAP: Record<string, string> = {
 
 export const CHOSEN_LANGUAGES = [
   {
-    language: "matl",
+    language: "MATL",
     version: "22.5.0",
     aliases: [],
   },
@@ -112,6 +112,10 @@ export const CHOSEN_LANGUAGES = [
     runtime: "gcc",
   },
   {
+    language: "gcc",
+    version: "10.2.0",
+  },
+  {
     language: "java",
     version: "15.0.2",
     aliases: [],
@@ -125,6 +129,12 @@ export const CHOSEN_LANGUAGES = [
   {
     language: "javascript",
     version: "18.15.0",
+    aliases: ["node-javascript", "node-js", "javascript", "js"],
+    runtime: "node",
+  },
+  {
+    language: "node",
+    version: "20.11.1",
     aliases: ["node-javascript", "node-js", "javascript", "js"],
     runtime: "node",
   },

@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Editor } from "@monaco-editor/react";
 import ShowAddTemplateForm from "./ShowAddTemplateForm";
 import { createProblemTemplate } from "@/api/problems/create-template";
+import { updateProblemTemplate } from "@/api/problems/update-tempate";
 
 type Template = {
   id: string;
@@ -33,25 +34,34 @@ function Templates() {
   >("defaultCode");
 
   const [showTemplateForm, setShowTemplateForm] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
-  /** user editable default code per language */
+  /** editable values */
   const [codeMap, setCodeMap] = useState<Record<string, string>>({});
+  const [functionBodyMap, setFunctionBodyMap] = useState<
+    Record<string, string>
+  >({});
 
   /* ---------------- FETCH ---------------- */
   useEffect(() => {
     getAllProblemTemplate((res: Template[]) => {
       setTemplates(res);
 
-      if (res.length === 0) return;
+      if (!res.length) return;
 
       const initialLang = res[0].language;
       setSelectedLang(initialLang);
 
-      const initialCode: Record<string, string> = {};
+      const defaultCodes: Record<string, string> = {};
+      const functionBodies: Record<string, string> = {};
+
       res.forEach((t) => {
-        initialCode[t.language] = t.defaultCode;
+        defaultCodes[t.language] = t.defaultCode;
+        functionBodies[t.language] = t.functionBody;
       });
-      setCodeMap(initialCode);
+
+      setCodeMap(defaultCodes);
+      setFunctionBodyMap(functionBodies);
     }, param.id as string);
   }, [param.id]);
 
@@ -76,9 +86,7 @@ function Templates() {
         No templates available
         <button
           onClick={() => setShowTemplateForm(true)}
-          className="rounded-md bg-blue-600 mt-3 px-4 py-2 text-sm font-medium text-white
-                     hover:bg-blue-700 focus:outline-none focus:ring-2
-                     focus:ring-blue-500 focus:ring-offset-2"
+          className="mt-3 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
         >
           + Add New Template
         </button>
@@ -86,13 +94,30 @@ function Templates() {
     );
   }
 
-  const activeTemplate = templateMap[selectedLang];
   const monacoLanguage = LANGUAGE_MAP[selectedLang] || "plaintext";
 
   const editorValue =
     currentDisplay === "defaultCode"
       ? (codeMap[selectedLang] ?? "")
-      : (activeTemplate?.functionBody ?? "");
+      : (functionBodyMap[selectedLang] ?? "");
+
+  /* ---------------- SAVE ---------------- */
+  const handleSave = async () => {
+    if (!selectedLang) return;
+    const activeTemplate = templateMap[selectedLang];
+
+    await updateProblemTemplate(
+      activeTemplate.id,
+      {
+        language: selectedLang,
+        defaultCode: codeMap[selectedLang],
+        functionBody: functionBodyMap[selectedLang],
+      },
+      templateMap,
+    );
+
+    setIsEditing(false);
+  };
 
   /* ---------------- UI ---------------- */
   return (
@@ -104,24 +129,30 @@ function Templates() {
         />
       )}
 
-      {/* Top Action */}
-      <div className="w-full p-3 gap-3 flex justify-end">
+      {/* Top Actions */}
+      <div className="w-full p-3 flex justify-end gap-3">
         <button
           onClick={() => setShowTemplateForm(true)}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white
-                     hover:bg-blue-700 focus:outline-none focus:ring-2
-                     focus:ring-blue-500 focus:ring-offset-2"
+          className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
         >
           + Add New Template
         </button>
-        <button
-          onClick={() => setShowTemplateForm(true)}
-          className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white
-                     hover:bg-green-700 focus:outline-none focus:ring-2
-                     focus:ring-green-500 focus:ring-offset-2"
-        >
-          Save
-        </button>
+
+        {!isEditing ? (
+          <button
+            onClick={() => setIsEditing(true)}
+            className="rounded-md bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700"
+          >
+            Edit
+          </button>
+        ) : (
+          <button
+            onClick={handleSave}
+            className="rounded-md bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700"
+          >
+            Save
+          </button>
+        )}
       </div>
 
       {/* Tabs */}
@@ -132,9 +163,9 @@ function Templates() {
             onClick={() =>
               setCurrentDisplay(tab as "defaultCode" | "functionBody")
             }
-            className={`px-4 py-2 text-sm font-medium transition ${
+            className={`px-4 py-2 text-sm font-medium ${
               currentDisplay === tab
-                ? "text-white border-b-2 border-indigo-500"
+                ? "border-b-2 border-indigo-500 text-white"
                 : "text-gray-400 hover:text-white"
             }`}
           >
@@ -164,31 +195,36 @@ function Templates() {
 
       {/* Editor */}
       <div className="flex-1">
-        {activeTemplate && (
-          <Editor
-            key={`${selectedLang}-${currentDisplay}`} // 🔑 CRITICAL FIX
-            language={monacoLanguage}
-            value={editorValue}
-            theme="vs-dark"
-            onChange={(value) => {
-              if (currentDisplay === "defaultCode") {
-                setCodeMap((prev) => ({
-                  ...prev,
-                  [selectedLang]: value ?? "",
-                }));
-              }
-            }}
-            options={{
-              readOnly: currentDisplay === "functionBody",
-              fontSize: 14,
-              fontFamily: "JetBrains Mono, Fira Code, monospace",
-              minimap: { enabled: false },
-              automaticLayout: true,
-              wordWrap: "on",
-              scrollBeyondLastLine: false,
-            }}
-          />
-        )}
+        <Editor
+          key={`${selectedLang}-${currentDisplay}-${isEditing}`}
+          language={monacoLanguage}
+          value={editorValue}
+          theme="vs-dark"
+          onChange={(value) => {
+            if (!isEditing) return;
+
+            if (currentDisplay === "defaultCode") {
+              setCodeMap((prev) => ({
+                ...prev,
+                [selectedLang]: value ?? "",
+              }));
+            } else {
+              setFunctionBodyMap((prev) => ({
+                ...prev,
+                [selectedLang]: value ?? "",
+              }));
+            }
+          }}
+          options={{
+            readOnly: !isEditing,
+            fontSize: 14,
+            fontFamily: "JetBrains Mono, Fira Code, monospace",
+            minimap: { enabled: false },
+            automaticLayout: true,
+            wordWrap: "on",
+            scrollBeyondLastLine: false,
+          }}
+        />
       </div>
     </div>
   );

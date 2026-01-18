@@ -6,7 +6,9 @@ import authRouter from "./auth.routes";
 import vendorRouter from "./vendor.routes";
 import studentRouter from "./student.routes";
 import courseRouter from "./course.route";
+import codeRouter from "./code-runner.routes";
 export {
+  codeRouter,
   adminRouter,
   institutionRouter,
   vendorRouter,

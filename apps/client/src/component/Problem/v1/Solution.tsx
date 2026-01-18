@@ -1,7 +1,4 @@
 "use client";
-
-import React from "react";
-import MarkdownComponent from "./MarkdownComponent";
 import MDEditor from "@uiw/react-md-editor";
 
 function Solution({ content }: any) {
@@ -12,7 +9,15 @@ function Solution({ content }: any) {
   }
 
   return (
-    <div className="h-full overflow-y-auto px-4 py-3 space-y-6">
+    <div
+      className="h-full overflow-y-auto px-4 py-3 space-y-6"
+      style={{
+        scrollbarWidth: "none",
+        msOverflowStyle: "none",
+        //@ts-ignore
+        WebkitScrollbar: { display: "none" },
+      }}
+    >
       {/* Video Solution */}
       {content.videoSolution && (
         <div className="space-y-2">
@@ -40,10 +45,8 @@ function Solution({ content }: any) {
           hideToolbar={true}
           spellCheck
           style={{
-            scrollbarWidth: "none",
-            msOverflowStyle: "none",
-            //@ts-ignore
-            WebkitScrollbar: { display: "none" },
+            backgroundColor: "#171717",
+            color: "white",
           }}
         />
       </div>

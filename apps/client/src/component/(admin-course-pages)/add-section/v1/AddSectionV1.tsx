@@ -7,6 +7,7 @@ import {
   Pencil,
   Trash2,
   AlertTriangle,
+  X,
 } from "lucide-react";
 import "./helper.css";
 import { useState } from "react";
@@ -32,6 +33,7 @@ type Topic = {
 
 type Section = {
   sectionId: number;
+  sectionName: string;
   isCompleted: boolean;
   topics: Topic[];
 };
@@ -41,30 +43,34 @@ type AddSectionProps = {
   sectionData?: Section;
 };
 
-
 /* ================= COMPONENT ================= */
 
-const AddSectionV1 = ({ sectionNumber,sectionData }: AddSectionProps) => {
+const AddSectionV1 = ({ sectionNumber, sectionData }: AddSectionProps) => {
   const [sectionCompleted, setSectionCompleted] = useState(false);
   const [sectionError, setSectionError] = useState<string | null>(null);
 
+  const [sectionName, setSectionName] = useState(
+    sectionData?.sectionName ?? ""
+  );
+
   const [topics, setTopics] = useState<Topic[]>(
     sectionData?.topics ?? [
-    {
-      id: 1,
-      title: "",
-      description: "",
-      isCompleted: false,
-      isEditing: true,
-      showContentOptions: false,
-      showDeleteConfirm: false,
-      contents: {
-        video: false,
-        transcript: false,
-        file: false,
+      {
+        id: 1,
+        title: "",
+        description: "",
+        isCompleted: false,
+        isEditing: true,
+        showContentOptions: false,
+        showDeleteConfirm: false,
+        contents: {
+          video: false,
+          transcript: false,
+          file: false,
+        },
       },
-    },
-  ]);
+    ]
+  );
 
   /* ================= HELPERS ================= */
 
@@ -100,7 +106,13 @@ const AddSectionV1 = ({ sectionNumber,sectionData }: AddSectionProps) => {
     ]);
   };
 
-  /* ---------- DELETE ---------- */
+  /* ---------- SECTION DELETE ---------- */
+
+  const deleteSection = () => {
+    console.log("DELETE SECTION:", sectionNumber);
+  };
+
+  /* ---------- DELETE TOPIC ---------- */
 
   const askDeleteTopic = (id: number) => {
     setTopics((prev) =>
@@ -139,10 +151,7 @@ const AddSectionV1 = ({ sectionNumber,sectionData }: AddSectionProps) => {
     );
   };
 
-  const addContent = (
-    id: number,
-    type: keyof TopicContent
-  ) => {
+  const addContent = (id: number, type: keyof TopicContent) => {
     setTopics((prev) =>
       prev.map((topic) =>
         topic.id === id
@@ -198,11 +207,12 @@ const AddSectionV1 = ({ sectionNumber,sectionData }: AddSectionProps) => {
 
     const sectionData: Section = {
       sectionId: sectionNumber,
+      sectionName,
       isCompleted: true,
       topics,
     };
 
-    console.log("SEND TO BACKEND:", sectionData);
+    console.log("SEND TO BACKEND:", sectionName);
   };
 
   const editSection = () => {
@@ -221,17 +231,41 @@ const AddSectionV1 = ({ sectionNumber,sectionData }: AddSectionProps) => {
   /* ================= UI ================= */
 
   return (
-    <div className="text-white bg-divBg h-full w-[90%] rounded-2xl px-8 py-6 shadow-xl border border-white/5">
+    <div className="relative text-white bg-divBg h-full w-[90%] rounded-2xl px-8 py-6 shadow-xl border border-white/5">
+
+      {/* DELETE SECTION BUTTON */}
+      <button
+        onClick={deleteSection}
+        disabled={sectionCompleted}
+        className="absolute top-4 right-4 p-2 rounded-full hover:bg-red-500/20 transition disabled:opacity-40"
+        title="Delete section"
+      >
+        <X size={18} className="text-red-400" />
+      </button>
 
       {/* SECTION HEADER */}
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <h1 className="text-2xl font-semibold">
-            Section {sectionNumber}
-          </h1>
-          <span className="text-xs px-3 py-1 rounded-full bg-white/10 text-white/70">
-            Curriculum
-          </span>
+        <div className="flex flex-col gap-3 w-full max-w-md">
+          <div className="flex items-center gap-4">
+            <h1 className="text-2xl font-semibold">
+              Section {sectionNumber}
+            </h1>
+            <span className="text-xs px-3 py-1 rounded-full bg-white/10 text-white/70">
+              Curriculum
+            </span>
+          </div>
+
+          <div className="input-wrapper">
+            <CircleCheck size={18} className="input-icon" />
+            <input
+              type="text"
+              value={sectionName}
+              disabled={sectionCompleted}
+              onChange={(e) => setSectionName(e.target.value)}
+              placeholder="Section name (e.g. Introduction to React)"
+              className="w-full border border-white/15 bg-transparent rounded-xl px-3 py-2 text-sm placeholder:text-white/40 disabled:opacity-50"
+            />
+          </div>
         </div>
 
         {sectionCompleted && (
@@ -246,11 +280,8 @@ const AddSectionV1 = ({ sectionNumber,sectionData }: AddSectionProps) => {
       </div>
 
       <div className="pl-6 w-full space-y-8">
-
         {topics.map((topic, index) => (
           <div key={topic.id} className="space-y-4">
-
-            {/* TOPIC HEADER */}
             <div className="flex items-center justify-between">
               <h2 className="text-xs uppercase tracking-wider text-white/60">
                 Topic {index + 1}
@@ -291,7 +322,6 @@ const AddSectionV1 = ({ sectionNumber,sectionData }: AddSectionProps) => {
               </div>
             </div>
 
-            {/* DELETE CONFIRM */}
             {index > 0 &&
               topic.showDeleteConfirm &&
               !sectionCompleted && (
@@ -313,10 +343,8 @@ const AddSectionV1 = ({ sectionNumber,sectionData }: AddSectionProps) => {
                 </div>
               )}
 
-            {/* TITLE */}
             <div className="input-wrapper">
               <CircleCheck size={18} className="input-icon" />
-
               <input
                 type="text"
                 value={topic.title}
@@ -339,7 +367,6 @@ const AddSectionV1 = ({ sectionNumber,sectionData }: AddSectionProps) => {
               </button>
             </div>
 
-            {/* DESCRIPTION */}
             <textarea
               value={topic.description}
               disabled={!topic.isEditing || sectionCompleted}
@@ -351,27 +378,27 @@ const AddSectionV1 = ({ sectionNumber,sectionData }: AddSectionProps) => {
               rows={4}
             />
 
-            {/* CONTENT OPTIONS */}
-            {topic.showContentOptions && topic.isEditing && !sectionCompleted && (
-              <div className="flex gap-3 pt-1">
-                {(["video", "transcript", "file"] as const).map(
-                  (type) => (
-                    <button
-                      key={type}
-                      onClick={() => addContent(topic.id, type)}
-                      className="flex items-center gap-1 bg-primaryBlue/90 text-black px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-primaryBlue transition"
-                    >
-                      <CirclePlus size={14} />
-                      {type}
-                    </button>
-                  )
-                )}
-              </div>
-            )}
+            {topic.showContentOptions &&
+              topic.isEditing &&
+              !sectionCompleted && (
+                <div className="flex gap-3 pt-1">
+                  {(["video", "transcript", "file"] as const).map(
+                    (type) => (
+                      <button
+                        key={type}
+                        onClick={() => addContent(topic.id, type)}
+                        className="flex items-center gap-1 bg-primaryBlue/90 text-black px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-primaryBlue transition"
+                      >
+                        <CirclePlus size={14} />
+                        {type}
+                      </button>
+                    )
+                  )}
+                </div>
+              )}
           </div>
         ))}
 
-        {/* SECTION ERROR */}
         {sectionError && (
           <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3 text-sm text-red-300">
             <AlertTriangle size={16} />
@@ -379,7 +406,6 @@ const AddSectionV1 = ({ sectionNumber,sectionData }: AddSectionProps) => {
           </div>
         )}
 
-        {/* FOOTER ACTIONS */}
         <div className="flex justify-between pt-6 border-t border-white/10">
           <button
             onClick={addNewTopic}

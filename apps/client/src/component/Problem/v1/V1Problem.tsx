@@ -6,11 +6,11 @@ import Description from "./Description";
 import Solution from "./Solution";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/component/ui/tabs";
 import Submission from "./Submission";
-import { EntityList } from "@/component/Institution-info/v1/EntityList";
 
 function V1Problem({ data }: any) {
   /* Sidebar */
   const [sidebarWidth, setSidebarWidth] = useState(720);
+  const [output, setOutput] = useState([]);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const isSidebarResizing = useRef(false);
 
@@ -117,7 +117,11 @@ function V1Problem({ data }: any) {
       <div ref={rightPanelRef} className="flex-1 flex flex-col min-w-0">
         {/* Code Editor */}
         <div style={{ flex: `${editorRatio} 0 0` }} className="min-h-0">
-          <CodeEditor template={data.problemTemplates} />
+          <CodeEditor
+            questionId={data.id}
+            output={setOutput}
+            template={data.problemTemplates}
+          />
         </div>
 
         {/* Resize Handle */}
@@ -137,11 +141,10 @@ function V1Problem({ data }: any) {
           }}
           className="overflow-y-auto min-h-0"
         >
-          <TestCases testCases={data.testCases} />
+          <TestCases output={output} testCases={data.testCases} />
         </div>
       </div>
     </div>
-
   );
 }
 
