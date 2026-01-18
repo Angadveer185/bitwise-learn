@@ -34,6 +34,7 @@ router.get(
   courseController.getAllCoursesByAdmin
 );
 router.get("/get-course-by-id/:id", authMiddleware,courseController.getCourseById);
+router.get("/get-all-sections-by-course/:id",authMiddleware,courseController.getAllSectionsByCourse);
 router.delete(
   "/delete-course/:id",
   authMiddleware,
@@ -51,7 +52,7 @@ router.put(
   authMiddleware,
   courseController.updateCourseSection
 );
-router.put(
+router.delete(
   "/delete-course-section/:id",
   authMiddleware,
   courseController.removeCourseSection

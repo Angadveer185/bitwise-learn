@@ -459,6 +459,56 @@ class CoursesController {
       return res.status(200).json(apiResponse(500, error.message, null));
     }
   }
+
+  async getAllSectionsByCourse(req:Request, res:Response){
+    try {
+      if(!req.user) throw new Error("User not Authenticated");
+
+      const userId = req.user.id;
+      const courseId = req.params.id;
+
+      if(!userId) throw new Error("UserId is Required");
+      if(!courseId) throw new Error("CourseId is Required");
+
+      const dbAdmin = await prismaClient.user.findFirst({
+        where:{id:userId},
+      });
+
+      if(!dbAdmin) throw new Error("No User Found");
+
+      const dbCourse = await prismaClient.course.findFirst({
+        where:{
+          id:courseId,
+          createdBy: dbAdmin.id,
+        },
+      });
+
+      if(!dbCourse) throw new Error("No Course Found for this User");
+      
+      const sections = await prismaClient.courseSections.findMany({
+        where:{
+          courseId:dbCourse.id,
+          creatorId:dbAdmin.id,
+        },
+        include:{
+          courseLearningContents:true,
+          courseAssignemnts:true,
+        },
+        orderBy:{
+          createdAt:"asc",
+        },
+      });
+
+      return res.status(200).json(
+        apiResponse(200,"Sections Fetched SuccessFully",sections)
+      );
+    } catch (error:any) {
+      console.log(error);
+      return res.status(200).json(
+        apiResponse(500,error.message,null)
+      );
+    }
+  }
 }
 
 export default new CoursesController();

@@ -20,6 +20,7 @@ export type Course = {
   duration?: string;
   thumbnail?: string;
   instructorName: string;
+  isPublished: "PUBLISHED" | "NOT_PUBLISHED";
 };
 
 type CourseCardProps = {
@@ -31,14 +32,16 @@ const CourseCard = ({ course }: CourseCardProps) => {
 
   const level = course.level?.toUpperCase();
 
+  const isDraft = course.isPublished !== "PUBLISHED";
+
   const levelStyles =
     level === "BASIC"
       ? "text-grey-300"
       : level === "INTERMEDIATE"
-      ? "text-yellow-400"
-      : level === "ADVANCE"
-      ? "text-red-400"
-      : "text-gray-400";
+        ? "text-yellow-400"
+        : level === "ADVANCE"
+          ? "text-red-400"
+          : "text-gray-400";
 
   const handleNavigate = () => {
     router.push(`/admin-dashboard/courses/${course.id}`);
@@ -67,14 +70,31 @@ const CourseCard = ({ course }: CourseCardProps) => {
       {/* Content */}
       <div className="flex flex-col gap-4 p-4">
         {/* Title + Delete */}
-        <div className="flex items-start justify-between">
-          <h3 className="text-xl font-semibold tracking-tight flex items-center gap-2">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xl font-semibold tracking-tight">
             {course.name}
           </h3>
+
+          {isDraft && (
+            <span
+              className="
+        text-xs font-medium
+        px-2.5 py-1
+        rounded-full
+        bg-slate-700/40
+        text-slate-300
+        border border-slate-600/40
+      "
+            >
+              Draft
+            </span>
+          )}
         </div>
 
         {/* Level + Duration */}
-        <div className={`flex items-center justify-between text-sm ${colors.secondary_Font}`}>
+        <div
+          className={`flex items-center justify-between text-sm ${colors.secondary_Font}`}
+        >
           <span
             className={`rounded-md bg-neutral-800 px-3 py-1 text-xs font-semibold ${levelStyles}`}
           >

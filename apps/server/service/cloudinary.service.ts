@@ -13,39 +13,40 @@ class CloudinaryService implements FileHandler {
     });
   }
   async uploadFile(
-    file: any,
-    folder: string,
-    filename: string
-  ): Promise<string | null> {
-    try {
-      if (!file) throw new Error("No file provided");
-
-      const tempDir = os.tmpdir();
-      const tempFilePath = path.join(tempDir, file.originalname);
-
-      const buffer = Buffer.from(await file.buffer);
-      await fs.writeFile(tempFilePath, buffer);
-
-      const mimeType = file.mimetype;
-
-      console.log(mimeType);
-      // Upload the file to Cloudinary
-      const response = await cloudinary.uploader.upload(tempFilePath, {
-        resource_type: "auto",
-        // flags: "attachment",
-        folder: folder,
-        public_id: filename,
-        access_mode: "public",
-      });
-
-      await fs.unlink(tempFilePath);
-
-      return response.secure_url;
-    } catch (error) {
-      console.log(error);
-      return null;
+  file: any,
+  folder: string,
+  filename: string
+): Promise<string | null> {
+  try {
+    if (!file || !file.buffer) {
+      throw new Error("Invalid file buffer");
     }
+
+    return await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          folder,
+          public_id: filename,
+          resource_type: "auto",
+        },
+        (error, result) => {
+          if (error) {
+            console.log("CLOUDINARY ERROR:", error);
+            return reject(error);
+          }
+
+          resolve(result?.secure_url || null);
+        }
+      );
+
+      stream.end(file.buffer);
+    });
+  } catch (error) {
+    console.log("UPLOAD FAILED:", error);
+    return null;
   }
+}
+
 
   async deleteFile(fileUrl: string): Promise<string | null> {
     try {

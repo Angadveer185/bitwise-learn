@@ -221,7 +221,7 @@ const RightSection = () => {
               {/* Add Course */}
               <button
                 onClick={() => setShowCourseForm(true)}
-                className={`rounded-md ${colors.special_Bg} px-4 py-2 text-sm font-medium ${colors.primary_Font} hover:opacity-90`}
+                className={`rounded-md ${colors.special_Bg} px-4 py-2 text-sm font-medium ${colors.primary_Font} hover:opacity-90 cursor-pointer`}
               >
                 + Add Course
               </button>
@@ -234,7 +234,7 @@ const RightSection = () => {
       flex items-center gap-2 px-4 py-2 rounded-md
       ${colors.secondary_Bg} ${colors.primary_Font}
       text-sm font-medium border border-neutral-700
-      hover:border-neutral-500 transition
+      hover:border-neutral-500 transition cursor-pointer
     `}
                 >
                   {filter === "ALL"

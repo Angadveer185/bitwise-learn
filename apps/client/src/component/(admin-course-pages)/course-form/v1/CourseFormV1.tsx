@@ -5,6 +5,7 @@ import { useState } from "react";
 import { createCourse } from "@/api/courses/course/create-course";
 import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
+
 type CourseFormData = {
   name: string;
   description: string;
@@ -21,6 +22,9 @@ type CourseFormProps = {
 const CourseForm: React.FC<CourseFormProps> = ({ onClose, onSuccess }) => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+
+  // ADDED
+  const [formError, setFormError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<CourseFormData>({
     name: "",
@@ -39,8 +43,15 @@ const CourseForm: React.FC<CourseFormProps> = ({ onClose, onSuccess }) => {
   const handleSubmit = async () => {
     if (loading) return;
 
+    // ADDED
+    if (!isFormValid) {
+      setFormError("Please fill in all required fields.");
+      return;
+    }
+
     try {
       setLoading(true);
+      setFormError(null); // ADDED
 
       await createCourse({
         name: formData.name.trim(),
@@ -49,9 +60,16 @@ const CourseForm: React.FC<CourseFormProps> = ({ onClose, onSuccess }) => {
         duration: formData.duration.trim(),
         instructorName: formData.instructorName.trim(),
       });
+
       onSuccess();
     } catch (error: any) {
       console.error("Course creation failed", error);
+
+      // ✅ ADDED
+      setFormError(
+        error?.response?.data?.message ||
+          "Something went wrong while creating the course."
+      );
     } finally {
       setLoading(false);
     }
@@ -77,7 +95,10 @@ const CourseForm: React.FC<CourseFormProps> = ({ onClose, onSuccess }) => {
         {/* Course Name */}
         <input
           value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          onChange={(e) => {
+            setFormData({ ...formData, name: e.target.value });
+            setFormError(null); // ADDED
+          }}
           className="w-full rounded-lg bg-neutral-900 px-4 py-3 outline-none focus:ring-1 focus:ring-[#64ACFF]"
           placeholder="Course title"
         />
@@ -86,9 +107,10 @@ const CourseForm: React.FC<CourseFormProps> = ({ onClose, onSuccess }) => {
         <textarea
           rows={4}
           value={formData.description}
-          onChange={(e) =>
-            setFormData({ ...formData, description: e.target.value })
-          }
+          onChange={(e) => {
+            setFormData({ ...formData, description: e.target.value });
+            setFormError(null); // ADDED
+          }}
           className="w-full rounded-lg bg-neutral-900 px-4 py-3 outline-none focus:ring-1 focus:ring-[#64ACFF]"
           placeholder="Course description"
         />
@@ -121,9 +143,10 @@ const CourseForm: React.FC<CourseFormProps> = ({ onClose, onSuccess }) => {
         {/* Duration */}
         <input
           value={formData.duration}
-          onChange={(e) =>
-            setFormData({ ...formData, duration: e.target.value })
-          }
+          onChange={(e) => {
+            setFormData({ ...formData, duration: e.target.value });
+            setFormError(null); // ADDED
+          }}
           className="w-full rounded-lg bg-neutral-900 px-4 py-3 outline-none focus:ring-1 focus:ring-[#64ACFF]"
           placeholder="Duration (e.g. 10 hours)"
         />
@@ -131,13 +154,21 @@ const CourseForm: React.FC<CourseFormProps> = ({ onClose, onSuccess }) => {
         {/* Instructor */}
         <input
           value={formData.instructorName}
-          onChange={(e) =>
-            setFormData({ ...formData, instructorName: e.target.value })
-          }
+          onChange={(e) => {
+            setFormData({ ...formData, instructorName: e.target.value });
+            setFormError(null); // ADDED
+          }}
           className="w-full rounded-lg bg-neutral-900 px-4 py-3 outline-none focus:ring-1 focus:ring-[#64ACFF]"
           placeholder="Instructor name"
         />
       </div>
+
+      {/* ADDED ERROR UI */}
+      {formError && (
+        <p className="mt-4 text-sm text-red-400">
+          {formError}
+        </p>
+      )}
 
       {/* Action */}
       <div className="mt-8 flex justify-end">
