@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   ClipboardCheck,
   LogOut,
+  LibraryBig
 } from "lucide-react";
 
 const MIN_WIDTH = 60;
@@ -101,6 +102,12 @@ export default function SideBar() {
           href="/admin-dashboard/reports"
           icon={<ClipboardCheck size={20} />}
           label="Reports"
+          collapsed={isCollapsed}
+        />
+        <NavLink
+          href="/admin-dashboard/assessments"
+          icon={<LibraryBig size={20} />}
+          label="Assessments"
           collapsed={isCollapsed}
         />
       </nav>
