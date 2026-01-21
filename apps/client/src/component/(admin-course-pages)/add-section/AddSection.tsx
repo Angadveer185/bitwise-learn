@@ -12,6 +12,7 @@ type Props = {
       id: string;
       name: string;
       description: string;
+      transcript: string;
     }[];
   };
   onAddAssignment: (sectionId:string) => void;

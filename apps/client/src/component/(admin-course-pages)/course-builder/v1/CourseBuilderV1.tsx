@@ -219,6 +219,7 @@ const CourseBuilderV1 = ({ courseId }: Props) => {
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [showAddAssignment, setShowAddAssignment] = useState(false);
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
+  const isPublished = course?.isPublished === "PUBLISHED";
 
   useEffect(() => {
     if (!courseId) return;
@@ -343,15 +344,20 @@ const CourseBuilderV1 = ({ courseId }: Props) => {
 
   const handlePublishCourse = async () => {
     try {
-      toast.loading("Publishing Course...", { id: "publish" });
+      toast.loading(
+        isPublished ? "UnPublishing Course..." : "Publishing Course...",
+        { id: "publish" },
+      );
 
       const res = await publishCourse(courseId);
 
-      if (!res.data) {
+      if (!res?.data) {
         throw new Error("Publish Failed");
       }
 
-      toast.success("Course Published SuccessFully", { id: "publish" });
+      toast.success(isPublished ? "Course UnPublished" : "Course Published", {
+        id: "publish",
+      });
 
       const refreshed = await getCourseById(courseId);
       setCourse(refreshed.data);
@@ -453,9 +459,16 @@ const CourseBuilderV1 = ({ courseId }: Props) => {
 
           <button
             onClick={() => setShowPublishModal(true)}
-            className="px-4 py-1.5 text-sm rounded-md bg-sky-600 text-black font-medium hover:bg-sky-500 transition cursor-pointer"
+            className={`
+    px-4 py-1.5 text-sm rounded-md font-medium transition cursor-pointer
+    ${
+      isPublished
+        ? "bg-sky-600 text-white hover:bg-sky-500"
+        : "bg-sky-600 text-black hover:bg-sky-500"
+    }
+  `}
           >
-            Publish
+            {isPublished ? "UnPublish" : "Publish"}
           </button>
         </div>
       </div>
@@ -472,7 +485,7 @@ const CourseBuilderV1 = ({ courseId }: Props) => {
               setActiveSectionId(sectionId);
               setShowAddAssignment(true);
             }}
-            onSectionDeleted={async()=>{
+            onSectionDeleted={async () => {
               const res = await getSections(courseId);
               setSections(res.data);
             }}
@@ -534,6 +547,7 @@ const CourseBuilderV1 = ({ courseId }: Props) => {
         onClose={() => setShowPublishModal(false)}
         onConfirm={handlePublishCourse}
         requirements={publishRequirements}
+        isPublished={course?.isPublished === "PUBLISHED"}
       />
 
       {/* create section modal  */}

@@ -13,6 +13,7 @@ type Props = {
   onClose: () => void;
   onConfirm: () => void;
   requirements: Requirement[];
+  isPublished: boolean;
 };
 
 const PublishCourseV1 = ({
@@ -20,6 +21,7 @@ const PublishCourseV1 = ({
   onClose,
   onConfirm,
   requirements,
+  isPublished,
 }: Props) => {
   const allSatisfied = requirements.every((r) => r.satisfied);
 
@@ -62,38 +64,39 @@ const PublishCourseV1 = ({
         "
       >
         <h2 className="text-xl font-semibold text-white">
-          Ready to publish this course?
+          {isPublished
+            ? "UnPublish this Course?"
+            : "Ready to publish this Course?"}
         </h2>
 
         <p className="mt-1 text-sm text-slate-400">
-          Please make sure all required fields are completed.
+          {isPublished
+            ? "This course will no longer be visible to Users."
+            : "Please make sure all required fields are completed."}
         </p>
 
         {/* Requirements */}
-        <div className="mt-5 space-y-3">
-          {requirements.map((req, idx) => (
-            <div
-              key={idx}
-              className="flex items-center gap-3 text-sm"
-            >
-              {req.satisfied ? (
-                <CheckCircle className="text-green-500" size={18} />
-              ) : (
-                <XCircle className="text-red-500" size={18} />
-              )}
+        {!isPublished && (
+          <div className="mt-5 space-y-3">
+            {requirements.map((req, idx) => (
+              <div key={idx} className="flex items-center gap-3 text-sm">
+                {req.satisfied ? (
+                  <CheckCircle className="text-green-500" size={18} />
+                ) : (
+                  <XCircle className="text-red-500" size={18} />
+                )}
 
-              <span
-                className={
-                  req.satisfied
-                    ? "text-slate-200"
-                    : "text-slate-400"
-                }
-              >
-                {req.label}
-              </span>
-            </div>
-          ))}
-        </div>
+                <span
+                  className={
+                    req.satisfied ? "text-slate-200" : "text-slate-400"
+                  }
+                >
+                  {req.label}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Actions */}
         <div className="mt-6 flex justify-end gap-3">
@@ -113,7 +116,7 @@ const PublishCourseV1 = ({
           </button>
 
           <button
-            disabled={!allSatisfied}
+            disabled={!isPublished && !allSatisfied}
             onClick={onConfirm}
             className={`
               px-4 py-2
@@ -121,13 +124,15 @@ const PublishCourseV1 = ({
               font-medium
               transition
               ${
-                allSatisfied
+                isPublished
+                ? "bg-red-600 text-white hover:bg-red-500 cursor-pointer"
+                : allSatisfied
                   ? "bg-blue-600 text-white hover:bg-blue-500 cursor-pointer"
                   : "bg-blue-600/40 text-white/50 cursor-not-allowed"
               }
             `}
           >
-            Confirm Publish
+            {isPublished?"UnPublish":"Publish Course"}
           </button>
         </div>
       </div>

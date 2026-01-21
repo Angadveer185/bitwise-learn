@@ -86,7 +86,7 @@ router.delete(
 router.put(
   "/update-content-to-section/:id",
   authMiddleware,
-  upload.single("transcript"),
+  upload.single("file"),
   courseContentController.updateContentToSection,
 );
 router.post(

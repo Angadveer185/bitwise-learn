@@ -10,6 +10,7 @@ export type PublishCourseProps = {
   onClose: () => void;
   onConfirm: () => void;
   requirements: Requirement[];
+  isPublished:boolean;
 };
 
 const PublishCourse = ({
@@ -17,6 +18,7 @@ const PublishCourse = ({
   onClose,
   onConfirm,
   requirements,
+  isPublished,
 }: PublishCourseProps) => {
   return (
     <PublishCourseV1
@@ -24,6 +26,7 @@ const PublishCourse = ({
       onClose={onClose}
       onConfirm={onConfirm}
       requirements={requirements}
+      isPublished={isPublished}
     />
   );
 };

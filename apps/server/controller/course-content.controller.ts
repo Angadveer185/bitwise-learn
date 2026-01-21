@@ -114,6 +114,10 @@ class CouseContentController {
 
       if (!dbContent) throw new Error("invalid section id");
 
+      if(dbContent.file){
+        await cloudinaryService.deleteFile(dbContent.file);
+      }
+
       const deletedCourse = await prismaClient.courseLearningContent.delete({
         where: { id: dbContent.id },
       });
@@ -205,7 +209,7 @@ class CouseContentController {
             id: dbContent.id,
           },
           data: {
-            file: null,
+            file: "",
           },
         });
 

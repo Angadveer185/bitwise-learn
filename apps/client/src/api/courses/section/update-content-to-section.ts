@@ -3,7 +3,7 @@ import axiosInstance from "@/lib/axios";
 type UpdateContentPayload={
     name?:string;
     description?:string;
-    transcript?:File | null;
+    transcript?:string | null;
     videoUrl?:string;
 }
 
