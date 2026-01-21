@@ -1,0 +1,481 @@
+"use client";
+
+import { getCourseById } from "@/api/courses/course/get-course-by-id";
+import { motion, AnimatePresence } from "framer-motion";
+import { Book, CheckLine, ChevronDown, Play } from "lucide-react";
+import { useParams } from "next/navigation";
+import React, { useEffect, useRef, useState } from "react";
+import ReactViewAdobe from "react-adobe-embed";
+import View from "react-adobe-embed";
+import PdfViewer from "./PDFViewer";
+import { markAsDone, markAsUnDone } from "@/api/courses/course/course-progress";
+import MarkdownEditor from "@/component/ui/MarkDownEditor";
+
+/* ================= TYPES ================= */
+
+type Topic = {
+  id: string;
+  name: string;
+  description: string;
+  videoUrl?: string;
+  transcript?: string;
+  file?: string;
+  isCompleted?: boolean;
+};
+
+type Assignment = {
+  id: string;
+  name: string;
+  description: string;
+  instruction: string;
+  marksPerQuestion: number;
+  courseAssignemntQuestions: any[];
+};
+
+type Section = {
+  id: string;
+  name: string;
+  isOpen: boolean;
+  courseLearningContents: Topic[];
+  courseAssignemnts: Assignment[];
+};
+
+/* ================= COMPONENT ================= */
+
+export default function CourseV2() {
+  const params = useParams();
+
+  const [sections, setSections] = useState<Section[]>([]);
+  const [activeTopic, setActiveTopic] = useState<Topic | null>(null);
+  const [activeAssignment, setActiveAssignment] = useState<Assignment | null>(
+    null,
+  );
+
+  const [mode, setMode] = useState<"LEARNING" | "ASSIGNEMENT">("LEARNING");
+  const [sidebarWidth, setSidebarWidth] = useState(320);
+  const [studyMode, setStudyMode] = useState(false);
+  const [showTranscript, setShowTranscript] = useState(true);
+  const [showPDF, setShowPDF] = useState(true);
+  const [completedSection, setCompletedSection] = useState([]);
+
+  const isResizing = useRef(false);
+
+  /* ================= FETCH COURSE ================= */
+
+  useEffect(() => {
+    async function fetchData() {
+      const res = await getCourseById(params.id as string);
+
+      const mappedSections = res.data.courseSections.map((sec: any) => ({
+        ...sec,
+        isOpen: false,
+      }));
+
+      setSections(mappedSections);
+
+      // map each section and mark the content as done
+      const firstTopic =
+        res.data.courseSections?.[0]?.courseLearningContents?.[0];
+      if (firstTopic) setActiveTopic(firstTopic);
+    }
+
+    fetchData();
+  }, [params.id]);
+
+  /* ================= SIDEBAR RESIZE ================= */
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing.current) return;
+      const next = e.clientX - 16;
+      setSidebarWidth(Math.min(Math.max(next, 240), 520));
+    };
+
+    const stopResize = () => {
+      isResizing.current = false;
+      document.body.style.cursor = "default";
+      document.body.style.userSelect = "auto";
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", stopResize);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", stopResize);
+    };
+  }, []);
+
+  const startResize = () => {
+    isResizing.current = true;
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+  };
+
+  const toggleStudyMode = async () => {
+    if (!document.fullscreenElement) {
+      // Enter fullscreen
+      await document.documentElement.requestFullscreen();
+      setStudyMode(true);
+    } else {
+      // Exit fullscreen
+      await document.exitFullscreen();
+      setStudyMode(false);
+    }
+  };
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setStudyMode(!!document.fullscreenElement);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+
+    return () =>
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+  const handleMarkAsDone = async () => {
+    if (!activeTopic) return;
+
+    if (activeTopic.isCompleted) {
+      //@ts-ignore
+      await markAsUnDone(activeTopic.id);
+
+      setCompletedSection((prev) =>
+        prev.filter((section) => section.id !== activeTopic.id),
+      );
+    } else {
+      //@ts-ignore
+      await markAsDone(activeTopic.id);
+
+      //@ts-ignore
+      setCompletedSection((prev) => [...prev, { id: activeTopic.id }]);
+    }
+  };
+
+  /* ================= RENDER ================= */
+
+  return (
+    <div className="min-h-screen bg-[#121313] p-4">
+      <motion.div className="flex gap-4 h-[calc(100vh-2rem)]">
+        {/* ================= LEFT SIDEBAR ================= */}
+        {!studyMode && (
+          <aside
+            style={{ width: sidebarWidth }}
+            className="relative bg-[#1a1b1b] rounded-lg shrink-0 overflow-hidden"
+          >
+            <SectionNav
+              sections={sections}
+              mode={mode}
+              setMode={setMode}
+              completedSection={completedSection}
+              onSelectTopic={(t: any) => {
+                setActiveTopic(t);
+                setActiveAssignment(null);
+              }}
+              onSelectAssignment={(a: any) => {
+                setActiveAssignment(a);
+                setActiveTopic(null);
+              }}
+              onToggleSection={(id: string) => {
+                setSections((prev) =>
+                  prev.map((sec) =>
+                    sec.id === id ? { ...sec, isOpen: !sec.isOpen } : sec,
+                  ),
+                );
+              }}
+            />
+            <div
+              onMouseDown={startResize}
+              className="absolute right-0 top-0 h-full w-1.5 cursor-col-resize hover:bg-blue-500/40"
+            />
+          </aside>
+        )}
+
+        {/* ================= RIGHT CONTENT ================= */}
+        <div className="flex-1 bg-[#161717] rounded-xl h-[95svh] overflow-hidden flex flex-col">
+          {/* HEADER */}
+          <div className="p-6 border-b border-[#2a2a2a] bg-[#1a1b1b] flex justify-between">
+            <h2 className="text-white text-lg font-semibold">
+              {mode === "LEARNING" ? activeTopic?.name : activeAssignment?.name}
+            </h2>
+            <div className="w-1/3 flex gap-4 flex-end">
+              {
+                <button
+                  onClick={() => {
+                    setStudyMode((p) => !p);
+                    toggleStudyMode();
+                  }}
+                  className="px-3 py-2 bg-[#2a2a2a] text-gray-300 rounded"
+                >
+                  {studyMode ? "Exit Study Mode" : "Study Mode"}
+                </button>
+              }
+              {activeTopic?.file && (
+                <button
+                  onClick={() => {
+                    setShowPDF((p) => !p);
+                  }}
+                  className="px-3 py-2 bg-[#2a2a2a] text-gray-300 rounded"
+                >
+                  {showPDF ? "Show PDF" : "Hide PDF"}
+                </button>
+              )}
+              <button
+                onClick={handleMarkAsDone}
+                className="px-3 py-2 bg-[#2a2a2a] text-gray-300 rounded"
+              >
+                Mark as Done
+              </button>
+            </div>
+          </div>
+
+          {/* ================= CONTENT SWITCH ================= */}
+          <div
+            className="flex-1 p-6"
+            style={{
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+              //@ts-ignore
+              WebkitScrollbar: { display: "none" },
+            }}
+          >
+            {mode === "LEARNING" && activeTopic && (
+              <LearningView
+                topic={activeTopic}
+                showPDF={showPDF}
+                showTranscript={showTranscript}
+                setShowPDF={setShowPDF}
+                setShowTranscript={setShowTranscript}
+                studyMode={studyMode}
+              />
+            )}
+
+            {mode === "ASSIGNEMENT" && activeAssignment && (
+              <AssignmentView assignment={activeAssignment} />
+            )}
+            {mode === "ASSIGNEMENT" && !activeAssignment && (
+              <div className="w-full h-fit mt-36 flex flex-col items-center justify-center text-center gap-3 text-gray-400">
+                <div className="p-4 rounded-full bg-[#1c1d1d]">
+                  <Book size={32} className="text-gray-300" />
+                </div>
+
+                <p className="text-lg font-medium text-gray-300">
+                  No assignments yet
+                </p>
+
+                <p className="text-sm text-gray-500 max-w-xs">
+                  You’ll see your assignments here once they’re added.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+/* ================= LEARNING VIEW ================= */
+
+function LearningView({ topic, showPDF, studyMode }: any) {
+  return (
+    <div className="flex gap-6">
+      <div className="flex-1 space-y-6">
+        <div className="aspect-video bg-black rounded-xl overflow-hidden">
+          {topic.videoUrl && (
+            <iframe
+              src={topic.videoUrl || ""}
+              className="w-full h-full"
+              allowFullScreen
+            />
+          )}
+        </div>
+
+        {topic.transcript ? (
+          <aside className="w-full bg-[#1c1d1d] p-4 rounded-xl text-gray-300">
+            <MarkdownEditor
+              height={550}
+              value={topic.transcript}
+              mode={"preview"}
+              hideToolbar={true}
+              theme="dark"
+            />
+          </aside>
+        ) : (
+          <aside className="w-full h-[25%] flex justify-center items-center pt-8 bg-[#1c1d1d] p-4 rounded-xl text-gray-300">
+            No Transcripts yet
+          </aside>
+        )}
+      </div>
+      {showPDF && topic.file && (
+        // <ReactViewAdobe
+        //   clientId={process.env.NEXT_PUBLIC_ADOBE_KEY as string}
+        //   title="Daksh Document"
+        //   url={topic.file}
+        //   id="pdf-brochure"
+        //   fileMeta={{
+        //     fileName: "Daksh Document",
+        //   }}
+        //   previewConfig={{
+        //     defaultViewMode: "SINGLE_PAGE",
+        //     showAnnotationTools: false,
+        //     showPageControls: true,
+        //     showDownloadPDF: true,
+        //     showZoomControl: true,
+        //   }}
+        //   style={{
+        //     height: "100vh",
+        //     width: "100vw",
+        //   }}
+        //   debug
+        // />
+        // <PdfViewer url={topic.file} />
+        <iframe src={topic.file} className="w-[40%] h-screen" />
+      )}
+    </div>
+  );
+}
+
+/* ================= ASSIGNMENT VIEW ================= */
+
+function AssignmentView({ assignment }: { assignment: Assignment }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="max-w-4xl mx-auto space-y-6"
+    >
+      <div className="bg-[#1a1b1b] p-6 rounded-xl">
+        <h3 className="text-white text-xl font-semibold mb-2">
+          {assignment.name}
+        </h3>
+        <p className="text-gray-400">{assignment.description}</p>
+      </div>
+
+      <div className="bg-[#141515] p-6 rounded-xl">
+        <h4 className="text-white font-medium mb-2">Instructions</h4>
+        <p className="text-gray-300 whitespace-pre-line">
+          {assignment.instruction}
+        </p>
+      </div>
+
+      <div className="text-gray-400">
+        Marks per question: {assignment.marksPerQuestion}
+      </div>
+    </motion.div>
+  );
+}
+
+/* ================= SIDEBAR ================= */
+
+function SectionNav({
+  sections,
+  mode,
+  setMode,
+  onSelectTopic,
+  onSelectAssignment,
+  onToggleSection,
+  completedSection,
+}: {
+  sections: Section[];
+  mode: "LEARNING" | "ASSIGNEMENT";
+  setMode: (m: "LEARNING" | "ASSIGNEMENT") => void;
+  onSelectTopic: (t: Topic) => void;
+  onSelectAssignment: (a: Assignment) => void;
+  onToggleSection: (id: string) => void;
+  completedSection: Section[];
+}) {
+  const fetchIcon = (id: string) => {
+    const match = completedSection.filter((section: any) => {
+      return section.id === id;
+    });
+
+    console.log(match);
+
+    return match.length === 0 ? (
+      <Play size={14} className="mr-2" />
+    ) : (
+      <CheckLine size={14} className="mr-2" />
+    );
+  };
+  return (
+    <nav className="h-full overflow-y-auto p-4 space-y-4">
+      {/* Mode Switch */}
+      <div className="flex mb-6 justify-center gap-4 text-white">
+        <button
+          onClick={() => setMode("LEARNING")}
+          className={`px-3 py-1.5 rounded-md ${
+            mode === "LEARNING" ? "bg-primaryBlue text-white" : "bg-[#1c1d1d]"
+          }`}
+        >
+          Learning
+        </button>
+        <button
+          onClick={() => setMode("ASSIGNEMENT")}
+          className={`px-3 py-1.5 rounded-md ${
+            mode === "ASSIGNEMENT"
+              ? "bg-primaryBlue text-white"
+              : "bg-[#1c1d1d]"
+          }`}
+        >
+          Assignments
+        </button>
+      </div>
+
+      {sections.map((section) => (
+        <div
+          key={section.id}
+          className="bg-[#141515] rounded-lg overflow-hidden"
+        >
+          {/* Section Header */}
+          <button
+            onClick={() => onToggleSection(section.id)}
+            className="w-full px-4 py-3 flex justify-between items-center text-white hover:bg-[#1c1d1d]"
+          >
+            <span>{section.name}</span>
+            <ChevronDown
+              className={`transition-transform ${
+                section.isOpen ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+
+          {/* Section Content */}
+          {section.isOpen && (
+            <div className="bg-[#101111]">
+              {mode === "LEARNING" ? (
+                section.courseLearningContents.length > 0 ? (
+                  section.courseLearningContents.map((t) => (
+                    <button
+                      key={t.id}
+                      onClick={() => onSelectTopic(t)}
+                      className="flex items-center w-full px-6 py-2 text-gray-300 hover:bg-[#1c1d1d]"
+                    >
+                      {fetchIcon(t.id)}
+                      {t.name}
+                    </button>
+                  ))
+                ) : (
+                  <div className="px-6 py-2 text-gray-500">No topics yet</div>
+                )
+              ) : section.courseAssignemnts.length > 0 ? (
+                section.courseAssignemnts.map((a) => (
+                  <button
+                    key={a.id}
+                    onClick={() => onSelectAssignment(a)}
+                    className="flex items-center w-full px-6 py-2 text-gray-300 hover:bg-[#1c1d1d]"
+                  >
+                    {a.name}
+                  </button>
+                ))
+              ) : (
+                <div className="px-6 py-2 text-gray-500">
+                  No assignments yet
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      ))}
+    </nav>
+  );
+}

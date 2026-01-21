@@ -1,5 +1,6 @@
-import CourseV1 from "./v1/CourseV1"
+import CourseV1 from "./v1/CourseV1";
+import CourseV2 from "./v2/CourseV2";
 
 export default function Course() {
-  return <CourseV1 />
+  return <CourseV2 />;
 }

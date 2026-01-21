@@ -19,6 +19,7 @@
     "next-remove-imports": "^1.0.12",
     "prismjs": "^1.30.0",
     "react": "^19.2.3",
+    "react-adobe-embed": "^13.1.2",
     "react-dom": "^19.2.3",
     "react-markdown": "^10.1.0",
     "rehype-katex": "^7.0.1",
