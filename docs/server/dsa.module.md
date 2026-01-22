@@ -30,3 +30,7 @@ The api Documentation of the DSA propotion is linked in the url to [postman](htt
 ## Flow of Problem Creation
 
 An admin will be creating a problem with the given data required for a problem. All the description is stored inside of a markdown format so that it can be kept dynamic and not fixed. Later on once the problem is created, he can navigate via the admin dashboard to create templates for various applications as well as the testcases, solution and all the stuff required by them.
+
+---
+
+### How to Add a new Question

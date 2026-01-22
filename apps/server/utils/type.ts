@@ -1,6 +1,6 @@
 export interface JwtPayload {
   id: string;
-  type: "SUPERADMIN" | "ADMIN" | "INSTITUTION" | "VENDOR" | "TEACHER";
+  type: "SUPERADMIN" | "ADMIN" | "INSTITUTION" | "VENDOR" | "TEACHER" | "STUDENT";
 }
 export interface CourseBody {
   name: string;

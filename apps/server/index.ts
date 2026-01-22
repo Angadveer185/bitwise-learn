@@ -93,6 +93,7 @@ declare global {
 }
 // routes
 app.use("/api/v1/admins", adminRouter);
+app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/institutions", institutionRouter);
 app.use("/api/v1/teachers", teacherRouter);
 app.use("/api/v1/students", studentRouter);

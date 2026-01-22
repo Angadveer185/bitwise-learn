@@ -5,6 +5,8 @@ import Image from "next/image";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import handleLogin from "@/api/handleLogin";
+import { useRouter } from "next/navigation";
 
 /* ================= ANIMATION VARIANTS ================= */
 
@@ -100,13 +102,30 @@ function WelcomeTypewriter() {
 
 export default function AdminLoginV1() {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  async function fetchLoginData(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
 
-  async function fetchLoginData(formData: FormData) {
-    const email = formData.get("email");
-    const password = formData.get("password");
-    const remember = formData.get("remember");
+    const payload = {
+      email,
+      password,
+      role: "STUDENT" as const,
+    };
 
-    console.log(email, password, remember);
+    console.log(payload);
+
+    try {
+      setLoading(true);
+      await handleLogin({ data: payload });
+      router.push("/dashboard")
+    } catch (err) {
+      console.error("Login failed", err);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -142,9 +161,10 @@ export default function AdminLoginV1() {
 
           <motion.form
             variants={stagger}
-            action={fetchLoginData}
+            onSubmit={fetchLoginData}
             className="space-y-6"
           >
+            {/* EMAIL */}
             <motion.div variants={slideUp} className="flex flex-col space-y-1">
               <label htmlFor="email" className="text-lg text-white">
                 Email Address
@@ -157,14 +177,18 @@ export default function AdminLoginV1() {
                   type="email"
                   name="email"
                   id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-12 py-2 pr-4 rounded-lg bg-bg text-white
                   focus:ring-2 focus:ring-primaryBlue focus:ring-offset-2 outline-none
                   focus:ring-offset-bg"
                   placeholder="johndoe@example.com"
+                  required
                 />
               </div>
             </motion.div>
 
+            {/* PASSWORD */}
             <motion.div variants={slideUp} className="mt-4">
               <label htmlFor="password" className="text-lg text-white">
                 Password
@@ -177,10 +201,13 @@ export default function AdminLoginV1() {
                   type={showPassword ? "text" : "password"}
                   name="password"
                   id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-12 py-2 pr-4 rounded-lg bg-bg text-white
                   focus:ring-2 focus:ring-primaryBlue focus:ring-offset-2 outline-none
                   focus:ring-offset-bg"
                   placeholder="123@somePass"
+                  required
                 />
                 <button
                   type="button"
@@ -192,27 +219,16 @@ export default function AdminLoginV1() {
               </div>
             </motion.div>
 
-            <motion.div variants={slideUp} className="flex items-center">
-              <label className="flex items-center space-x-2 text-white">
-                <input
-                  type="checkbox"
-                  name="remember"
-                  className="w-4 h-4 rounded border border-neutral-500 bg-bg
-                  focus:ring-2 focus:ring-primaryBlue focus:ring-offset-2
-                  focus:ring-offset-bg outline-none"
-                />
-                <span>Remember me</span>
-              </label>
-            </motion.div>
-
+            {/* SUBMIT */}
             <motion.button
               variants={slideUp}
               type="submit"
+              disabled={loading}
               className="w-full py-3 rounded-lg bg-primaryBlue
               text-white text-lg font-semibold
-              hover:opacity-90 transition"
+              hover:opacity-90 transition disabled:opacity-60"
             >
-              Log in
+              {loading ? "Logging in..." : "Log in"}
             </motion.button>
 
             <motion.div variants={slideUp}>
@@ -247,3 +263,4 @@ export default function AdminLoginV1() {
     </motion.div>
   );
 }
+

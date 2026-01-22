@@ -135,7 +135,62 @@ class AuthController {
             return res.status(401).json(apiResponse(401, error.message, null));
         }
     }
+    async studentLogin(req: Request, res: Response) {
+        try {
+            const { email, password } = req.body;
 
+            if (!email || !password)
+                throw new Error("email and password are required");
+
+            const student = await prismaClient.student.findFirst({
+                where: { email },
+            });
+
+            if (!student) throw new Error("invalid credentials");
+
+            const isValid = await comparePassword(
+                password,
+                student.loginPassword
+            );
+            if (!isValid) throw new Error("invalid credentials");
+
+            const tokens = generateFreshTokens({
+                id: student.id,
+                type: "STUDENT",
+            });
+            const dbStudent = await prismaClient.student.findUnique({
+                where: { id: student.id },
+                select: {
+                    email: true,
+                    name: true,
+                    rollNumber: true,
+                    batch: {
+                        select: {
+                            batchname: true,
+                            branch: true,
+                            batchEndYear: true,
+                        },
+                    },
+                    insitution: {
+                        select: {
+                            name: true,
+                            tagline: true,
+                            websiteLink: true,
+                        },
+                    },
+                },
+                });
+
+            return res
+                .status(200)
+                .json(apiResponse(200, "login successful", {
+                    tokens:tokens.accessToken,
+                    data:dbStudent
+                }));
+        } catch (error: any) {
+            return res.status(401).json(apiResponse(401, error.message, null));
+        }
+    }
     //  REFRESH TOKEN
     async refreshToken(req: Request, res: Response) {
         try {

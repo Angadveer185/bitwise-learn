@@ -1,6 +1,6 @@
 "use client";
 
-type LoginRole = "Instructor" | "Institution" | "Partner";
+type LoginRole = "INSTITUTION" | "VENDOR" | "TEACHER";
 
 import MutliLoginIMG from "../V1/MultiLoginIMG.png";
 import Image from "next/image";
@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import handleLogin from "@/api/handleLogin";
+import toast from "react-hot-toast";
 
 /* ================= ANIMATION VARIANTS ================= */
 
@@ -109,192 +111,159 @@ function WelcomeTypewriter() {
 /* ================= MAIN COMPONENT ================= */
 
 export default function AdminLoginV1() {
+  const [role, setRole] = useState<LoginRole>("TEACHER");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [role, setRole] = useState<LoginRole>("Instructor");
 
-  async function fetchLoginData(formData: FormData) {
-    const email = formData.get("email");
-    const password = formData.get("password");
-    const remember = formData.get("remember");
-    const role = formData.get("role");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const isDisabled = !email || !password || loading;
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    try {
+      const payload = {
+        email,
+        password,
+        role
+      };
+
+      const response = await handleLogin({data:payload});
+      toast.success("login successful");
+    } catch (err) {
+      setError("Invalid email or password");
+      toast.error("login failed");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
-    <motion.div
-      variants={pageFade}
-      initial="hidden"
-      animate="show"
-      className="bg-bg min-h-screen w-screen flex flex-col md:flex-row"
-    >
-      {/* LEFT SECTION */}
-      <motion.div
-        variants={stagger}
-        initial="hidden"
-        animate="show"
-        className="flex-1 flex flex-col px-6 py-10 md:p-16"
-      >
-        <motion.div
-          variants={slideUp}
-          className="flex justify-center md:justify-start"
-        >
-          <h1 className="text-3xl">
-            <span className="text-primaryBlue font-bold">B</span>
-            <span className="font-bold text-white">itwise</span>{" "}
-            <span className="text-white">Learn</span>
-          </h1>
-        </motion.div>
+    <motion.div className="bg-bg min-h-screen w-screen flex flex-col md:flex-row">
+      {/* LEFT */}
+      <div className="flex-1 flex flex-col px-6 py-10 md:p-16">
+        <h1 className="text-3xl mb-10">
+          <span className="text-primaryBlue font-bold">B</span>
+          <span className="font-bold text-white">itwise</span>{" "}
+          <span className="text-white">Learn</span>
+        </h1>
 
-        <motion.div
-          variants={slideUp}
-          className="relative w-full md:w-[60%] h-auto md:h-[70%] bg-divBg mt-10 md:mt-16 md:ml-16 rounded-3xl p-8 pt-4"
-        >
-          <h1 className="text-2xl font-bold mb-2">
+        <div className="relative w-full md:w-[60%] bg-divBg rounded-3xl p-8">
+          <h2 className="text-2xl font-bold mb-4">
             <span className="text-white">Log</span>{" "}
             <span className="text-primaryBlue">in</span>
-          </h1>
+          </h2>
 
-          <motion.form
-            variants={stagger}
-            action={fetchLoginData}
-            className="space-y-5"
-          >
-            <motion.div
-              variants={slideUp}
-              className="bg-bg rounded-xl flex flex-wrap gap-2 justify-center md:justify-around items-center p-2"
-            >
-              <input type="hidden" name="role" value={role} />
-
+          {/* ROLE SELECT */}
+          <div className="flex gap-2 mb-6 bg-bg p-2 rounded-xl">
+            {[
+              { label: "TEACHER", icon: GraduationCap },
+              { label: "INSTITUTION", icon: School },
+              { label: "VENDOR", icon: Handshake },
+            ].map(({ label, icon: Icon }) => (
               <button
+                key={label}
                 type="button"
-                onClick={() => setRole("Instructor")}
-                className={`px-2 py-2 rounded-lg transition flex items-center gap-2
-                ${role === "Instructor"
-                    ? "bg-primaryBlue text-slate"
-                    : "bg-[#3B82F6]"
+                onClick={() => setRole(label as LoginRole)}
+                className={`flex-1 py-2 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition
+                  ${
+                    role === label
+                      ? "bg-primaryBlue text-white"
+                      : "bg-[#3B82F6]/60 text-white hover:bg-[#3B82F6]"
                   }`}
               >
-                <GraduationCap size={20} color="white" />
-                Instructor
+                <Icon size={18} />
+                {label.toLowerCase()}
               </button>
+            ))}
+          </div>
 
-              <button
-                type="button"
-                onClick={() => setRole("Institution")}
-                className={`px-2 py-2 rounded-lg transition flex items-center gap-2
-                ${role === "Institution"
-                    ? "bg-primaryBlue text-white"
-                    : "bg-[#3B82F6]"
-                  }`}
-              >
-                <School size={20} color="white" />
-                Institution
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setRole("Partner")}
-                className={`px-2 py-2 rounded-lg transition flex items-center gap-2
-                ${role === "Partner"
-                    ? "bg-primaryBlue text-white"
-                    : "bg-[#3B82F6]"
-                  }`}
-              >
-                <Handshake size={20} color="white" />
-                Partner
-              </button>
-            </motion.div>
-
-            <motion.div variants={slideUp} className="flex flex-col space-y-1">
-              <label htmlFor="email" className="text-lg text-white">
-                Email Address
-              </label>
-              <div className="relative">
-                <div className="absolute top-1/2 left-3 -translate-y-1/2">
-                  <Mail size={24} color="white" />
-                </div>
+          {/* FORM */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* EMAIL */}
+            <div>
+              <label className="text-white text-sm">Email Address</label>
+              <div className="relative mt-1">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-white" />
                 <input
                   type="email"
-                  name="email"
-                  id="email"
-                  className="w-full pl-12 py-2 pr-4 rounded-lg bg-bg text-white
-                  focus:ring-2 focus:ring-primaryBlue focus:ring-offset-2 outline-none
-                  focus:ring-offset-bg"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full pl-11 py-2 rounded-lg bg-bg text-white focus:ring-2 focus:ring-primaryBlue outline-none"
                   placeholder="johndoe@example.com"
                 />
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div variants={slideUp} className="mt-4">
-              <label htmlFor="password" className="text-lg text-white">
-                Password
-              </label>
-              <div className="relative">
-                <div className="absolute top-1/2 left-3 -translate-y-1/2">
-                  <Lock size={24} color="white" />
-                </div>
+            {/* PASSWORD */}
+            <div>
+              <label className="text-white text-sm">Password</label>
+              <div className="relative mt-1">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-white" />
                 <input
                   type={showPassword ? "text" : "password"}
-                  name="password"
-                  id="password"
-                  className="w-full pl-12 py-2 pr-4 rounded-lg bg-bg text-white
-                  focus:ring-2 focus:ring-primaryBlue focus:ring-offset-2 outline-none
-                  focus:ring-offset-bg"
-                  placeholder="123@somePass"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-11 pr-10 py-2 rounded-lg bg-bg text-white focus:ring-2 focus:ring-primaryBlue outline-none"
+                  placeholder="••••••••"
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute top-1/2 right-3 -translate-y-1/2 text-white"
+                  onClick={() => setShowPassword((p) => !p)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white"
                 >
-                  {showPassword ? <Eye size={17} /> : <EyeOff size={17} />}
+                  {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
                 </button>
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div variants={slideUp} className="flex items-center">
-              <label className="flex items-center space-x-2 text-white">
+            {/* REMEMBER + ERROR */}
+            <div className="flex items-center justify-between text-sm">
+              <label className="flex items-center gap-2 text-white">
                 <input
                   type="checkbox"
-                  name="remember"
-                  className="w-4 h-4 rounded border border-neutral-500 bg-bg
-                  focus:ring-2 focus:ring-primaryBlue focus:ring-offset-2
-                  focus:ring-offset-bg outline-none"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
+                  className="accent-primaryBlue"
                 />
-                <span>Remember me</span>
+                Remember me
               </label>
-            </motion.div>
 
-            <motion.button
-              variants={slideUp}
-              type="submit"
-              className="w-full py-3 rounded-lg bg-primaryBlue
-              text-white text-lg font-semibold
-              hover:opacity-90 transition"
-            >
-              Log in
-            </motion.button>
-
-            <motion.div variants={slideUp} className="-mt-3">
               <button
                 type="button"
-                className="text-sm text-neutral-300 hover:text-primaryBlue transition"
+                className="text-neutral-300 hover:text-primaryBlue transition"
               >
-                Forgot Password?
+                Forgot password?
               </button>
-            </motion.div>
-          </motion.form>
-        </motion.div>
+            </div>
 
-        <WelcomeTypewriter />
-      </motion.div>
+            {error && (
+              <p className="text-red-400 text-sm bg-red-400/10 p-2 rounded-lg">
+                {error}
+              </p>
+            )}
+
+            {/* SUBMIT */}
+            <button
+              type="submit"
+              disabled={isDisabled}
+              className="w-full py-3 rounded-lg bg-primaryBlue text-white font-semibold
+              disabled:opacity-50 disabled:cursor-not-allowed transition"
+            >
+              {loading ? "Signing in..." : "Log in"}
+            </button>
+          </form>
+        </div>
+      </div>
 
       {/* RIGHT IMAGE */}
-      <motion.div
-        variants={imageReveal}
-        initial="hidden"
-        animate="show"
-        className="relative hidden lg:block lg:w-[38%] lg:h-screen"
-      >
+      <div className="hidden lg:block lg:w-[38%] relative">
         <Image
           src={MutliLoginIMG}
           alt="Admin login illustration"
@@ -302,7 +271,7 @@ export default function AdminLoginV1() {
           className="object-cover"
           priority
         />
-      </motion.div>
+      </div>
     </motion.div>
   );
 }
