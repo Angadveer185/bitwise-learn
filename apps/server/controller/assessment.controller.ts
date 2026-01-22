@@ -102,7 +102,7 @@ class AssessmentController {
         try {
             if (!req.user) throw new Error("user is not authenticated");
             if (req.user.type !== "SUPERADMIN" && req.user.type !== "ADMIN" && req.user.type !== "INSTITUTION" && req.user.type !== "VENDOR") throw new Error("User Not Authorized to delete Assessments");
-            const institutions = await prismaClient.assessment.findMany({
+            const assessments = await prismaClient.assessment.findMany({
                 select: {
                     id: true,
                     name: true,
@@ -118,7 +118,7 @@ class AssessmentController {
 
             return res
                 .status(200)
-                .json(apiResponse(200, "assessments fetched successfully", institutions));
+                .json(apiResponse(200, "assessments fetched successfully", assessments));
         } catch (error: any) {
             console.log(error);
             return res.status(200).json(apiResponse(200, error.message, null));
@@ -133,6 +133,7 @@ class AssessmentController {
             const assessment = await prismaClient.assessment.findFirst({
                 where: { id: assessmentId },
                 select: {
+                    id: true,
                     name: true,
                     description: true,
                     instruction: true,
