@@ -15,7 +15,7 @@ export async function handleSendMail(email: any, password: any) {
 
 
     await transporter.sendMail({
-        from: `"Auth Module" <${process.env.EMAIL_USER}>`,
+        from: `"Bitwise Learn" <${process.env.EMAIL_USER}>`,
         to: email,
         subject: "Your Bitwise Learn Password",
         html: template

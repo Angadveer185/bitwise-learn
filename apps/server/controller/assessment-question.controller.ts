@@ -15,14 +15,14 @@ class AssessmentSectionController {
             const createdAssessmentQuestion = await prismaClient.assessmentQuestion.create({
                 data: {
                     question: data.question,
-        options: data.options,
-        ...(data.problem ? { problem: { connect: { id: data.problem } } } : {}),
-        maxMarks: data.maxMarks,
+                    options: data.options,
+                    ...(data.problem ? { problem: { connect: { id: data.problem } } } : {}),
+                    maxMarks: data.maxMarks,
                 }
             });
             if (!createdAssessmentQuestion) throw new Error("Error Creating Assessment Section");
             return res.status(200)
-                .json(apiResponse(200, "Assessment Section Created Successfully.", createdAssessmentSection))
+                .json(apiResponse(200, "Assessment Section Created Successfully.", createdAssessmentQuestion))
         } catch (error: any) {
             console.log(error);
             return res.status(200).json(apiResponse(200, error.message, null));
@@ -32,7 +32,7 @@ class AssessmentSectionController {
         try {
             const sectionId = req.params.id;
             if (!req.user) throw new Error("User not authenticated");
-            const data: UpdateAssessmentSection = req.body;
+            const data: UpdateAssessmentQuestionBody = req.body;
             if (!data) throw new Error("Please provide all fields");
             if (req.user.type !== "SUPERADMIN" && req.user.type !== "ADMIN" && req.user.type !== "INSTITUTION" && req.user.type !== "VENDOR") throw new Error("User Not Authorized to update Assessments");
 
@@ -41,7 +41,7 @@ class AssessmentSectionController {
             });
             if (!section) throw new Error("assessment section not found");
 
-            const updatedAssessmentSection = await prismaClient.assessmentSection.update({
+            const updatedAssessmentSection = await prismaClient.assessmentQuestion.update({
                 where: { id: sectionId },
                 data: {
                     name: data.name ?? section.name,

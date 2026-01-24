@@ -8,13 +8,13 @@ import { getAllTeachers } from "@/api/teachers/get-all-teachers";
 import { getAllBatches } from "@/api/batches/get-all-batches";
 import { getAllVendors } from "@/api/vendors/get-all-vendors";
 import { deleteEntity, updateEntity } from "@/api/institutions/entity";
-
+import { getTeacherByInstitute } from "@/api/teachers/get-teachers-by-institute";
 type EntityListProps = {
   type: string;
   institutionId?: string;
 };
 
-export const EntityList = ({ type }: EntityListProps) => {
+export const EntityList = ({ type, institutionId }: EntityListProps) => {
   const router = useRouter();
 
   const [entities, setEntities] = useState<any[]>([]);
@@ -53,7 +53,9 @@ export const EntityList = ({ type }: EntityListProps) => {
       try {
         switch (type) {
           case "Teachers":
-            await getAllTeachers((data: any) => setEntities(data || []));
+            await getTeacherByInstitute((data: any) => {
+              setEntities(Array.isArray(data) ? data : []);
+            }, institutionId as string);
             break;
           case "Batches":
             await getAllBatches((data: any) => setEntities(data || []));
