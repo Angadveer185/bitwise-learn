@@ -43,6 +43,8 @@ router.get(
   authMiddleware,
   assessmentSectionController.getAllAssessmentSection,
 );
+
+// for questions
 router.get(
   "/get-assessment-section/:id",
   authMiddleware,

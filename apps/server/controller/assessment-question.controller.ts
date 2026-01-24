@@ -31,7 +31,7 @@ class AssessmentQuestionController {
 
       let createdAssessmentQuestion;
 
-      if (data.problem) {
+      if (!data.problem) {
         createdAssessmentQuestion =
           await prismaClient.assessmentQuestion.create({
             data: {
