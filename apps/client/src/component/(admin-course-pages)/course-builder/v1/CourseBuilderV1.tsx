@@ -186,20 +186,13 @@ const AddAssignmentPopup = ({
       className="absolute inset-0 z-999 flex justify-center mt-5 backdrop-blur-sm"
       onClick={onClose}
     >
-      <div className="relative w-205" onClick={(e) => e.stopPropagation()}>
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="absolute -top-3 -right-3 text-white text-xl cursor-pointer"
-        >
-          ✕
-        </button>
-
+      <div className="relative w-200" onClick={(e) => e.stopPropagation()}>
         {children}
       </div>
     </div>
   );
 };
+
 
 const CourseSidebar = ({
   course,
@@ -815,10 +808,12 @@ const CourseBuilderV1 = ({ courseId }: Props) => {
         {showAddAssignment && activeSectionId && (
           <AddAssignmentPopup
             open={showAddAssignment}
-            onClose={() => {
-              setShowAddAssignment(false);
-              setActiveSectionId(null);
-            }}
+            onClose={async () => {
+                setShowAddAssignment(false);
+                setActiveSectionId(null);
+                const res = await getSections(courseId);
+                setSections(res.data);
+              }}
           >
             <AddAssignment
               sectionId={activeSectionId}

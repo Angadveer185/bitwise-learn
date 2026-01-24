@@ -52,14 +52,15 @@ export default function AddAssignmentV1({
   };
 
   return (
-    <div className="my-6 flex justify-center">
+    <div className="my-[-8] flex justify-center">
       <div
-        className={`${Colors.background.secondary} ${Colors.border} rounded-xl w-[90%] max-w-3xl p-2`}
+        className={`rounded-xl w-[93%] max-w-3xl p-2`}
       >
         <AssignmentInfo
           assignment={assignment}
           setAssignment={setAssignment}
           onSubmit={submitAssignment}
+          onClose={onClose}
           loading={loading}
         />
       </div>

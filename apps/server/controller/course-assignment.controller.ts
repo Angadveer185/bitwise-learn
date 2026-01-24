@@ -134,18 +134,36 @@ class CourseAssignmentController {
   }
   async getAllAssignmentFromSection(req: Request, res: Response) {
     try {
+      if (!req.user) throw new Error("User not Authenticated");
+      const userId = req.user.id;
       const sectionId = req.params.id;
       if (!sectionId) throw new Error("assignmentID is required!");
+
+      const dbAdmin = await prismaClient.user.findFirst({
+        where: {
+          id: userId,
+        },
+      });
+
+      if (!dbAdmin) throw new Error("No such Admin Found");
 
       const dbSection = await prismaClient.courseSections.findFirst({
         where: {
           id: sectionId,
+          creatorId: userId,
         },
       });
 
       if (!dbSection) throw new Error("can not find course section");
 
-      const dbAssignment = await prismaClient.courseAssignemnt.findMany({});
+      const dbAssignment = await prismaClient.courseAssignemnt.findMany({
+        where: {
+          sectionId: sectionId,
+        },
+        orderBy: {
+          createdAt: "asc",
+        },
+      });
 
       return res
         .status(200)
@@ -157,32 +175,31 @@ class CourseAssignmentController {
   }
   async getAssignmentById(req: Request, res: Response) {
     try {
-      const assignmentId = req.params.id;
-      if (!assignmentId) throw new Error("assignmentID is required!");
+      if (!req.user) throw new Error("user not authenticated");
 
-      const dbAssignement = await prismaClient.courseSections.findFirst({
+      const userId = req.user.id;
+      const assignmentId = req.params.id;
+
+      const assignment = await prismaClient.courseAssignemnt.findFirst({
         where: {
           id: assignmentId,
-        },
-      });
-
-      if (!dbAssignement) throw new Error("can not find course section");
-
-      const fetchedAssignment = await prismaClient.courseAssignemnt.findFirst({
-        where: {
-          id: dbAssignement.id,
+          section: {
+            creatorId: userId,
+          },
         },
         include: {
           courseAssignemntQuestions: true,
         },
       });
 
+      if (!assignment) throw new Error("assignment not found");
+
       return res
         .status(200)
-        .json(apiResponse(200, "assignment fetched", fetchedAssignment));
+        .json(apiResponse(200, "assignment fetched", assignment));
     } catch (error: any) {
       console.log(error);
-      return res.status(200).json(apiResponse(500, error.message, null));
+      return res.status(500).json(apiResponse(500, error.message, null));
     }
   }
 
@@ -225,7 +242,7 @@ class CourseAssignmentController {
       return res
         .status(200)
         .json(
-          apiResponse(200, "question added to assignment", createdQuestion)
+          apiResponse(200, "question added to assignment", createdQuestion),
         );
     } catch (error: any) {
       console.log(error);
@@ -273,7 +290,7 @@ class CourseAssignmentController {
       return res
         .status(200)
         .json(
-          apiResponse(200, "question updated to assignment", updatedQuestion)
+          apiResponse(200, "question updated to assignment", updatedQuestion),
         );
     } catch (error: any) {
       console.log(error);
@@ -312,7 +329,7 @@ class CourseAssignmentController {
       return res
         .status(200)
         .json(
-          apiResponse(200, "question removed to assignment", removedQuestion)
+          apiResponse(200, "question removed to assignment", removedQuestion),
         );
     } catch (error: any) {
       console.log(error);
