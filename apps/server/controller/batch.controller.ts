@@ -122,16 +122,15 @@ class BatchController {
     try {
       if (!req.user) throw new Error("user is not authenticated");
 
-      const institutionId = req.user.id;
+      const institutionId = req.params.id;
       let whereClause: any = {};
-      if (req.user.type !== "INSTITUTION" && req.user.type !== "SUPERADMIN") {
+      if (req.user.type === "STUDENT") {
         throw new Error("only institution can view batches");
       }
-      if (req.user.type === "INSTITUTION")
-        whereClause = { institutionId: institutionId };
+
 
       const institutions = await prismaClient.batch.findMany({
-        where: whereClause,
+        where: { institutionId: institutionId },
         select: {
           id: true,
           batchname: true,

@@ -15,12 +15,12 @@ const InstitutionInfo = ({ institution }: InstitutionInfoProps) => {
       <div className="flex gap-6 max-w-screen mx-auto">
         <InstitutionSidebar
           institution={institution}
-          onUpdate={() => {}}
-          onDelete={() => {}}
+          onUpdate={() => { }}
+          onDelete={() => { }}
         />
 
         <main className="flex-1">
-          <Tabs value={activeTab} onValueChange={setActiveTab} />
+          <Tabs value={activeTab} onValueChange={setActiveTab} institutionId={institution.id} />
           <EntityList type={activeTab} institutionId={institution.id} />
         </main>
       </div>
