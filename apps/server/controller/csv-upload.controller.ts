@@ -60,7 +60,7 @@ class CSVUploader {
         raw: false,
       });
 
-      batchArray.map((batchArray) => {
+      batchArray = batchArray.map((batchArray) => {
         return { ...batchArray, institutionId: dbInstitute.id };
       });
       const createdBatches = await prismaClient.batch.createMany({
@@ -173,12 +173,11 @@ class CSVUploader {
         defval: null,
         raw: false,
       });
-
-      batchArray.map((batch: CSVTestCase) => {
+      batchArray = batchArray.map((batch: CSVTestCase) => {
         return { ...batch, problemId: dbProblem.id };
       });
 
-      const createdTestCase = await prismaClient.problem.createMany({
+      const createdTestCase = await prismaClient.problemTestCase.createMany({
         data: batchArray as any,
       });
 
@@ -190,7 +189,7 @@ class CSVUploader {
         .status(200)
         .json(apiResponse(200, "students uploaded", createdTestCase));
     } catch (error: any) {
-      //   console.log(error);
+      console.log(error);
       return res.status(200).json(apiResponse(500, error.message, null));
     }
   }

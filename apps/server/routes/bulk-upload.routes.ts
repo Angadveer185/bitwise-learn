@@ -17,7 +17,7 @@ router.post(
   csvUploadController.uploadMultipleBatches,
 );
 router.post(
-  "/testcases",
+  "/testcases/:id",
   authMiddleware,
   upload.single("file"),
   csvUploadController.uploadMultipleTestCase,
