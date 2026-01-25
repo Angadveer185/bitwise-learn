@@ -155,7 +155,7 @@ class BatchController {
       let whereClause: any = {};
       const institutionId = req.user.id;
       const batchId = req.params.id;
-      if (req.user.type !== "INSTITUTION" && req.user.type !== "SUPERADMIN") {
+      if (req.user.type === "STUDENT") {
         throw new Error("only institution can view batches");
       }
       const batch = await prismaClient.batch.findFirst({

@@ -404,15 +404,15 @@ model AssessmentSection {
 }
 
 model AssessmentQuestion {
-  id       String   @id @default(auto()) @map("_id") @db.ObjectId
-  question String?
-  options  String[]
-
-  sectionId String            @db.ObjectId
-  section   AssessmentSection @relation(fields: [sectionId], references: [id] , onDelete: Cascade)
+  id            String            @id @default(auto()) @map("_id") @db.ObjectId
+  question      String?
+  options       String[]
+  correctOption Int?
+  sectionId     String            @db.ObjectId
+  section       AssessmentSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
 
   problemId String?  @db.ObjectId
-  problem   Problem? @relation(fields: [problemId], references: [id] )
+  problem   Problem? @relation(fields: [problemId], references: [id])
 
   maxMarks                      Int
   assessmentQuestionSubmissions AssessmentQuestionSubmission[]
