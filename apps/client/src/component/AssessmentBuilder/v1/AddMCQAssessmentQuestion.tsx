@@ -5,11 +5,22 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import { createQuestion } from "@/api/assessments/create-question";
 
+
+type Question = {
+  id: string;
+  question?: string;
+  options: string[];
+  correctOption: number;
+  maxMarks: number;
+};
+
+
 interface AddAssessmentMCQProps {
   open: boolean;
   onClose: () => void;
   sectionId: string;
   maxMarks: number;
+  onCreated: (question: Question) => void;
 }
 
 const AddAssessmentMCQ = ({
@@ -17,6 +28,7 @@ const AddAssessmentMCQ = ({
   onClose,
   sectionId,
   maxMarks,
+  onCreated,
 }: AddAssessmentMCQProps) => {
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState<string[]>(["", "", "", ""]);
@@ -50,15 +62,15 @@ const AddAssessmentMCQ = ({
     try {
       setLoading(true);
 
-      await createQuestion(sectionId,
-        {
-          question,
-          options,
-          maxMarks,
-        }
-      );
+      const created = await createQuestion(sectionId, {
+        question,
+        options,
+        correctOption: correctAnswer,
+        maxMarks,
+      }); // ✅ STORE RESULT
 
       toast.success("Question added");
+      onCreated(created); // ✅ NOW VALID
 
       // reset state
       setQuestion("");
@@ -73,6 +85,7 @@ const AddAssessmentMCQ = ({
       setLoading(false);
     }
   };
+
 
   return (
     <div
@@ -115,10 +128,9 @@ const AddAssessmentMCQ = ({
               <div
                 key={index}
                 className={`flex items-center gap-3 rounded-lg border px-4 py-3 transition cursor-pointer
-                  ${
-                    isCorrect
-                      ? "border-[#1DA1F2] bg-[#1DA1F2]/10"
-                      : "border-white/10 bg-[#181A1A]"
+                  ${isCorrect
+                    ? "border-[#1DA1F2] bg-[#1DA1F2]/10"
+                    : "border-white/10 bg-[#181A1A]"
                   }`}
                 onClick={() => setCorrectAnswer(index)}
               >

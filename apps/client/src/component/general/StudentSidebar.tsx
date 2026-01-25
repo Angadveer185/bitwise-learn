@@ -9,7 +9,10 @@ import {
   ClipboardCheck,
   LogOut,
   LibraryBig,
+  User,
 } from "lucide-react";
+import { useStudent } from "@/store/studentStore";
+
 
 const MIN_WIDTH = 60;
 const MAX_WIDTH = 420;
@@ -18,6 +21,8 @@ export default function StudentSideBar() {
   const [width, setWidth] = useState(220);
   const isResizing = useRef(false);
   const sidebarRef = useRef<HTMLElement | null>(null);
+
+  const { studentInfo, logout } = useStudent();
 
   const isCollapsed = width <= 80;
 
@@ -59,26 +64,37 @@ export default function StudentSideBar() {
       ref={sidebarRef}
       style={{ width }}
       className="
-        relative shrink-0
-        h-full
+        relative shrink-0 h-full
         border-r border-white/10
         bg-primary-bg text-white
         flex flex-col
       "
     >
-      {/* Logo */}
-      <div className="px-4 py-6 flex justify-center">
-        {isCollapsed ? (
-          <span className="text-2xl font-bold text-primaryBlue">B</span>
-        ) : (
-          <h1 className="text-xl font-semibold tracking-wide">
-            <span className="text-primaryBlue">B</span>
-            itwise <span className="opacity-80">Learn</span>
-          </h1>
+      {/* PROFILE */}
+      <div className="px-4 pt-6 pb-4 flex flex-col items-center">
+        <div
+          className="
+            h-16 w-16 rounded-full
+            bg-white/10 flex items-center justify-center
+            text-primaryBlue
+          "
+        >
+          <User size={28} />
+        </div>
+
+        {!isCollapsed && (
+          <div className="mt-3 text-center">
+            <p className="text-sm font-semibold">
+              {studentInfo?.name || "Student"}
+            </p>
+            <p className="text-xs text-white/50">
+              {studentInfo?.batch.batchname}
+            </p>
+          </div>
         )}
       </div>
 
-      {/* Navigation */}
+      {/* NAVIGATION */}
       <nav className="px-2 py-4 space-y-1">
         <NavLink
           href="/dashboard"
@@ -112,9 +128,10 @@ export default function StudentSideBar() {
         />
       </nav>
 
-      {/* Logout */}
+      {/* LOGOUT */}
       <div className="mt-auto px-2 py-4">
         <button
+          onClick={logout}
           className={`
             w-full flex items-center
             ${isCollapsed ? "justify-center px-2" : "gap-3 px-4"}
@@ -131,7 +148,7 @@ export default function StudentSideBar() {
         </button>
       </div>
 
-      {/* Resize Handle */}
+      {/* RESIZE HANDLE */}
       <div
         onMouseDown={startResizing}
         className="

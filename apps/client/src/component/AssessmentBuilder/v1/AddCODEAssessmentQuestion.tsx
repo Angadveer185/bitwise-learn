@@ -20,7 +20,7 @@ const AddAssessmentCode = ({ open, onClose }: AddAssessmentCodeProps) => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!open) return;           // ✅ guard INSIDE effect
+    if (!open) return;           
     if (query.length > 2) {
       fetchQuestions(query);
     }
