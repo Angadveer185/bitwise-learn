@@ -176,7 +176,7 @@ class AssessmentQuestionController {
 
       const questions = await prismaClient.assessmentQuestion.findMany({
         where: {
-          id: dbSection.id,
+          sectionId: dbSection.id,
         },
       });
 

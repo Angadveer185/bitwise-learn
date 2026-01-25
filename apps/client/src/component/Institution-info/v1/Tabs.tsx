@@ -1,7 +1,7 @@
 import BatchesForm from "@/component/general/BatchesForm";
-import CourseForm from "@/component/general/CourseForm";
 import TeacherForm from "@/component/general/TeacherForm";
 import { Plus, X } from "lucide-react";
+import { useParams } from "next/navigation";
 import { useState } from "react";
 
 type TabsProps = {
@@ -10,6 +10,7 @@ type TabsProps = {
   institutionId: string;
 };
 
+<<<<<<< Updated upstream
 type RenderComponentProps = {
   value: string;
   institutionId: string;
@@ -17,13 +18,22 @@ type RenderComponentProps = {
 };
 
 const RenderComponent = ({ value, institutionId, onClose }: RenderComponentProps) => {
+=======
+const RenderComponent = ({ value }: { value: string }) => {
+  const params = useParams();
+>>>>>>> Stashed changes
   switch (value) {
     case "Teachers":
       return <TeacherForm openForm={onClose} institutionId={institutionId} />;
     case "Batches":
       return <BatchesForm />;
+<<<<<<< Updated upstream
     case "Courses":
       return <CourseForm />;
+=======
+    case "Vendors":
+      return <VendorForm />;
+>>>>>>> Stashed changes
     default:
       return null;
   }
@@ -31,7 +41,11 @@ const RenderComponent = ({ value, institutionId, onClose }: RenderComponentProps
 
 export const Tabs = ({ value, onValueChange, institutionId }: TabsProps) => {
   const [addNew, setAddNew] = useState(false);
+<<<<<<< Updated upstream
   const tabs = ["Teachers", "Batches", "Courses"];
+=======
+  const tabs = ["Teachers", "Batches", "Vendors"];
+>>>>>>> Stashed changes
 
   return (
     <>

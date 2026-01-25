@@ -5,18 +5,20 @@ import { Plus, X } from "lucide-react";
 import { useState } from "react";
 import StudentsForm from "./StudentsForm";
 import AssessmentsForm from "./AssessmentsForm";
+import { useParams } from "next/navigation";
 type TabsProps = {
   value: string;
   onValueChange: (value: string) => void;
 };
 const RenderComponent = ({ value }: { value: string }) => {
+  const params = useParams();
   switch (value) {
     case "Teachers":
       return <TeacherForm />;
     case "Students":
       return <StudentsForm />;
     case "Courses":
-      return <CourseForm />;
+      return <CourseForm batchId={params.batchId as string} />;
     case "Assessments":
       return <AssessmentsForm />;
     default:
