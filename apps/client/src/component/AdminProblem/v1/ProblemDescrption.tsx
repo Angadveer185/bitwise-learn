@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { ChevronRight } from "lucide-react";
 import TestCaseSection from "@/component/Problem/v1/TestcaseSection";
 import MarkdownEditor, { THEME_MAP } from "@/component/ui/MarkDownEditor";
+import { changeStatus } from "@/api/problems/change-status";
 
 function ProblemDescrption({ data }: { data: any }) {
   if (!data) return null;
@@ -36,7 +37,10 @@ function ProblemDescrption({ data }: { data: any }) {
     document.removeEventListener("mousemove", resize);
     document.removeEventListener("mouseup", stopResizing);
   };
-
+  const handlePublish = async (id: string) => {
+    await changeStatus(id);
+    data.problem = "LISTED";
+  };
   return (
     <div
       className="relative h-screen overflow-y-auto border-r border-gray-800 mt-12 p-4 space-y-6 text-gray-300"
@@ -53,6 +57,12 @@ function ProblemDescrption({ data }: { data: any }) {
         onMouseDown={startResizing}
         className="absolute top-0 right-0 h-full w-1 cursor-col-resize bg-transparent hover:bg-blue-500/30"
       />
+      <button
+        onClick={() => handlePublish(data.id)}
+        className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+      >
+        {data.published === "NOT_LISTED" ? "List Question" : "Remove Question"}
+      </button>
       {/* Problem Title */}
       <h1 className="text-xl font-semibold text-white">{name}</h1>
       {/* Problem Description */}

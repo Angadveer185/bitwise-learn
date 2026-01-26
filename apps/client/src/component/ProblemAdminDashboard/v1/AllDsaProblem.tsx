@@ -17,7 +17,7 @@ function AllDsaProblem() {
   const [status, setStatus] = useState<Status>(null);
 
   useEffect(() => {
-    getAllProblemData(setQuestions);
+    getAllProblemData(setQuestions, true);
   }, []);
 
   /* ---------------- FILTERED QUESTIONS ---------------- */

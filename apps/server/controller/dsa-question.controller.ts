@@ -129,10 +129,59 @@ class DsaQuestionController {
       return res.status(200).json(apiResponse(500, error.message, null));
     }
   }
+  async changePublishStatus(req: Request, res: Response) {
+    try {
+      const userId = req.user?.id;
+      const problemId = req.params.id;
+
+      if (!userId) throw new Error("kindly Login");
+      if (!problemId) throw new Error("problemId is required");
+
+      const dbAdmin = await prismaClient.user.findUnique({
+        where: { id: userId },
+      });
+      if (!dbAdmin) throw new Error("no such admin found!");
+
+      const dbProblem = await prismaClient.problem.findFirst({
+        where: { id: problemId as string },
+      });
+      if (!dbProblem) throw new Error("problem doesn't exists");
+
+      const updatedProblem = await prismaClient.problem.update({
+        where: { id: dbProblem.id },
+        data: {
+          published: dbProblem.published === "LISTED" ? "NOT_LISTED" : "LISTED",
+        },
+      });
+
+      if (!updatedProblem) throw new Error("problem not updated!");
+
+      return res
+        .status(200)
+        .json(apiResponse(200, "problem updated successfully", updatedProblem));
+    } catch (error: any) {
+      console.log(error);
+      return res.status(200).json(apiResponse(500, error.message, null));
+    }
+  }
   //TODO: implement pagination service
   async getAllDsaProblem(req: Request, res: Response) {
     try {
       const problems = await prismaClient.problem.findMany({
+        include: {
+          problemTopics: true,
+        },
+      });
+      return res.status(200).json(apiResponse(200, "data fetched", problems));
+    } catch (error: any) {
+      console.log(error);
+      return res.status(200).json(apiResponse(500, error.message, null));
+    }
+  }
+  async getAllPublishedDsaProblem(req: Request, res: Response) {
+    try {
+      const problems = await prismaClient.problem.findMany({
+        where: { published: "LISTED" },
         include: {
           problemTopics: true,
         },
@@ -572,6 +621,7 @@ class DsaQuestionController {
         };
       });
       const createdTestCases = await prismaClient.problemTestCase.createMany({
+        //@ts-ignore
         data: testCasesWithProblemId,
       });
 
@@ -750,7 +800,7 @@ class DsaQuestionController {
       if (!dbAdmin) throw new Error("no such admin found!");
 
       const dbProblem = await prismaClient.problem.findFirst({
-        where: { id: problemId },
+        where: { id: problemId as string },
         include: {
           solution: true,
         },

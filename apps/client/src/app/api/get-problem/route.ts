@@ -10,10 +10,18 @@ export async function GET(req: NextRequest) {
         { status: 500 },
       );
     }
-
-    const response = await axiosInstance.get(
-      `${backendUrl}/api/v1/problems/get-all-dsa-problem`,
-    );
+    const params = req.nextUrl.searchParams;
+    const isAdminRequest = params.get("q") === "valid";
+    let response;
+    if (isAdminRequest) {
+      response = await axiosInstance.get(
+        `${backendUrl}/api/v1/problems/get-all-dsa-problem`,
+      );
+    } else {
+      response = await axiosInstance.get(
+        `${backendUrl}/api/v1/problems/get-all-listed-problem`,
+      );
+    }
     return NextResponse.json(response.data.data, { status: 200 });
   } catch (error: any) {
     console.error("Error fetching problem:", error.message);

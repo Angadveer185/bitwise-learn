@@ -12,6 +12,11 @@ enum COURSE_STATUS {
   NOT_PUBLISHED
 }
 
+enum LISTING_STATUS {
+  LISTED
+  NOT_LISTED
+}
+
 enum PROCTOR {
   CHEATED
   NOT_CHEATED
@@ -291,9 +296,9 @@ model Problem {
   createdBy   String        @db.ObjectId
   creator     User          @relation(fields: [createdBy], references: [id])
 
-  sectionId String?         @db.ObjectId
-  section   CourseSections? @relation(fields: [sectionId], references: [id])
-
+  sectionId           String?              @db.ObjectId
+  section             CourseSections?      @relation(fields: [sectionId], references: [id])
+  published           LISTING_STATUS       @default(NOT_LISTED)
   testCases           ProblemTestCase[]
   submissions         ProblemSubmission[]
   solution            ProblemSolution?

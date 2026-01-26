@@ -1,11 +1,23 @@
 import { Router } from "express";
 import dsaQuestionController from "../controller/dsa-question.controller";
-import { authMiddleware as adminMiddleware } from "../middleware/auth.middleware";
+import {
+  authMiddleware as adminMiddleware,
+  authMiddleware,
+} from "../middleware/auth.middleware";
 const problemsRouter = Router();
 
 problemsRouter.get(
   "/get-all-dsa-problem/",
   dsaQuestionController.getAllDsaProblem,
+);
+problemsRouter.get(
+  "/get-all-listed-problem/",
+  dsaQuestionController.getAllPublishedDsaProblem,
+);
+problemsRouter.put(
+  "/change-status/:id",
+  authMiddleware,
+  dsaQuestionController.changePublishStatus,
 );
 problemsRouter.get(
   "/get-dsa-problem/:id/",

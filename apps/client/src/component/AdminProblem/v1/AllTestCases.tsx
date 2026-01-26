@@ -48,7 +48,7 @@ export default function AllTestCases() {
       formData.append("batchId", param.id as string);
 
       await uploadBatches(param.id as string, file, "TESTCASE", null);
-
+      await getAllProblemTestCases(setData, problemId);
       toast.success("Students uploaded successfully", {
         id: "bulk-upload",
       });

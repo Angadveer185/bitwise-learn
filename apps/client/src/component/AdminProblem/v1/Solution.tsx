@@ -39,6 +39,11 @@ function Solution() {
         videoSolution: solution.videoSolution,
       });
 
+      setSolution({
+        ...solution,
+        solution: solution.solution,
+        videoSolution: solution.videoSolution,
+      });
       alert("Solution saved successfully ✅");
     } catch (error) {
       console.error(error);

@@ -80,7 +80,28 @@ function Templates() {
         {showTemplateForm && (
           <ShowAddTemplateForm
             onClose={() => setShowTemplateForm(false)}
-            onSave={(data) => createProblemTemplate(param.id as string, data)}
+            onSave={(data) => {
+              createProblemTemplate(param.id as string, data);
+              getAllProblemTemplate((res: Template[]) => {
+                setTemplates(res);
+
+                if (!res.length) return;
+
+                const initialLang = res[0].language;
+                setSelectedLang(initialLang);
+
+                const defaultCodes: Record<string, string> = {};
+                const functionBodies: Record<string, string> = {};
+
+                res.forEach((t) => {
+                  defaultCodes[t.language] = t.defaultCode;
+                  functionBodies[t.language] = t.functionBody;
+                });
+
+                setCodeMap(defaultCodes);
+                setFunctionBodyMap(functionBodies);
+              }, param.id as string);
+            }}
           />
         )}
         No templates available
