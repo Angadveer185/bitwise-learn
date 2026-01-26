@@ -14,7 +14,7 @@ type ThemeContextType = {
 const ThemeContext = createContext<ThemeContextType | null>(null);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("Light");
+  const [theme, setTheme] = useState<Theme>("Dark");
 
   useEffect(() => {
     const semantic = theme === "Dark" ? DarkSemantic : LightSemantic;

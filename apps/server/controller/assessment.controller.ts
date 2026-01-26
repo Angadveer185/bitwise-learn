@@ -185,7 +185,7 @@ class AssessmentController {
       )
         throw new Error("User Not Authorized to update Assessments");
 
-      const assessment = await prismaClient.assessment.findFirst({
+      const assessment = await prismaClient.assessment.findUnique({
         where: { id: assessmentId as string },
         select: {
           id: true,
@@ -197,6 +197,11 @@ class AssessmentController {
           individualSectionTimeLimit: true,
           status: true,
           batchId: true,
+          sections: {
+            include: {
+              questions: true,
+            }
+          }
         },
       });
       if (!assessment) throw new Error("assessment not found");
