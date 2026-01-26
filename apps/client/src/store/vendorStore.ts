@@ -1,9 +1,34 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+interface Vendor {
+  email: string;
+  id: string;
+  name: string;
+  address: string;
+  pincode: string;
+  tagline: string;
+  websiteLink: string;
+  phoneNumber: string;
+}
+interface VendorStore {
+  info: Vendor | null;
+  setData: (data: Vendor) => void;
+  logout: () => void;
+}
 // vendor Information setup
-const useVendor = create(
-  persist((set) => ({}), {
-    name: "vendor-storage", // storage key
-  }),
+const useVendor = create<VendorStore>()(
+  persist(
+    (set) => ({
+      info: null,
+      setData: (data) => set({ info: data }),
+      logout: () => set({ info: null }),
+    }),
+    {
+      name: "institute-storage",
+      partialize: (state) => ({
+        info: state.info, // persist ONLY data
+      }),
+    },
+  ),
 );

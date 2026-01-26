@@ -1,29 +1,27 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-interface Student {
-  email: string;
+interface Teacher {
   name: string;
-  rollNumber: string;
-  batch: {
-    batchname: string;
-    branch: string;
-    batchEndYear: string;
-  };
-  insitution: {
+  email: string;
+  phoneNumber: string;
+  institution: {
+    id: string;
     name: string;
-    tagline: string;
-    websiteLink: string;
+  };
+  batch: {
+    id: string;
+    batchName: string;
+    branch: string;
   };
 }
-
-interface StudentStore {
-  info: Student | null;
-  setData: (data: Student) => void;
+interface TeacherStore {
+  info: Teacher | null;
+  setData: (data: Teacher) => void;
   logout: () => void;
 }
-
-export const useStudent = create<StudentStore>()(
+// vendor Information setup
+export const useTeacher = create<TeacherStore>()(
   persist(
     (set) => ({
       info: null,
@@ -31,7 +29,7 @@ export const useStudent = create<StudentStore>()(
       logout: () => set({ info: null }),
     }),
     {
-      name: "student-storage",
+      name: "teacher-storage",
       partialize: (state) => ({
         info: state.info, // persist ONLY data
       }),

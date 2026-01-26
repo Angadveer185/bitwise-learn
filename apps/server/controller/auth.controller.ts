@@ -4,6 +4,7 @@ import apiResponse from "../utils/apiResponse";
 import { comparePassword } from "../utils/password";
 import { generateFreshTokens, verifyRefreshToken } from "../utils/jwt";
 import type { JwtPayload } from "../utils/type";
+import { connect } from "bun";
 
 class AuthController {
   // ADMIN / SUPERADMIN LOGIN
@@ -29,7 +30,16 @@ class AuthController {
         type: admin.ROLE as JwtPayload["type"],
       });
 
-      return res.status(200).json(apiResponse(200, "login successful", tokens));
+      const dbAdmin = await prismaClient.user.findUnique({
+        where: { id: admin.id },
+        select: {
+          password: false,
+        },
+      });
+
+      return res
+        .status(200)
+        .json(apiResponse(200, "login successful", { tokens, data: dbAdmin }));
     } catch (error: any) {
       return res.status(401).json(apiResponse(401, error.message, null));
     }
@@ -60,7 +70,19 @@ class AuthController {
         type: "INSTITUTION",
       });
 
-      return res.status(200).json(apiResponse(200, "login successful", tokens));
+      const dbInstitute = await prismaClient.institution.findUnique({
+        where: { id: institution.id },
+        select: {
+          loginPassword: false,
+          secondaryEmail: false,
+          secondaryPhoneNumber: false,
+        },
+      });
+      return res
+        .status(200)
+        .json(
+          apiResponse(200, "login successful", { data: dbInstitute, tokens }),
+        );
     } catch (error: any) {
       return res.status(401).json(apiResponse(401, error.message, null));
     }
@@ -88,7 +110,18 @@ class AuthController {
         type: "VENDOR",
       });
 
-      return res.status(200).json(apiResponse(200, "login successful", tokens));
+      const dbVendor = await prismaClient.vendor.findUnique({
+        where: { id: vendor.id },
+        select: {
+          loginPassword: false,
+          secondaryEmail: false,
+          secondaryPhoneNumber: false,
+        },
+      });
+
+      return res
+        .status(200)
+        .json(apiResponse(200, "login successful", { data: dbVendor, tokens }));
     } catch (error: any) {
       return res.status(401).json(apiResponse(401, error.message, null));
     }
@@ -116,7 +149,33 @@ class AuthController {
         type: "TEACHER",
       });
 
-      return res.status(200).json(apiResponse(200, "login successful", tokens));
+      const dbTeacher = await prismaClient.teacher.findUnique({
+        where: { id: teacher.id },
+        select: {
+          name: true,
+          email: true,
+          phoneNumber: true,
+          loginPassword: false,
+          institution: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          batch: {
+            select: {
+              id: true,
+              batchname: true,
+              branch: true,
+            },
+          },
+        },
+      });
+      return res
+        .status(200)
+        .json(
+          apiResponse(200, "login successful", { data: dbTeacher, tokens }),
+        );
     } catch (error: any) {
       return res.status(401).json(apiResponse(401, error.message, null));
     }

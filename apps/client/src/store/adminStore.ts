@@ -1,9 +1,30 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+interface Admin {
+  email: string;
+  id: string;
+  name: string;
+  ROLE: string;
+}
+interface AdminStore {
+  info: Admin | null;
+  setData: (data: Admin) => void;
+  logout: () => void;
+}
 // admin Information setup
-const useAdmin = create(
-  persist((set) => ({}), {
-    name: "admin-storage", // storage key
-  }),
+export const useAdmin = create<AdminStore>()(
+  persist(
+    (set) => ({
+      info: null,
+      setData: (data) => set({ info: data }),
+      logout: () => set({ info: null }),
+    }),
+    {
+      name: "admin-storage",
+      partialize: (state) => ({
+        info: state.info, // persist ONLY data
+      }),
+    },
+  ),
 );
