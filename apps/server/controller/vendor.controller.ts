@@ -165,16 +165,20 @@ class VendorController {
 
       const institutionId = req.user.id;
       const vendorId = req.params.id;
-      if (req.user.type !== "INSTITUTION") {
-        throw new Error("only institution can view vendors");
-      }
+      // if (req.user.type !== "INSTITUTION") {
+      //   throw new Error("only institution can view vendors");
+      // }
       const vendor = await prismaClient.vendor.findFirst({
         where: { id: vendorId },
         select: {
           id: true,
           name: true,
           email: true,
+          secondaryEmail: true,
+          tagline: true,
           phoneNumber: true,
+          secondaryPhoneNumber: true,
+          websiteLink: true,
           createdAt: true,
           updatedAt: true,
         },

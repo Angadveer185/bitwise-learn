@@ -47,17 +47,6 @@ const RenderComponent = ({
           }}
         />
       );
-    case "Students":
-      return (
-        <StudentForm
-          openForm={onClose}
-          institutionId={institutionId}
-          batches={batches}
-          onSubmit={() => {
-            onBatchCreated?.();
-          }}
-        />
-      );
     default:
       return null;
   }
@@ -66,7 +55,7 @@ const RenderComponent = ({
 export const Tabs = ({ value, onValueChange, institutionId, onBatchCreated }: TabsProps) => {
   const [addNew, setAddNew] = useState(false);
   const [batches, setBatches] = useState<Batch[]>([]);
-  const tabs = ["Teachers", "Batches", "Students"];
+  const tabs = ["Teachers", "Batches"];
 
   useEffect(() => {
     if (institutionId) {

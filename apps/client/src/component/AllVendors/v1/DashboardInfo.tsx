@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { X, Pencil, Trash2 } from "lucide-react";
 import { deleteEntity, updateEntity } from "@/api/institutions/entity";
 
@@ -43,9 +44,14 @@ function formatValue(value: any) {
 }
 
 export default function DashboardInfo({ data, onUpdate, onDelete }: Props) {
+  const router = useRouter();
   const [selected, setSelected] = useState<CompanyData | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<CompanyData | null>(null);
+
+  const handleSeeDetails = (vendorId: string) => {
+    router.push(`/admin-dashboard/vendors/${vendorId}`);
+  };
 
   /* ------------------ HANDLERS ------------------ */
 
@@ -135,10 +141,7 @@ export default function DashboardInfo({ data, onUpdate, onDelete }: Props) {
                 </td>
                 <td className="px-6 py-4 text-right">
                   <button
-                    onClick={() => {
-                      setSelected(company);
-                      setIsEditing(false);
-                    }}
+                    onClick={() => handleSeeDetails(company.id)}
                     className="rounded-md border border-primaryBlue/40 px-3 py-1.5 text-xs font-medium text-primaryBlue transition hover:bg-primaryBlue/20"
                   >
                     See details
