@@ -4,12 +4,19 @@ import { URL_ACCESS_MAP } from "./lib/access";
 
 export function proxy(request: NextRequest) {
   //   if(!process.env.NODE_ENV || process.env.NODE_ENV==="development"){
-  // return NextResponse.next();
+  return NextResponse.next();
   //   }
   const pathname = request.nextUrl.pathname;
 
   // Public routes
-  const PUBLIC_ROUTES = ["/", "/about", "/contact", "/student-login", "/multi-login", "/admin-login"];
+  const PUBLIC_ROUTES = [
+    "/",
+    "/about",
+    "/contact",
+    "/student-login",
+    "/multi-login",
+    "/admin-login",
+  ];
   if (PUBLIC_ROUTES.includes(pathname)) {
     return NextResponse.next();
   }
