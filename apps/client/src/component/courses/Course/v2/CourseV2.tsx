@@ -367,6 +367,7 @@ function LearningView({ topic, showPDF, studyMode }: any) {
         // <PdfViewer url={topic.file} />
         <iframe src={topic.file} className="w-[40%] h-screen" />
       )}
+      
     </div>
   );
 }

@@ -6,6 +6,7 @@ import RightSection from "./RightSection";
 import { useRouter } from "next/navigation";
 import { useColors } from "@/component/general/(Color Manager)/useColors";
 import toast from "react-hot-toast";
+import { Wifi } from "lucide-react";
 
 import { getAssessmentById } from "@/api/assessments/get-assessment-by-id";
 import { getProblemData } from "@/api/problems/get-individual-problem";
@@ -18,6 +19,13 @@ import { useTabSwitchCounter } from "./Proctoring/TabSwitchCounter";
 import { useAntiCheatControls } from "./Proctoring/AntiCheat";
 import { AttemptMode } from "./types";
 import CodeRightSection from "./CodeRightSection";
+
+
+type NetworkInfo = {
+  downlink?: number;
+  effectiveType?: string;
+  rtt?: number;
+};
 
 export default function AttemptV1({ id, mode }: { id: string; mode: AttemptMode }) {
   const Colors = useColors();
@@ -65,6 +73,97 @@ export default function AttemptV1({ id, mode }: { id: string; mode: AttemptMode 
     autoSubmitText: "Assessment auto-submitted.",
     redirectPath: "/assessments",
   };
+
+  // Network Logic
+  const [networkStatus, setNetworkStatus] = useState<
+    "online" | "offline"
+  >(navigator.onLine ? "online" : "offline");
+
+  // Network Info
+  const [networkInfo, setNetworkInfo] = useState<NetworkInfo>({});
+  useEffect(() => {
+    const connection =
+      (navigator as any).connection ||
+      (navigator as any).mozConnection ||
+      (navigator as any).webkitConnection;
+
+    if (!connection) return;
+
+    const updateNetworkInfo = () => {
+      setNetworkInfo({
+        downlink: connection.downlink,
+        effectiveType: connection.effectiveType,
+        rtt: connection.rtt,
+      });
+    };
+
+    updateNetworkInfo();
+    connection.addEventListener("change", updateNetworkInfo);
+
+    return () => {
+      connection.removeEventListener("change", updateNetworkInfo);
+    };
+  }, []);
+
+
+  useEffect(() => {
+    const handleOnline = () => setNetworkStatus("online");
+    const handleOffline = () => setNetworkStatus("offline");
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  function getConnectionQuality(downlink?: number) {
+    if (!downlink) {
+      return {
+        label: "Unknown",
+        color: "#9ca3af",
+        description: "Unable to estimate connection quality",
+      };
+    }
+
+    if (downlink >= 5) {
+      return {
+        label: "Stable",
+        color: "#22c55e",
+        description: "Connection is stable for assessments",
+      };
+    }
+
+    if (downlink >= 2) {
+      return {
+        label: "Average",
+        color: "#f59e0b",
+        description: "Connection may be unstable at times",
+      };
+    }
+
+    return {
+      label: "Poor",
+      color: "#ef4444",
+      description: "Connection may interrupt the assessment",
+    };
+  }
+
+  const connectionQuality = getConnectionQuality(networkInfo.downlink);
+
+  useEffect(() => {
+    if (networkStatus === "offline") {
+      toast.error(
+        "Network disconnected. Your answers will be saved locally.",
+        { id: "network-offline" }
+      );
+    }
+  }, [networkStatus]);
+  
+
+
 
   // Fetch assessment
   useEffect(() => {
@@ -181,11 +280,55 @@ export default function AttemptV1({ id, mode }: { id: string; mode: AttemptMode 
     setCurrentQuestionIndex(0);
   };
 
+
+
   return (
     <div className={`${Colors.background.primary} h-screen flex flex-col`}>
 
       {/* TOP BAR */}
-      <div className="flex justify-end items-center px-4 py-3 border-b border-white/10">
+      <div className="flex gap-3 justify-end items-center px-4 py-3 border-b border-white/10">
+
+        <div className="relative group flex items-center justify-center">
+          {/* WiFi Icon */}
+          <Wifi
+            className="h-6 w-6 cursor-pointer"
+            style={{
+              color: networkStatus === "online" ? "#22c55e" : "#ef4444",
+            }}
+          />
+
+          {/* Tooltip */}
+          <div className="pointer-events-none absolute top-full mt-2 hidden group-hover:block z-50">
+            <div className="rounded-md bg-black px-3 py-2 text-xs text-white shadow-lg whitespace-nowrap">
+              {networkStatus === "offline" ? (
+                <div className="text-red-400">
+                  Network disconnected
+                </div>
+              ) : (
+                <>
+                  <div
+                    className="font-semibold"
+                    style={{ color: connectionQuality.color }}
+                  >
+                    Connection: {connectionQuality.label}
+                  </div>
+
+                  <div className="opacity-80 mt-1">
+                    Estimated bandwidth: ~
+                    {networkInfo.downlink?.toFixed(1) ?? "–"} Mbps
+                  </div>
+
+                  <div className="opacity-70">
+                    {connectionQuality.description}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+        </div>
+
+
         <button
           onClick={() => setShowSubmitConfirm(true)}
           className={`${Colors.background.secondary} px-4 py-2 rounded-md hover:opacity-90 font-mono`}
@@ -211,7 +354,7 @@ export default function AttemptV1({ id, mode }: { id: string; mode: AttemptMode 
               section.type === "CODE"
                 ? codingProblem?.testCases ?? []
                 : []
-            }            
+            }
             currentIndex={currentQuestionIndex}
             totalQuestions={questions.length}
             onNext={goNext}
