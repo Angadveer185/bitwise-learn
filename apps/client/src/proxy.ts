@@ -17,6 +17,7 @@ export function proxy(request: NextRequest) {
   //   "/multi-login",
   //   "/admin-login",
   // ];
+  // const PUBLIC_ROUTES = ["/", "/about", "/contact", "/student-login", "/multi-login", "/admin-login"];
   // if (PUBLIC_ROUTES.includes(pathname)) {
   //   return NextResponse.next();
   // }
@@ -29,6 +30,7 @@ export function proxy(request: NextRequest) {
   // }
 
   // const allowedRoutes = URL_ACCESS_MAP[role];
+  // const allowedRbunoutes = URL_ACCESS_MAP[role];
 
   // if (!allowedRoutes) {
   //   return NextResponse.redirect(new URL("/dashboard", request.url));

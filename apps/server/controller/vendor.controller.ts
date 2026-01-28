@@ -33,7 +33,6 @@ class VendorController {
           secondaryPhoneNumber: data.secondaryPhoneNumber ?? null,
           websiteLink: data.websiteLink,
           loginPassword: hashedPassword,
-          userId: req.user.id,
         },
       });
       await handleSendMail(data.email, loginPassword);
@@ -201,12 +200,12 @@ class VendorController {
       const vendor = await prismaClient.vendor.findUnique({
         where: { id: req.user.id },
         select: {
-           id: true,
-            name: true,
-            email: true,
-            phoneNumber: true,
-            createdAt: true,
-            loginPassword: false,
+          id: true,
+          name: true,
+          email: true,
+          phoneNumber: true,
+          createdAt: true,
+          loginPassword: false,
         },
       });
 
@@ -220,6 +219,37 @@ class VendorController {
     } catch (error: any) {
       console.error(error);
       return res.status(400).json(apiResponse(400, error.message, null));
+    }
+  }
+  async getAllInformation(req: Request, res: Response) {
+    try {
+      const vendorId = req.user?.id;
+      if (!vendorId) throw new Error("unAuthenticated User");
+
+      const dbAdmin = await prismaClient.vendor.findUnique({
+        where: {
+          id: vendorId,
+        },
+      });
+
+      if (!dbAdmin) throw new Error("db Admin not found");
+
+      const dataObject = {
+        institutions: 0,
+        vendors: 0,
+        admins: 0,
+        batches: 0,
+      };
+
+      dataObject["institutions"] = await prismaClient.institution.count();
+      dataObject["batches"] = await prismaClient.batch.count();
+      dataObject["admins"] = await prismaClient.user.count();
+      dataObject["vendors"] = await prismaClient.vendor.count();
+
+      return res.status(200).json(apiResponse(200, "data fetched", dataObject));
+    } catch (error: any) {
+      console.log(error);
+      return res.status(200).json(apiResponse(500, error.message, null));
     }
   }
 }

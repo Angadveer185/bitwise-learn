@@ -4,9 +4,8 @@ import apiResponse from "../utils/apiResponse";
 import { comparePassword, hashPassword } from "../utils/password";
 import { generateFreshTokens, verifyRefreshToken } from "../utils/jwt";
 import type { JwtPayload } from "../utils/type";
-import { connect, password } from "bun";
-import { handleSendOTPMail, handleVerifyOTP } from "../utils/nodemailer/mailHandler";
-import bcrypt from "bcryptjs";
+import { handleSendMail, handleSendOTPMail, handleVerifyOTP } from "../utils/nodemailer/mailHandler";
+import { generateResetToken, verifyResetToken } from "../utils/resetToken";
 
 class AuthController {
 
@@ -87,88 +86,121 @@ class AuthController {
   }
 
   async resetPassword(req: Request, res: Response) {
-    /**
-            * req.body = {email,newPassword}
-        */
     try {
+      const { newPassword } = req.body;
+      const resetToken = req.cookies.reset_token;
 
-      const { email, newPassword } = req.body;
-      if (!req.user) throw new Error("User not authenticated");
-
-      if (!email || !newPassword) {
-        return res.status(400).json(apiResponse(400, "Email and new password are required", null));
+      if (!resetToken) {
+        return res.status(401).json(
+          apiResponse(401, "Reset token missing or expired", null)
+        );
+      }
+      if (!newPassword) {
+        return res
+          .status(400)
+          .json(apiResponse(400, "new password is required", null));
       }
 
+      // 🔐 Verify reset token
+      const payload = verifyResetToken(resetToken);
 
-      // finding user
-      let dbUser;
-      if (req.user.type === "ADMIN" || req.user.type === "SUPERADMIN") {
-        dbUser = await prismaClient.user.findFirst({ where: { email: email } });
+      if (payload.purpose !== "PASSWORD_RESET") {
+        return res
+          .status(401)
+          .json(apiResponse(401, "Invalid reset token", null));
       }
-      else if (req.user.type === "STUDENT") {
-        dbUser = await prismaClient.student.findFirst({ where: { email: email } });
+
+      const email = payload.email;
+
+      // 🔍 find user in all tables
+      let userType:
+        | "ADMIN"
+        | "STUDENT"
+        | "VENDOR"
+        | "TEACHER"
+        | "INSTITUTION"
+        | null = null;
+      let dbUser: any = null;
+
+      dbUser = await prismaClient.user.findFirst({ where: { email } });
+      if (dbUser) userType = "ADMIN";
+
+      if (!dbUser) {
+        dbUser = await prismaClient.student.findFirst({ where: { email } });
+        if (dbUser) userType = "STUDENT";
       }
-      else if (req.user.type === "VENDOR") {
-        dbUser = await prismaClient.vendor.findFirst({ where: { email: email } });
+
+      if (!dbUser) {
+        dbUser = await prismaClient.vendor.findFirst({ where: { email } });
+        if (dbUser) userType = "VENDOR";
       }
-      else if (req.user.type === "TEACHER") {
-        dbUser = await prismaClient.teacher.findFirst({ where: { email: email } });
-      } else {
-        dbUser = await prismaClient.institution.findFirst({ where: { email: email } });
+
+      if (!dbUser) {
+        dbUser = await prismaClient.teacher.findFirst({ where: { email } });
+        if (dbUser) userType = "TEACHER";
       }
-      if (!dbUser) throw new Error("no such user found!")
 
-      // @ts-ignore
-      const isSamePassword = await bcrypt.compare(newPassword, dbUser.password || dbUser.loginPassword);
+      if (!dbUser) {
+        dbUser = await prismaClient.institution.findFirst({ where: { email } });
+        if (dbUser) userType = "INSTITUTION";
+      }
 
-      const hashed = await hashPassword(newPassword)
+      if (!dbUser || !userType) {
+        return res
+          .status(404)
+          .json(apiResponse(404, "User not found", null));
+      }
 
-      // Update DB
-      if (!hashPassword) throw new Error("password hash failed");
+      // 🔐 Hash new password
+      const hashed = await hashPassword(newPassword);
 
-      if (req.user.type === "ADMIN" || req.user.type === "SUPERADMIN") {
-        dbUser = await prismaClient.user.update({
+      // 🔄 Update password
+      if (userType === "ADMIN") {
+        await prismaClient.user.update({
           where: { id: dbUser.id },
-          data: { password: hashed }
+          data: { password: hashed },
         });
-      }
-      else if (req.user.type === "STUDENT") {
-        dbUser = await prismaClient.student.update({
-          where: { id: dbUser.id }, data: {
-            loginPassword: hashed
-          }
+      } else if (userType === "STUDENT") {
+        await prismaClient.student.update({
+          where: { id: dbUser.id },
+          data: { loginPassword: hashed },
         });
-      }
-      else if (req.user.type === "VENDOR") {
-        dbUser = await prismaClient.vendor.update({
-          where: { id: dbUser.id }, data: {
-            loginPassword: hashed
-          }
+      } else if (userType === "VENDOR") {
+        await prismaClient.vendor.update({
+          where: { id: dbUser.id },
+          data: { loginPassword: hashed },
         });
-      }
-      else if (req.user.type === "TEACHER") {
-        dbUser = await prismaClient.teacher.update({
-          where: { id: dbUser.id }, data: {
-            loginPassword: hashed
-          }
+      } else if (userType === "TEACHER") {
+        await prismaClient.teacher.update({
+          where: { id: dbUser.id },
+          data: { loginPassword: hashed },
         });
       } else {
-        dbUser = await prismaClient.institution.update({
-          where: { id: dbUser.id }, data: {
-            loginPassword: hashed
-          }
+        await prismaClient.institution.update({
+          where: { id: dbUser.id },
+          data: { loginPassword: hashed },
         });
       }
+
+      const tokens = generateFreshTokens({
+        id: dbUser.id,
+        type: userType,
+      });
+      res.clearCookie("reset_token");
 
       return res.status(200).json(
-        apiResponse(200, "Password reset successfully. You can now log in with your new password.", null)
+        apiResponse(
+          200,
+          "Password reset successfully",
+          { tokens }
+        )
       );
-
     } catch (error: any) {
-      console.log(error);
-      res.status(500).json(apiResponse(500, error.message, null));
+      console.error(error);
+      return res.status(500).json(apiResponse(500, error.message, null));
     }
   }
+
   // ADMIN / SUPERADMIN LOGIN
   async adminLogin(req: Request, res: Response) {
     try {
@@ -418,6 +450,97 @@ class AuthController {
     }
   }
 
+  async forgotPassword(req: Request, res: Response) {
+    try {
+      /**
+          * req.body = {email}
+      */
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json(apiResponse(400, "Email is required", null));
+      }
+
+      // Check user in all tables
+      let dbUser;
+      dbUser = await prismaClient.user.findFirst({ where: { email } });
+
+      if (!dbUser) {
+        dbUser = await prismaClient.student.findFirst({ where: { email } });
+      }
+      if (!dbUser) {
+        dbUser = await prismaClient.vendor.findFirst({ where: { email } });
+      }
+      if (!dbUser) {
+        dbUser = await prismaClient.teacher.findFirst({ where: { email } });
+      }
+      if (!dbUser) {
+        dbUser = await prismaClient.institution.findFirst({ where: { email } });
+      }
+
+      if (!dbUser) {
+        return res.status(404).json(apiResponse(404, "User not found", null));
+      }
+
+      // Send password reset OTP
+      const sentOtp = await handleSendOTPMail(email, "reset-password");
+      if (sentOtp === false) throw new Error("OTP could not be sent");
+
+      return res.status(200).json(apiResponse(200, "Password reset OTP sent to your email", null));
+
+    } catch (error: any) {
+      res.status(500).json(apiResponse(500, error.message, error));
+    }
+  }
+  // verify the forgot password OTP
+  async verifyForgotPassword(req: Request, res: Response) {
+    try {
+      /**
+          * req.body = {email, otp}
+      */
+      const { email, otp } = req.body;
+
+      if (!email || !otp) {
+        return res.status(400).json(apiResponse(400, "Email and OTP are required", null));
+      }
+
+      // Check user in all tables
+      let dbUser;
+      dbUser = await prismaClient.user.findFirst({ where: { email } });
+
+      if (!dbUser) {
+        dbUser = await prismaClient.student.findFirst({ where: { email } });
+      }
+      if (!dbUser) {
+        dbUser = await prismaClient.vendor.findFirst({ where: { email } });
+      }
+      if (!dbUser) {
+        dbUser = await prismaClient.teacher.findFirst({ where: { email } });
+      }
+      if (!dbUser) {
+        dbUser = await prismaClient.institution.findFirst({ where: { email } });
+      }
+
+      if (!dbUser) {
+        return res.status(404).json(apiResponse(404, "User not found", null));
+      }
+
+      // Verify OTP
+      const verifiedOtp = handleVerifyOTP(email, otp);
+      if (!verifiedOtp) {
+        return res
+          .status(401)
+          .json(apiResponse(401, "OTP is not verified", null));
+      }
+
+      const resetToken = generateResetToken(email);
+
+      return res.status(200).json(apiResponse(200, "Forgot password OTP verified successfully", { resetToken }));
+
+    } catch (error: any) {
+      res.status(500).json(apiResponse(500, error.message, error));
+    }
+  }
 }
 
 export default new AuthController();
