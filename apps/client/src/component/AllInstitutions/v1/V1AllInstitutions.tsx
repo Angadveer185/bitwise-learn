@@ -20,16 +20,24 @@ function V1AllInstitutions() {
   }, []);
 
   const handleCreateInstitution = async (data: any) => {
-    try {
-      await createInstitution(data);
-      setAddNew(false);
-      toast.success("Institute Created Successfully");
-      getAllInstitutions(setData);
-    } catch (err) {
-      toast.error("Error creating Institute");
-      console.error(err);
-    }
-  };
+  const toastId = toast.loading("Creating Institute...");
+
+  try {
+    await createInstitution(data);
+
+    setAddNew(false);
+    toast.success("Institute Created Successfully", { id: toastId });
+    await getAllInstitutions(setData);
+
+  } catch (err: any) {
+    toast.error(
+      err?.response?.data?.message || err.message || "Error creating Institute",
+      { id: toastId }
+    );
+    console.error(err);
+  }
+};
+
 
   return (
     <div className={`flex ${Colors.background.primary}`}>

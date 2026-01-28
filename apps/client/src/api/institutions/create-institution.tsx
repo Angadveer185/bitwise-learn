@@ -5,5 +5,6 @@ export const createInstitution = async (data: any) => {
     "/api/institution/create-institution/",
     data,
   );
-  console.log(createInstitution);
+
+  return createInstitution.data;
 };
