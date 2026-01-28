@@ -38,6 +38,7 @@ export function generateOTP(email: string): OTPEntry {
 
 // Verify OTP for an email
 export function handleVerifyOTP(email: string, otp: string): boolean {
+
   if (!OTP_MAP[email])
     throw new Error("OTP isn't present");
 
