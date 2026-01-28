@@ -10,22 +10,20 @@ export const WELCOME_EMAIL = `
               <td style="text-align: center;">
                 <h2 style="color: #333; margin-bottom: 10px;">Welcome to Our Platform!</h2>
                 <p style="color: #555; font-size: 16px; margin-bottom: 20px;">
-                  We're excited to have you on board. To get started, please verify your email address by clicking the button below.
+                  We're excited to have you on board. To get started, your login password is below.
                 </p>
 
-                <a href="{PASSWORD}" 
+                <p 
                   style="display: inline-block; background-color: #4CAF50; color: #fff; padding: 12px 20px; 
                   text-decoration: none; font-size: 16px; border-radius: 5px;">
-                  Verify Email
-                </a>
-
-                <p style="color: #777; font-size: 14px; margin-top: 25px;">
-                  If the button doesn't work, you can also copy and paste the link below into your browser:
-                </p>
-
-                <p style="word-break: break-all; font-size: 14px; color: #007BFF;">
                   {PASSWORD}
                 </p>
+
+                <p style="color: #777; font-size: 14px; margin-top: 25px;">
+                  Welcome Onboard!
+                </p>
+
+                
 
                 <p style="color: #999; font-size: 12px; margin-top: 30px;">
                   If you did not create an account, you can safely ignore this email.
