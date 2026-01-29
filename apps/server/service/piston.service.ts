@@ -66,7 +66,10 @@ class CodeExecution {
         version: VERSION_MAP[language] as string,
         files: [
           {
-            name: `${Date.now()}.${EXTENSION_MAP[language]}`,
+            name:
+              language === "java"
+                ? "CodeRunner.java"
+                : Date.now().toString() + EXTENSION_MAP,
             content: code,
           },
         ],
@@ -79,6 +82,8 @@ class CodeExecution {
         compile_memory_limit: -1,
         run_memory_limit: -1,
       };
+      console.log("====================");
+      console.log(executionObject);
       const result = await axios.post(
         this.client + "api/v2/execute",
         executionObject,
@@ -88,9 +93,9 @@ class CodeExecution {
           },
         },
       );
-      return result;
-    } catch (error) {
-      console.log(error);
+      return result.data;
+    } catch (error: any) {
+      console.log(error.message);
       return null;
     }
   }

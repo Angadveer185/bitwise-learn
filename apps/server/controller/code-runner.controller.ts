@@ -77,8 +77,8 @@ class CodeRunnerController {
           testrun = testrun.replace(`input_${key}`, `${input[key]}`);
         });
 
-        const result = await CodeExecution.compileCode(testrun, language);
-
+        const result = await CodeExecution.compileDsaProblem(testrun, language);
+        console.log(result);
         const hasRuntimeError =
           result?.run?.stderr && result.run.stderr.length > 0;
 
@@ -170,7 +170,7 @@ class CodeRunnerController {
           testrun = testrun.replace(`input_${key}`, `${input[key]}`);
         });
 
-        const result = await CodeExecution.compileCode(testrun, language);
+        const result = await CodeExecution.compileDsaProblem(testrun, language);
         const runtime = result?.run?.time ?? 0;
         const memory = result?.run?.memory ?? 0;
 

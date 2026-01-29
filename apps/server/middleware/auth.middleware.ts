@@ -38,6 +38,10 @@ export const authMiddleware = (
         id: "6953fe21886add45ec3e62da", // SUPERADMIN ID
         type: "SUPERADMIN",
       };
+      // req.user = {
+      //   id: "69710e8f07a6336b3031418f", // SUPERADMIN ID
+      //   type: "STUDENT",
+      // };
       return next();
     }
 

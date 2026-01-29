@@ -45,6 +45,8 @@ export default function CodeEditor({
   const handleRun = async () => {
     const runLang = language;
     const currentCode = code;
+
+    setOutput([]);
     const res = await runCode({
       language: runLang,
       code: currentCode,

@@ -3,7 +3,7 @@ import axiosInstance from "@/lib/axios";
 export const uploadBatches = async (
   id: string,
   file: File,
-  type: "STUDENT" | "BATCH" | "TESTCASE",
+  type: "STUDENT" | "BATCH" | "TESTCASE" | "CLOUD",
   stateFn?: any,
 ) => {
   const formData = new FormData();

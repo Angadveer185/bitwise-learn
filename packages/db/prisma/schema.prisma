@@ -12,6 +12,12 @@ enum COURSE_STATUS {
   NOT_PUBLISHED
 }
 
+enum CLOUD_PROVIDER {
+  AWS
+  GCP
+  AZURE
+}
+
 enum LISTING_STATUS {
   LISTED
   NOT_LISTED
@@ -159,6 +165,10 @@ model Student {
   rollNumber                  String
   email                       String                       @unique
   loginPassword               String
+  cloudPlatform               CLOUD_PROVIDER               @default(AWS)
+  cloudname                   String?                      @default("")
+  cloudpass                   String?                      @default("")
+  cloudurl                    String?                      @default("")
   batchId                     String                       @db.ObjectId
   batch                       Batch                        @relation(references: [id], fields: [batchId])
   instituteId                 String                       @db.ObjectId

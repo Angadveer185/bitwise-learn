@@ -1,10 +1,30 @@
 services:
-  api:
+  api-1:
     image: ghcr.io/engineer-man/piston
     restart: always
     privileged: true
     ports:
       - 2000:2000
+    volumes:
+      - ./data/piston/packages:/piston/packages
+    tmpfs:
+      - /tmp:exec
+  api-2:
+    image: ghcr.io/engineer-man/piston
+    restart: always
+    privileged: true
+    ports:
+      - 2001:2000
+    volumes:
+      - ./data/piston/packages:/piston/packages
+    tmpfs:
+      - /tmp:exec
+  api-3:
+    image: ghcr.io/engineer-man/piston
+    restart: always
+    privileged: true
+    ports:
+      - 2002:2000
     volumes:
       - ./data/piston/packages:/piston/packages
     tmpfs:

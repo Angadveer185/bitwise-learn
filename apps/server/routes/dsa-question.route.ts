@@ -139,5 +139,10 @@ problemsRouter.get(
   adminMiddleware,
   dsaQuestionController.getAllQuestionInfo,
 );
+problemsRouter.get(
+  "/get-submission/:id",
+  authMiddleware,
+  dsaQuestionController.getAllUserSubmission,
+);
 
 export default problemsRouter;

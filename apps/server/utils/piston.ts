@@ -78,11 +78,6 @@ export const EXTENSION_MAP: Record<string, string> = {
 
 export const CHOSEN_LANGUAGES = [
   {
-    language: "MATL",
-    version: "22.5.0",
-    aliases: [],
-  },
-  {
     language: "bash",
     version: "5.2.0",
     aliases: ["sh"],

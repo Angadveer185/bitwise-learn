@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useColors } from "@/component/general/(Color Manager)/useColors";
 import { useTheme } from "@/component/general/(Color Manager)/ThemeController";
+import { loadProfile } from "@/api/problems/load-profile";
 
 const RADIUS = 80;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
@@ -24,20 +25,32 @@ function QuestionInfoSidebar() {
   );
 
   useEffect(() => {
+    async function handleLoad() {
+      const res = await loadProfile();
+      console.log(res);
+      setQuestion(res);
+    }
+    handleLoad();
+  }, []);
+  useEffect(() => {
     setSolved(question.easy + question.medium + question.hard);
   }, [question]);
 
-  const easyPercent = question.easy / question.totalQuestion;
-  const mediumPercent = question.medium / question.totalQuestion;
-  const hardPercent = question.hard / question.totalQuestion;
+  const easyPercent = question ? question.easy / question.totalQuestion : 0;
+  const mediumPercent = question ? question.medium / question.totalQuestion : 0;
+  const hardPercent = question ? question.hard / question.totalQuestion : 0;
 
   const easyLength = CIRCUMFERENCE * easyPercent;
   const mediumLength = CIRCUMFERENCE * mediumPercent;
   const hardLength = CIRCUMFERENCE * hardPercent;
 
   return (
-    <div className={`w-1/3 mt-3 ${Colors.background.secondary} h-95 ${Colors.border.faded} border-2  rounded-xl p-6`}>
-      <h2 className={`text-lg font-semibold mb-6 ${Colors.text.primary}`}>Problems Solved</h2>
+    <div
+      className={`w-1/3 mt-3 ${Colors.background.secondary} h-95 ${Colors.border.faded} border-2  rounded-xl p-6`}
+    >
+      <h2 className={`text-lg font-semibold mb-6 ${Colors.text.primary}`}>
+        Problems Solved
+      </h2>
 
       {/* Ring */}
       <div className="relative w-44 h-44 mx-auto">
@@ -47,7 +60,9 @@ function QuestionInfoSidebar() {
             cx="88"
             cy="88"
             r={RADIUS}
-            stroke={theme === "Dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"}
+            stroke={
+              theme === "Dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"
+            }
             strokeWidth="10"
             fill="none"
           />
@@ -102,7 +117,9 @@ function QuestionInfoSidebar() {
         </svg>
 
         {/* Center Info */}
-        <div className={`absolute inset-0 flex flex-col items-center justify-center ${Colors.text.primary}`}>
+        <div
+          className={`absolute inset-0 flex flex-col items-center justify-center ${Colors.text.primary}`}
+        >
           {hovered ? (
             <>
               <span className="text-3xl font-bold">{question[hovered]}</span>
@@ -112,9 +129,11 @@ function QuestionInfoSidebar() {
             </>
           ) : (
             <>
-              <span className="text-3xl font-bold">
-                {solved}/{question.totalQuestion}
-              </span>
+              {question && (
+                <span className="text-3xl font-bold">
+                  {solved}/{question.totalQuestion}
+                </span>
+              )}
               <span className={`text-sm ${Colors.text.secondary}`}>Solved</span>
             </>
           )}
@@ -122,11 +141,17 @@ function QuestionInfoSidebar() {
       </div>
 
       {/* Legend */}
-      <div className="mt-6 space-y-3">
-        <StatRow label="Easy" value={question.easy} color="bg-green-500" />
-        <StatRow label="Medium" value={question.medium} color="bg-yellow-400" />
-        <StatRow label="Hard" value={question.hard} color="bg-red-500" />
-      </div>
+      {question && (
+        <div className="mt-6 space-y-3">
+          <StatRow label="Easy" value={question.easy} color="bg-green-500" />
+          <StatRow
+            label="Medium"
+            value={question.medium}
+            color="bg-yellow-400"
+          />
+          <StatRow label="Hard" value={question.hard} color="bg-red-500" />
+        </div>
+      )}
     </div>
   );
 }
@@ -141,7 +166,9 @@ function StatRow({
   color: string;
 }) {
   return (
-    <div className={`flex items-center justify-between text-sm ${Colors.text.primary}`}>
+    <div
+      className={`flex items-center justify-between text-sm ${Colors.text.primary}`}
+    >
       <div className="flex items-center gap-2">
         <span className={`w-2 h-2 rounded-full ${color}`} />
         <span>{label}</span>

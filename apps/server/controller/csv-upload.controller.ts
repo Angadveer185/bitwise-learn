@@ -25,6 +25,13 @@ interface CSVTestCase {
   output: string;
   problemId: string;
 }
+interface CSVCloudInfo {
+  cloudname: string;
+  cloudpass: string;
+  cloudPlatform: string;
+  cloudurl: string;
+  email: string;
+}
 
 class CSVUploader {
   async uploadMultipleBatches(req: Request, res: Response) {
@@ -188,6 +195,53 @@ class CSVUploader {
       return res
         .status(200)
         .json(apiResponse(200, "students uploaded", createdTestCase));
+    } catch (error: any) {
+      console.log(error);
+      return res.status(200).json(apiResponse(500, error.message, null));
+    }
+  }
+  async uploadCloudCred(req: Request, res: Response) {
+    try {
+      const userId = req.user?.id;
+      const file = req.file;
+
+      if (!userId) throw new Error("unAuthenticated user");
+      if (!file) throw new Error("file is needed");
+
+      if (req.user?.type === "STUDENT" || req.user?.type === "TEACHER") {
+        throw new Error("unAuthorized to perform this task");
+      }
+
+      let batchArray: CSVCloudInfo[] = [];
+      const workbook = XLSX.read(file.buffer, { type: "buffer" });
+      const sheetName = workbook.SheetNames[0];
+      if (!sheetName) throw new Error("No sheets found in workbook");
+      const sheet = workbook.Sheets[sheetName];
+      if (!sheet) throw new Error("Sheet is undefined");
+
+      batchArray = XLSX.utils.sheet_to_json(sheet, {
+        defval: null,
+        raw: false,
+      });
+
+      for (let i = 0; i < batchArray.length; i++) {
+        let batch = batchArray[i];
+        const dbStudent = await prismaClient.student.findUnique({
+          where: { email: batch?.email },
+        });
+
+        const updatedStudent = await prismaClient.student.update({
+          where: { id: dbStudent?.id },
+          data: {
+            cloudname: batch?.cloudname,
+            cloudpass: batch?.cloudpass,
+            cloudPlatform: batch?.cloudPlatform as any,
+            cloudurl: batch?.cloudurl,
+          },
+        });
+      }
+
+      return res.status(200).json(apiResponse(200, "students uploaded", null));
     } catch (error: any) {
       console.log(error);
       return res.status(200).json(apiResponse(500, error.message, null));

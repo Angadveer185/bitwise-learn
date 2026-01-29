@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Pencil, Save, X, Trash } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Pencil, Save, X, Trash, Upload } from "lucide-react";
 import InfoBlock from "./InfoBlock";
 import { updateEntity, deleteEntity } from "@/api/institutions/entity";
 import { useRouter } from "next/navigation";
+import { uploadBatches } from "@/api/batches/create-batches";
+import toast from "react-hot-toast";
 
 type BatchSidebarProps = {
   batch: any;
@@ -59,6 +61,34 @@ const BatchSidebar = ({ batch }: BatchSidebarProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(batch);
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleBulkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      toast.loading("Uploading students...", { id: "bulk-upload" });
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      await uploadBatches("", file, "CLOUD", null);
+
+      toast.success("Students uploaded successfully", {
+        id: "bulk-upload",
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error("Bulk upload failed", {
+        id: "bulk-upload",
+      });
+    } finally {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
   useEffect(() => {
     setFormData(batch);
   }, [batch]);
@@ -104,6 +134,13 @@ const BatchSidebar = ({ batch }: BatchSidebarProps) => {
 
   return (
     <aside className="w-[320px] bg-[#1b1b1b] text-white p-6 rounded-xl min-h-[93vh]">
+      <input
+        type="file"
+        accept=".csv,.xlsx"
+        ref={fileInputRef}
+        onChange={handleBulkUpload}
+        hidden
+      />
       {/* Header */}
       <div className="mb-4">
         {isEditing ? (
@@ -199,6 +236,13 @@ const BatchSidebar = ({ batch }: BatchSidebarProps) => {
           </>
         )}
       </div>
+      <button
+        onClick={() => fileInputRef.current?.click()}
+        className="flex-1 mt-4 w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded"
+      >
+        <Upload size={16} />
+        upload cloud credentials
+      </button>
     </aside>
   );
 };

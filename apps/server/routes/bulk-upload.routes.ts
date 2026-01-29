@@ -22,4 +22,10 @@ router.post(
   upload.single("file"),
   csvUploadController.uploadMultipleTestCase,
 );
+router.post(
+  "/cloud-info/",
+  authMiddleware,
+  upload.single("file"),
+  csvUploadController.uploadCloudCred,
+);
 export default router;

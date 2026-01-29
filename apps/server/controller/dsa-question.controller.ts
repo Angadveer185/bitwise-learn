@@ -1000,6 +1000,9 @@ class DsaQuestionController {
 
       if (!dbStudent) throw new Error("user not found!");
 
+      const totalQuestion = await prismaClient.problem.count({
+        where: { published: "LISTED" },
+      });
       const grouped = await prismaClient.problemSubmission.groupBy({
         by: ["problemId"],
         where: {
@@ -1036,10 +1039,32 @@ class DsaQuestionController {
           medium: counts.MEDIUM,
           hard: counts.HARD,
           totalSolved: counts.EASY + counts.MEDIUM + counts.HARD,
+          totalQuestion: totalQuestion,
         }),
       );
     } catch (error: any) {
       console.error(error);
+      return res.status(200).json(apiResponse(500, error.message, null));
+    }
+  }
+  async getAllUserSubmission(req: Request, res: Response) {
+    try {
+      const userId = req.user?.id;
+      const problemId = req.params.id;
+
+      if (!userId) throw new Error("user not found ");
+      if (!problemId) throw new Error("problemid not found ");
+      const dbUser = await prismaClient.student.findUnique({
+        where: { id: userId },
+      });
+      if (!dbUser) throw new Error("user not found");
+
+      const dbProblem = await prismaClient.problem.findUnique({
+        where: { id: problemId as string },
+      });
+      if (!dbProblem) throw new Error("user not found");
+    } catch (error: any) {
+      console.log(error);
       return res.status(200).json(apiResponse(500, error.message, null));
     }
   }
