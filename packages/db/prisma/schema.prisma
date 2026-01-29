@@ -160,26 +160,27 @@ model Teacher {
 }
 
 model Student {
-  id                          String                       @id @default(auto()) @map("_id") @db.ObjectId
-  name                        String
-  rollNumber                  String
-  email                       String                       @unique
-  loginPassword               String
-  cloudPlatform               CLOUD_PROVIDER               @default(AWS)
-  cloudname                   String?                      @default("")
-  cloudpass                   String?                      @default("")
-  cloudurl                    String?                      @default("")
-  batchId                     String                       @db.ObjectId
-  batch                       Batch                        @relation(references: [id], fields: [batchId])
-  instituteId                 String                       @db.ObjectId
-  insitution                  Institution                  @relation(references: [id], fields: [instituteId])
-  courseProgresses            CourseProgress[]
-  courseAssignemntSubmissions CourseAssignemntSubmission[]
-  problemSubmissions          ProblemSubmission[]
-  assessmentSubmissions       AssessmentSubmission[]
-  createdAt                   DateTime                     @default(now())
-  updatedAt                   DateTime                     @updatedAt
-  problemTemplates            ProblemTemplate[]
+  id                            String                         @id @default(auto()) @map("_id") @db.ObjectId
+  name                          String
+  rollNumber                    String
+  email                         String                         @unique
+  loginPassword                 String
+  cloudPlatform                 CLOUD_PROVIDER                 @default(AWS)
+  cloudname                     String?                        @default("")
+  cloudpass                     String?                        @default("")
+  cloudurl                      String?                        @default("")
+  batchId                       String                         @db.ObjectId
+  batch                         Batch                          @relation(references: [id], fields: [batchId])
+  instituteId                   String                         @db.ObjectId
+  insitution                    Institution                    @relation(references: [id], fields: [instituteId])
+  courseProgresses              CourseProgress[]
+  courseAssignemntSubmissions   CourseAssignemntSubmission[]
+  problemSubmissions            ProblemSubmission[]
+  assessmentSubmissions         AssessmentSubmission[]
+  createdAt                     DateTime                       @default(now())
+  updatedAt                     DateTime                       @updatedAt
+  problemTemplates              ProblemTemplate[]
+  assessmentQuestionSubmissions AssessmentQuestionSubmission[]
 }
 
 model Course {
@@ -243,16 +244,17 @@ model CourseProgress {
 }
 
 model CourseAssignemnt {
-  id                        String                     @id @default(auto()) @map("_id") @db.ObjectId
-  name                      String
-  description               String
-  instruction               String
-  marksPerQuestion          Int
-  sectionId                 String                     @db.ObjectId
-  section                   CourseSections             @relation(fields: [sectionId], references: [id])
-  courseAssignemntQuestions CourseAssignemntQuestion[]
-  createdAt                 DateTime                   @default(now())
-  updatedAt                 DateTime                   @updatedAt
+  id                          String                       @id @default(auto()) @map("_id") @db.ObjectId
+  name                        String
+  description                 String
+  instruction                 String
+  marksPerQuestion            Int
+  sectionId                   String                       @db.ObjectId
+  section                     CourseSections               @relation(fields: [sectionId], references: [id])
+  courseAssignemntQuestions   CourseAssignemntQuestion[]
+  createdAt                   DateTime                     @default(now())
+  updatedAt                   DateTime                     @updatedAt
+  courseAssignemntSubmissions CourseAssignemntSubmission[]
 }
 
 model CourseAssignemntQuestion {
@@ -275,6 +277,8 @@ model CourseAssignemntSubmission {
   studentId     String                   @db.ObjectId
   student       Student                  @relation(fields: [studentId], references: [id])
   answer        String[]
+  assignmentId  String                   @db.ObjectId
+  assignment    CourseAssignemnt         @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
   marksObtained Int?
   isCorrect     Boolean?
   submittedAt   DateTime                 @default(now())
@@ -396,12 +400,13 @@ model Assessment {
   batchId String @db.ObjectId
   batch   Batch  @relation(fields: [batchId], references: [id])
 
-  sections    AssessmentSection[]
-  submissions AssessmentSubmission[]
-  createdAt   DateTime               @default(now())
-  updatedAt   DateTime               @updatedAt
-  teacher     Teacher?               @relation(fields: [teacherId], references: [id])
-  teacherId   String?                @db.ObjectId
+  sections                      AssessmentSection[]
+  submissions                   AssessmentSubmission[]
+  createdAt                     DateTime                       @default(now())
+  updatedAt                     DateTime                       @updatedAt
+  teacher                       Teacher?                       @relation(fields: [teacherId], references: [id])
+  teacherId                     String?                        @db.ObjectId
+  assessmentQuestionSubmissions AssessmentQuestionSubmission[]
 }
 
 model AssessmentSection {
@@ -462,8 +467,13 @@ model AssessmentQuestionSubmission {
   questionId String             @db.ObjectId
   question   AssessmentQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
-  answer                 String?
-  marksObtained          Int?
+  assessmentId String     @db.ObjectId
+  assessment   Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  student      Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId    String     @db.ObjectId
+  answer       String?
+
+  marksObtained          Int                   @default(0)
   createdAt              DateTime              @default(now())
   updatedAt              DateTime              @updatedAt
   assessmentSubmission   AssessmentSubmission? @relation(fields: [assessmentSubmissionId], references: [id])

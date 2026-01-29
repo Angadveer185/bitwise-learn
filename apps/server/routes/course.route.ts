@@ -159,7 +159,7 @@ router.get(
   courseGradeController.getAssignmentMarksByCourseId,
 );
 router.post(
-  "/submit-course-assignment/",
+  "/submit-course-assignment/:id",
   authMiddleware,
   courseGradeController.submitCourseAssignment,
 );

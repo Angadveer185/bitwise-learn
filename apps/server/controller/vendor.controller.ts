@@ -63,12 +63,12 @@ class VendorController {
         throw new Error("only institution can update vendors");
       }
       const vendor = await prismaClient.vendor.findFirst({
-        where: { id: vendorId },
+        where: { id: vendorId as string },
       });
       if (!vendor) throw new Error("Vendor not found");
 
       const updatedVendor = await prismaClient.vendor.update({
-        where: { id: vendorId },
+        where: { id: vendorId as string },
         data: {
           name: data.name ?? vendor.name,
           email: data.email ?? vendor.email,
@@ -105,12 +105,12 @@ class VendorController {
         throw new Error("only institution can delete vendors");
       }
       const vendor = await prismaClient.vendor.findFirst({
-        where: { id: vendorId },
+        where: { id: vendorId as string },
       });
       if (!vendor) throw new Error("vendor not found");
 
       const deletedVendor = await prismaClient.vendor.delete({
-        where: { id: vendorId },
+        where: { id: vendorId as string },
       });
 
       if (!deletedVendor) throw new Error("error in deleting vendor");
@@ -165,7 +165,7 @@ class VendorController {
       //   throw new Error("only institution can view vendors");
       // }
       const vendor = await prismaClient.vendor.findFirst({
-        where: { id: vendorId },
+        where: { id: vendorId as string },
         select: {
           id: true,
           name: true,

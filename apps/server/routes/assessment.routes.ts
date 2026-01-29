@@ -4,6 +4,7 @@ import { authMiddleware } from "../middleware/auth.middleware";
 import assessmentController from "../controller/assessment.controller";
 import assessmentSectionController from "../controller/assessment-section.controller";
 import assessmentQuestionController from "../controller/assessment-question.controller";
+import assessmentSubmissionController from "../controller/assessment-submission.controller";
 
 const router = Router();
 // assessment-controllers
@@ -94,4 +95,15 @@ router.post(
   authMiddleware,
   assessmentController.assessmentReportRequest,
 );
+router.post(
+  "/submit-assessment-by-id/:id",
+  authMiddleware,
+  assessmentSubmissionController.submitAssessment,
+);
+router.post(
+  "/submit-assessment-question-by-id/:id",
+  authMiddleware,
+  assessmentSubmissionController.submitAssessmentQuestion,
+);
+
 export default router;

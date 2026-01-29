@@ -39,16 +39,16 @@ class TeacherController {
       if (req.user.type === "VENDOR") {
         const vendor = await prismaClient.vendor.findFirst({
           where: { id: req.user.id },
-          select: { id: true, institutionId: true },
+          select: { id: true, createdInstitutions: true },
         });
 
         if (!vendor) {
           throw new Error("vendor not found");
         }
 
-        if (vendor.institutionId !== data.instituteId) {
-          throw new Error("vendor does not belong to this institution");
-        }
+        // if (vendor.createdInstitutions !== data.instituteId) {
+        //   throw new Error("vendor does not belong to this institution");
+        // }
       }
 
       const existingTeacher = await prismaClient.teacher.findFirst({
@@ -102,7 +102,7 @@ class TeacherController {
       }
 
       const teacher = await prismaClient.teacher.findFirst({
-        where: { id: teacherId },
+        where: { id: teacherId as string },
       });
       if (!teacher) throw new Error("teacher not found");
 
@@ -118,7 +118,7 @@ class TeacherController {
       }
 
       const updatedTeacher = await prismaClient.teacher.update({
-        where: { id: teacherId },
+        where: { id: teacherId as string },
         data: {
           name: data.name ?? teacher.name,
           email: data.email ?? teacher.email,
@@ -168,14 +168,14 @@ class TeacherController {
         throw new Error("cannot delete a teacher");
       }
       const teacher = await prismaClient.teacher.findFirst({
-        where: { id: teacherId },
+        where: { id: teacherId as string },
       });
       if (!teacher) throw new Error("teacher not found");
 
       // TODO: make sure an no cross institution admins can be deleted
 
       const deletedTeacher = await prismaClient.teacher.delete({
-        where: { id: teacherId },
+        where: { id: teacherId as string },
       });
       if (!deletedTeacher) throw new Error("Error deleting teacher");
 
@@ -250,7 +250,7 @@ class TeacherController {
       // if (!dbUser) throw new Error("no such user found");
 
       const teacher = await prismaClient.teacher.findFirst({
-        where: { id: teacherId },
+        where: { id: teacherId as string },
         select: {
           id: true,
           name: true,
@@ -299,7 +299,7 @@ class TeacherController {
       if (!instituteId) throw new Error("institute id is required");
 
       const teachers = await prismaClient.teacher.findMany({
-        where: { instituteId: instituteId },
+        where: { instituteId: instituteId as string },
         select: {
           id: true,
           name: true,
@@ -342,7 +342,7 @@ class TeacherController {
       // if (!dbUser) throw new Error("no such user found");
 
       const teachers = await prismaClient.teacher.findMany({
-        where: { batchId: batchId },
+        where: { batchId: batchId as string },
         select: {
           id: true,
           name: true,

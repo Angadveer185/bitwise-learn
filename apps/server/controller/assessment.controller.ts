@@ -239,6 +239,14 @@ class AssessmentController {
           status: status ?? assessment.status,
         },
       });
+
+      if (status === "LIVE") {
+        await MQClient.registerNewChannel("assessment-end");
+        await MQClient.sendToQueue("assignment-end", {
+          id: assessmentId,
+          endTime: assessment.endTime,
+        });
+      }
       if (!updatedAssessment) throw new Error("Error Updating Assessment");
       return res
         .status(200)

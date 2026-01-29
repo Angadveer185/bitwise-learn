@@ -186,9 +186,11 @@ class CourseGradeController {
 
   async submitCourseAssignment(req: Request, res: Response) {
     try {
+      const assignmentId = req.params.id;
       const data: GradesBody[] = req.body;
       const studentId = req.user?.id;
 
+      if (!assignmentId) throw new Error("assignmentId is required");
       if (!studentId) throw new Error("no new student found");
       if (!Array.isArray(data) || data.length === 0)
         throw new Error("submission data is required");
@@ -197,6 +199,10 @@ class CourseGradeController {
         where: { id: studentId },
       });
       if (!dbStudent) throw new Error("no such student found");
+      const dbAssignment = await prismaClient.courseAssignemnt.findUnique({
+        where: { id: assignmentId as string },
+      });
+      if (!dbAssignment) throw new Error("no such student found");
 
       const createdSubmissions: any[] = [];
 
@@ -246,6 +252,7 @@ class CourseGradeController {
               answer: submission.answer,
               isCorrect,
               marksObtained,
+              assignmentId: dbAssignment.id,
             },
           });
 

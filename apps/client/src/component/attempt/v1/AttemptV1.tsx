@@ -19,7 +19,11 @@ import { useTabSwitchCounter } from "./Proctoring/TabSwitchCounter";
 import { useAntiCheatControls } from "./Proctoring/AntiCheat";
 import { AttemptMode } from "./types";
 import CodeRightSection from "./CodeRightSection";
-
+import { data } from "framer-motion/client";
+import {
+  submitIndividualQuestion,
+  submitTest,
+} from "@/api/assessments/submit-assessment";
 
 type NetworkInfo = {
   downlink?: number;
@@ -27,7 +31,13 @@ type NetworkInfo = {
   rtt?: number;
 };
 
-export default function AttemptV1({ id, mode }: { id: string; mode: AttemptMode }) {
+export default function AttemptV1({
+  id,
+  mode,
+}: {
+  id: string;
+  mode: AttemptMode;
+}) {
   const Colors = useColors();
   const router = useRouter();
 
@@ -60,7 +70,9 @@ export default function AttemptV1({ id, mode }: { id: string; mode: AttemptMode 
 
   const [codingProblem, setCodingProblem] = useState<any>(null);
 
-  const [userAnswers, setUserAnswers] = useState<Record<string, string | null>>({});
+  const [userAnswers, setUserAnswers] = useState<Record<string, string | null>>(
+    {},
+  );
   const [codeAnswers, setCodeAnswers] = useState<Record<string, string>>({});
 
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
@@ -75,9 +87,9 @@ export default function AttemptV1({ id, mode }: { id: string; mode: AttemptMode 
   };
 
   // Network Logic
-  const [networkStatus, setNetworkStatus] = useState<
-    "online" | "offline"
-  >(navigator.onLine ? "online" : "offline");
+  const [networkStatus, setNetworkStatus] = useState<"online" | "offline">(
+    navigator.onLine ? "online" : "offline",
+  );
 
   // Network Info
   const [networkInfo, setNetworkInfo] = useState<NetworkInfo>({});
@@ -104,7 +116,6 @@ export default function AttemptV1({ id, mode }: { id: string; mode: AttemptMode 
       connection.removeEventListener("change", updateNetworkInfo);
     };
   }, []);
-
 
   useEffect(() => {
     const handleOnline = () => setNetworkStatus("online");
@@ -155,15 +166,11 @@ export default function AttemptV1({ id, mode }: { id: string; mode: AttemptMode 
 
   useEffect(() => {
     if (networkStatus === "offline") {
-      toast.error(
-        "Network disconnected. Your answers will be saved locally.",
-        { id: "network-offline" }
-      );
+      toast.error("Network disconnected. Your answers will be saved locally.", {
+        id: "network-offline",
+      });
     }
   }, [networkStatus]);
-  
-
-
 
   // Fetch assessment
   useEffect(() => {
@@ -225,8 +232,12 @@ export default function AttemptV1({ id, mode }: { id: string; mode: AttemptMode 
   if (!started) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4 font-mono">
-        <div className={`w-full max-w-md rounded-2xl p-8 ${Colors.background.secondary}`}>
-          <h1 className={`text-2xl font-bold text-center ${Colors.text.special}`}>
+        <div
+          className={`w-full max-w-md rounded-2xl p-8 ${Colors.background.secondary}`}
+        >
+          <h1
+            className={`text-2xl font-bold text-center ${Colors.text.special}`}
+          >
             {attemptConfig.label} Instructions
           </h1>
           <p className="text-center mt-4">
@@ -254,23 +265,23 @@ export default function AttemptV1({ id, mode }: { id: string; mode: AttemptMode 
 
   const goNext = () => {
     if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(i => i + 1);
+      setCurrentQuestionIndex((i) => i + 1);
       return;
     }
     if (currentSectionIndex < assessment.sections.length - 1) {
-      setCurrentSectionIndex(s => s + 1);
+      setCurrentSectionIndex((s) => s + 1);
       setCurrentQuestionIndex(0);
     }
   };
 
   const goPrev = () => {
     if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(i => i - 1);
+      setCurrentQuestionIndex((i) => i - 1);
       return;
     }
     if (currentSectionIndex > 0) {
       const prev = assessment.sections[currentSectionIndex - 1];
-      setCurrentSectionIndex(s => s - 1);
+      setCurrentSectionIndex((s) => s - 1);
       setCurrentQuestionIndex(prev.questions.length - 1);
     }
   };
@@ -280,14 +291,23 @@ export default function AttemptV1({ id, mode }: { id: string; mode: AttemptMode 
     setCurrentQuestionIndex(0);
   };
 
-
+  const handleSubmitQuestion = async (id: string, data: any) => {
+    console.log(id);
+    console.log({ option: data });
+    await submitIndividualQuestion(id, { option: data }, "NO_CODE");
+  };
+  const handleCodeQuestion = async (id: string, data: any) => {
+    // console.log(first);
+    await submitIndividualQuestion(id, { code: data }, "CODE");
+  };
+  const handleSubmitTest = async () => {
+    await submitTest(id, { tabSwitchCount: tabSwitchCount });
+  };
 
   return (
     <div className={`${Colors.background.primary} h-screen flex flex-col`}>
-
       {/* TOP BAR */}
       <div className="flex gap-3 justify-end items-center px-4 py-3 border-b border-white/10">
-
         <div className="relative group flex items-center justify-center">
           {/* WiFi Icon */}
           <Wifi
@@ -301,9 +321,7 @@ export default function AttemptV1({ id, mode }: { id: string; mode: AttemptMode 
           <div className="pointer-events-none absolute top-full mt-2 hidden group-hover:block z-50">
             <div className="rounded-md bg-black px-3 py-2 text-xs text-white shadow-lg whitespace-nowrap">
               {networkStatus === "offline" ? (
-                <div className="text-red-400">
-                  Network disconnected
-                </div>
+                <div className="text-red-400">Network disconnected</div>
               ) : (
                 <>
                   <div
@@ -325,9 +343,7 @@ export default function AttemptV1({ id, mode }: { id: string; mode: AttemptMode 
               )}
             </div>
           </div>
-
         </div>
-
 
         <button
           onClick={() => setShowSubmitConfirm(true)}
@@ -351,9 +367,7 @@ export default function AttemptV1({ id, mode }: { id: string; mode: AttemptMode 
                 : codingProblem?.description || "Loading problem..."
             }
             testCases={
-              section.type === "CODE"
-                ? codingProblem?.testCases ?? []
-                : []
+              section.type === "CODE" ? (codingProblem?.testCases ?? []) : []
             }
             currentIndex={currentQuestionIndex}
             totalQuestions={questions.length}
@@ -373,11 +387,12 @@ export default function AttemptV1({ id, mode }: { id: string; mode: AttemptMode 
               currentIndex={currentQuestionIndex}
               totalQuestions={questions.length}
               selectedAnswer={userAnswers[question.id] ?? null}
-              onSelectAnswer={a =>
-                setUserAnswers(p => ({ ...p, [question.id]: a }))
-              }
+              onSelectAnswer={(a) => {
+                handleSubmitQuestion(question.id, a);
+                setUserAnswers((p) => ({ ...p, [question.id]: a }));
+              }}
               onResetCurrentAnswer={() =>
-                setUserAnswers(p => ({ ...p, [question.id]: null }))
+                setUserAnswers((p) => ({ ...p, [question.id]: null }))
               }
               onJumpToQuestion={setCurrentQuestionIndex}
               onExit={() => setShowExitConfirm(true)}
@@ -391,13 +406,12 @@ export default function AttemptV1({ id, mode }: { id: string; mode: AttemptMode 
               problem={codingProblem}
               problemId={question.id}
               code={codeAnswers[question.id] ?? ""}
-              onChange={(code) =>
-                setCodeAnswers(p => ({ ...p, [question.id]: code }))
-              }
+              onChange={(code) => {
+                handleCodeQuestion(question.id, code);
+                setCodeAnswers((p) => ({ ...p, [question.id]: code }));
+              }}
               onRun={() => console.log("Run code")}
-              onSubmit={() =>
-                toast("Code submit placeholder", { icon: "🧪" })
-              }
+              onSubmit={() => toast("Code submit placeholder", { icon: "🧪" })}
             />
           )}
         </div>
@@ -406,7 +420,7 @@ export default function AttemptV1({ id, mode }: { id: string; mode: AttemptMode 
       <ConfirmSubmit
         open={showSubmitConfirm}
         onCancel={() => setShowSubmitConfirm(false)}
-        onConfirm={() => router.push("/assessments")}
+        onConfirm={handleSubmitTest}
       />
 
       <ConfirmExit
@@ -416,6 +430,4 @@ export default function AttemptV1({ id, mode }: { id: string; mode: AttemptMode 
       />
     </div>
   );
-
-
 }
