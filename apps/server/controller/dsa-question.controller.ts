@@ -1063,6 +1063,12 @@ class DsaQuestionController {
         where: { id: problemId as string },
       });
       if (!dbProblem) throw new Error("user not found");
+
+      const dbSubmission = await prismaClient.problemSubmission.findMany({
+        where: { problemId: dbProblem.id, studentId: dbUser.id },
+      });
+
+      return res.status(200).json(apiResponse(200, "submission", dbSubmission));
     } catch (error: any) {
       console.log(error);
       return res.status(200).json(apiResponse(500, error.message, null));

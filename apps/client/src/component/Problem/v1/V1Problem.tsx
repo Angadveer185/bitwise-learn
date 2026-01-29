@@ -101,7 +101,7 @@ function V1Problem({ data }: any) {
               <Solution content={data.solution} />
             </TabsContent>
             <TabsContent value="submission">
-              <Submission content={data.submission} />
+              <Submission id={data.id} />
             </TabsContent>
           </div>
         </Tabs>
@@ -120,7 +120,7 @@ function V1Problem({ data }: any) {
           <CodeEditor
             questionId={data.id}
             output={setOutput}
-            template={data.problemTemplates}  
+            template={data.problemTemplates}
           />
         </div>
 

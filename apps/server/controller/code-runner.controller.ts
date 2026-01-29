@@ -193,7 +193,7 @@ class CodeRunnerController {
           isCorrect,
         });
       }
-
+      let wrongTestCase: any;
       // ---- Run Hidden Testcases (for verdict)
       for (const testcase of hiddenTestCases) {
         let testrun = executionCode;
@@ -218,6 +218,7 @@ class CodeRunnerController {
         if (actualOutput !== expectedOutput) {
           finalVerdict = "FAILED";
           verdictMessage = "Wrong Answer";
+          wrongTestCase = { ...testcase, yourOutput: actualOutput };
           break;
         }
       }
@@ -231,6 +232,7 @@ class CodeRunnerController {
           studentId: dbUser.id,
           code,
           status: finalVerdict,
+          failedTestCase: JSON.stringify(wrongTestCase),
           runtime: `${runtimeMs} ms`,
           memory: `${memoryMb} MB`,
         },
