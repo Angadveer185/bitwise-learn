@@ -6,7 +6,9 @@ export async function DELETE(
 ) {
   try {
     const { id: assignemntId } = await context.params;
-    const token = req.cookies.get("accessToken")?.value;
+    const token = req.cookies.get("token") || "";
+    if (!token) throw new Error("Token not found");
+    const cookieHeader = req.headers.get("cookie");
 
     if (!assignemntId) {
       return NextResponse.json(
@@ -20,8 +22,9 @@ export async function DELETE(
       {
         method: "DELETE",
         headers: {
-          Authorization: token || "",
+          Cookie: cookieHeader || "",
         },
+        credentials: "include",
       },
     );
 

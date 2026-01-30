@@ -6,7 +6,10 @@ export async function GET(
 ) {
   try {
     const assessmentId = (await params).id;
-    const token = req.headers.get("authorization");
+    const token = req.cookies.get("token") || "";
+    if (!token) throw new Error("Token not found");
+    const cookieHeader = req.headers.get("cookie");
+
 
     if (!assessmentId) {
       return NextResponse.json(
@@ -20,8 +23,9 @@ export async function GET(
       {
         method: "GET",
         headers: {
-          Authorization: token || "",
+          Cookie: cookieHeader || "",
         },
+        credentials: "include",
       },
     );
 

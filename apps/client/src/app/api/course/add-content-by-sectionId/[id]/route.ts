@@ -4,7 +4,9 @@ import axiosInstance from "@/lib/axios";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const token = req.headers.get("authorization");
+    const token = req.cookies.get("token") || "";
+    if (!token) throw new Error("Token not found");
+    const cookieHeader = req.headers.get("cookie");
 
     const response = await axiosInstance.post(
       `${process.env.BACKEND_URL}/api/v1/courses/add-content-to-section`,
@@ -12,8 +14,9 @@ export async function POST(req: NextRequest) {
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: token || "",
+          Cookie: cookieHeader || "",
         },
+        withCredentials: true,
       },
     );
 

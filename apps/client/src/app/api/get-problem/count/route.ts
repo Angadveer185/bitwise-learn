@@ -13,8 +13,15 @@ export async function GET(req: NextRequest) {
     }
 
     const url = backendUrl + "/api/v1/problems/admin/get-user-solved-questions";
-
-    const response = await axiosInstance.get(url);
+    const token = req.cookies.get("token") || "";
+    if (!token) throw new Error("Token not found");
+    const cookieHeader = req.headers.get("cookie");
+    const response = await axiosInstance.get(url, {
+      headers: {
+        Cookie: cookieHeader || "",
+      },
+      withCredentials: true,
+    });
 
     return NextResponse.json(response.data, {
       status: response.status,

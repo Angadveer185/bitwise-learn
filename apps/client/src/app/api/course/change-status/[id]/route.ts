@@ -11,15 +11,29 @@ export async function POST(
   try {
     const { id } = await context.params;
     const body = await req.json();
-    const token = req.cookies.get("accessToken")?.value;
+    const token = req.cookies.get("token") || "";
+    if (!token) throw new Error("Token not found");
+    const cookieHeader = req.headers.get("cookie");
     let res;
     if (body.currentStatus === "DONE") {
       res = await axiosInstance.post(
         `${process.env.BACKEND_URL}/api/v1/courses/mark-content-as-done/${id}`,
+        {
+          headers: {
+            Cookie: cookieHeader || "",
+          },
+          withCredentials: true,
+        }
       );
     } else {
       res = await axiosInstance.post(
         `${process.env.BACKEND_URL}/api/v1/courses/mark-content-as-done/${id}`,
+        {
+          headers: {
+            Cookie: cookieHeader || "",
+          },
+          withCredentials: true,
+        }
       );
     }
 

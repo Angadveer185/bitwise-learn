@@ -7,8 +7,16 @@ export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
     const backendUrl = `${process.env.BACKEND_URL}/api/v1/problems/search-question`;
+    const token = req.cookies.get("token") || "";
+    if (!token) throw new Error("Token not found");
+    const cookieHeader = req.headers.get("cookie");
 
-    const response = await axiosInstance.post(backendUrl, data);
+    const response = await axiosInstance.post(backendUrl, data, {
+      headers: {
+        Cookie: cookieHeader || "",
+      },
+      withCredentials: true,
+    });
 
     return NextResponse.json({
       success: true,

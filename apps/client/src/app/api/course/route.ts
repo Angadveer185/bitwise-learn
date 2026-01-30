@@ -13,7 +13,9 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const cookie = req.headers.get("cookie");
+    const token = req.cookies.get("token") || "";
+    if (!token) throw new Error("Token not found");
+    const cookieHeader = req.headers.get("cookie");
 
     const res = await fetch(
       `${backendUrl}/api/v1/courses/get-all-courses-by-admin`,
@@ -21,8 +23,9 @@ export async function GET(req: NextRequest) {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          cookie: cookie || "",
+          Cookie: cookieHeader || "",
         },
+        credentials: "include",
         cache: "no-store",
       },
     );

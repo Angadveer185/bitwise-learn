@@ -12,9 +12,18 @@ export async function POST(req: NextRequest) {
         { status: 500 },
       );
     }
+    const token = req.cookies.get("token") || "";
+    if (!token) throw new Error("Token not found");
+    const cookieHeader = req.headers.get("cookie");
+
     const response = await axiosInstance.get(
       `${backendUrl}/api/v1/reports/course-report/${data.batchId}/${data.courseId}?page=${data.pageNumber}`,
-      data,
+      {
+        headers: {
+          Cookie: cookieHeader || "",
+        },
+        withCredentials: true,
+      },
     );
 
     return NextResponse.json(response.data.data, { status: 200 });

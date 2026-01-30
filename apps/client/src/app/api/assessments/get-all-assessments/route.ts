@@ -2,14 +2,18 @@ import { NextResponse, NextRequest } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
-    const token = req.cookies.get("accessToken")?.value;
+    const token = req.cookies.get("token") || "";
+    if (!token) throw new Error("Token not found");
+    const cookieHeader = req.headers.get("cookie");
+
     const res = await fetch(
       `${process.env.BACKEND_URL}/api/v1/assessments/get-all-assessment`,
       {
         method: "GET",
         headers: {
-          Authorization: token || "",
+          Cookie: cookieHeader || "",
         },
+        credentials: "include",
       },
     );
 

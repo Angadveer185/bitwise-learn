@@ -3,7 +3,10 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const token = req.headers.get("authorization");
+    const token = req.cookies.get("token") || "";
+    if (!token) throw new Error("Token not found");
+    const cookieHeader = req.headers.get("cookie");
+
 
     if (!body.assessmentId) {
       return NextResponse.json(
@@ -18,8 +21,9 @@ export async function POST(req: NextRequest) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: token || "",
+          Cookie: cookieHeader || "",
         },
+        credentials: "include",
         body: JSON.stringify(body),
       },
     );

@@ -2,11 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   req: NextRequest,
-  context : { params: Promise<{ id: string }> },
+  context: { params: Promise<{ id: string }> },
 ) {
   try {
-    const {id} = await context.params;
-    const token = req.headers.get("authorization");
+    const { id } = await context.params;
+    const token = req.cookies.get("token") || "";
+    if (!token) throw new Error("Token not found");
+    const cookieHeader = req.headers.get("cookie");
     console.log(id)
 
     const res = await fetch(
@@ -14,8 +16,9 @@ export async function GET(
       {
         method: "GET",
         headers: {
-          Authorization: token || "",
+          Cookie: cookieHeader || "",
         },
+        credentials: "include",
       },
     );
 

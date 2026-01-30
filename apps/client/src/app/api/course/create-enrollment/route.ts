@@ -5,7 +5,9 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const courses = body.courses;
-    const token = req.headers.get("authorization");
+    const token = req.cookies.get("token") || "";
+    if (!token) throw new Error("Token not found");
+    const cookieHeader = req.headers.get("cookie");
 
     console.log(body);
     for (let i = 0; i < courses.length; i++) {
@@ -18,8 +20,9 @@ export async function POST(req: NextRequest) {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: token || "",
+            Cookie: cookieHeader || "",
           },
+          withCredentials: true,
         },
       );
     }

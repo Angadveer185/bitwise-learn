@@ -8,7 +8,10 @@ export async function POST(
     const body = await req.json();
     const sectionId = (await context.params).id;
 
-    const token = req.headers.get("authorization");
+    const token = req.cookies.get("token") || "";
+    if (!token) throw new Error("Token not found");
+    const cookieHeader = req.headers.get("cookie");
+
     console.log(body);
     const res = await fetch(
       `${process.env.BACKEND_URL}/api/v1/assessments/add-assessment-question/${sectionId}`,
@@ -16,8 +19,9 @@ export async function POST(
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: token ?? "",
+          Cookie: cookieHeader || "",
         },
+        credentials: "include",
         body: JSON.stringify(body),
       },
     );

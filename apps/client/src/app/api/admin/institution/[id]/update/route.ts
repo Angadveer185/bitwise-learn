@@ -15,10 +15,19 @@ export async function POST(
         { status: 500 },
       );
     }
+    const token = req.cookies.get("token") || "";
+    if (!token) throw new Error("Token not found");
+    const cookieHeader = req.headers.get("cookie");
 
     const response = await axiosInstance.put(
       `${backendUrl}/api/v1/institutions/update-insitituion-by-id/${id}`,
       data.data,
+      {
+        headers: {
+          Cookie: cookieHeader || "",
+        },
+        withCredentials: true,
+      }
     );
 
     return NextResponse.json(response.data.data, { status: 200 });

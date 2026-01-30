@@ -14,9 +14,18 @@ export async function POST(
         { status: 500 },
       );
     }
+    const token = req.cookies.get("token") || "";
+    if (!token) throw new Error("Token not found");
+    const cookieHeader = req.headers.get("cookie");
 
     const response = await axiosInstance.put(
       `${backendUrl}/api/v1/problems/change-status/${id}`,
+      {
+        headers: {
+          Cookie: cookieHeader || "",
+        },
+        withCredentials: true,
+      }
     );
 
     console.log("==================");

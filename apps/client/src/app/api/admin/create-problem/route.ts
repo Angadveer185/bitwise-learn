@@ -9,7 +9,16 @@ export async function POST(req: NextRequest) {
     const backendUrl = `${process.env.BACKEND_URL}/api/v1/problems/add-problem/`;
     console.log(backendUrl);
     // Send the data directly without JSON.parse
-    const response = await axiosInstance.post(backendUrl, data);
+    const token = req.cookies.get("token") || "";
+    if (!token) throw new Error("Token not found");
+    const cookieHeader = req.headers.get("cookie");
+
+    const response = await axiosInstance.post(backendUrl, data, {
+      headers: {
+        Cookie: cookieHeader || "",
+      },
+      withCredentials: true,
+    });
     console.log(response);
     return NextResponse.json({
       success: true,

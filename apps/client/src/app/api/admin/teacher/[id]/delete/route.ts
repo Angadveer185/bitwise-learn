@@ -14,9 +14,18 @@ export async function POST(
         { status: 500 },
       );
     }
+    const token = req.cookies.get("token") || "";
+    if (!token) throw new Error("Token not found");
+    const cookieHeader = req.headers.get("cookie");
 
     const response = await axiosInstance.delete(
       `${backendUrl}/api/v1/teachers/delete-teacher-by-id/${id}`,
+      {
+        headers: {
+          Cookie: cookieHeader || "",
+        },
+        withCredentials: true,
+      }
     );
 
     return NextResponse.json(response.data.data, { status: 200 });

@@ -11,8 +11,17 @@ export async function GET(req: NextRequest) {
         { status: 500 },
       );
     }
+    const token = req.cookies.get("token") || "";
+    if (!token) throw new Error("Token not found");
+    const cookieHeader = req.headers.get("cookie");
     const response = await axios.get(
       `${backendUrl}/api/v1/batches/get-all-batch`,
+      {
+        headers: {
+          Cookie: cookieHeader || "",
+        },
+        withCredentials: true,
+      }
     );
 
     return NextResponse.json(response.data.data, { status: 200 });

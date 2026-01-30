@@ -2,19 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function DELETE(
   req: NextRequest,
-  context: { params: Promise<{ id: string }>},
+  context: { params: Promise<{ id: string }> },
 ) {
   try {
-    const {id} = await context.params;
-    const token = req.cookies.get("accessToken")?.value;
+    const { id } = await context.params;
+    const token = req.cookies.get("token") || "";
+    if (!token) throw new Error("Token not found");
+    const cookieHeader = req.headers.get("cookie");
 
     const res = await fetch(
       `${process.env.BACKEND_URL}/api/v1/courses/remove-assignment-question/${id}`,
       {
         method: "DELETE",
         headers: {
-          Authorization: token || "",
+          Cookie: cookieHeader || "",
         },
+        credentials: "include",
       },
     );
 

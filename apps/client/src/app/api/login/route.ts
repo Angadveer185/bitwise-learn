@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
 import { cookies } from "next/headers";
+import { createJWT } from "@/lib/authJwt";
 interface LoginProp {
   email: string;
   password: string;
@@ -29,7 +30,7 @@ export async function POST(req: NextRequest) {
       `${backendUrl}/api/v1/auth` + URL_MAP[data.role],
       { email: data.email, password: data.password },
     );
-
+    console.log(response.data);
     (await cookies()).set("token", response.data.data.tokens.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -37,7 +38,10 @@ export async function POST(req: NextRequest) {
       maxAge: 60 * 60 * 2,
     });
 
-    (await cookies()).set("role", data.role, {
+    const roleToken = createJWT({ role: data.role });
+
+
+    (await cookies()).set("role", roleToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",

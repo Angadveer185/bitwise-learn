@@ -9,7 +9,9 @@ export async function POST(
     const { id } = await context.params;
     const body = await req.json();
 
-    const token = req.headers.get("authorization");
+    const token = req.cookies.get("token") || "";
+    if (!token) throw new Error("Token not found");
+    const cookieHeader = req.headers.get("cookie");
 
     const response = await axiosInstance.post(
       `${process.env.BACKEND_URL}/api/v1/courses/add-course-section/${id}`,
@@ -17,8 +19,9 @@ export async function POST(
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: token || "",
+          Cookie: cookieHeader || "",
         },
+        withCredentials: true,
       },
     );
 

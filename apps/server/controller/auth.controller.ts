@@ -433,7 +433,7 @@ class AuthController {
 
       return res.status(200).json(
         apiResponse(200, "login successful", {
-          tokens: tokens.accessToken,
+          tokens: tokens,
           data: dbStudent,
         }),
       );

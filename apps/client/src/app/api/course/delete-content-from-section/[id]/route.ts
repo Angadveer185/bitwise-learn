@@ -6,16 +6,18 @@ export async function DELETE(
 ) {
   try {
     const { id } = await context.params;
-    const token = req.cookies.get("accessToken")?.value;
+    const token = req.cookies.get("token") || "";
+    if (!token) throw new Error("Token not found");
+    const cookieHeader = req.headers.get("cookie");
 
     const res = await fetch(
       `${process.env.BACKEND_URL}/api/v1/courses/delete-content/${id}`,
       {
-        method: "DELETE",
         headers: {
-          Authorization: token || "",
+          Cookie: cookieHeader || "",
         },
-      },
+        credentials: "include",
+      }
     );
 
     const data = await res.json();

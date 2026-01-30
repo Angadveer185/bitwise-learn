@@ -3,14 +3,17 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
-    const token = req.cookies.get("accessToken")?.value;
+    const token = req.cookies.get("token") || "";
+    if (!token) throw new Error("Token not found");
+    const cookieHeader = req.headers.get("cookie");
 
     const res = await axiosInstance.get(
       `${process.env.BACKEND_URL}/api/v1/courses/get-all-course-progress`,
       {
         headers: {
-          Authorization: token ? `Bearer ${token}` : "",
+          Cookie: cookieHeader || "",
         },
+        withCredentials: true,
       },
     );
 

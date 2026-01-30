@@ -13,7 +13,9 @@ export async function POST(
         { status: 400 },
       );
     }
-    const token = req.headers.get("authorization");
+    const token = req.cookies.get("token") || "";
+    if (!token) throw new Error("Token not found");
+    const cookieHeader = req.headers.get("cookie");
     const formData = await req.formData();
 
     const res = await fetch(
@@ -21,8 +23,9 @@ export async function POST(
       {
         method: "POST",
         headers: {
-          Authorization: token || "",
+          Cookie: cookieHeader || "",
         },
+        credentials: "include",
         body: formData,
       },
     );
