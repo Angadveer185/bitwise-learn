@@ -48,7 +48,11 @@ export default function MarkdownEditor({
         preview={mode}
         hideToolbar={hideToolbar}
         spellCheck
-        className={mode !== "live" ? `${Colors.background.primary} ${Colors.text.primary}` : ""}
+        className={`rounded-lg ${
+          mode !== "live"
+            ? `${Colors.background.primary} ${Colors.text.primary}`
+            : ""
+        }`}
         style={{
           ...THEME_MAP[theme],
           scrollbarWidth: "none",

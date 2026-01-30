@@ -3,6 +3,9 @@
 import { runCode, submitCode } from "@/api/problems/run-code";
 import { Editor } from "@monaco-editor/react";
 import React, { useEffect, useMemo, useState } from "react";
+import { Play, Send } from "lucide-react";
+import { useColors } from "@/component/general/(Color Manager)/useColors";
+import { useTheme } from "@/component/general/(Color Manager)/ThemeController";
 
 const languageOptions = [
   { label: "JavaScript", value: "javascript" },
@@ -23,7 +26,8 @@ export default function CodeEditor({
   questionId: string;
   output: any;
 }) {
-  /* Map backend templates by language */
+  const Colors = useColors();
+
   const templatesByLanguage = useMemo(() => {
     const map: Record<string, any> = {};
     template?.forEach((t) => {
@@ -32,43 +36,38 @@ export default function CodeEditor({
     return map;
   }, [template]);
 
-  /* Pick first available language deterministically */
   const defaultLang = template?.length
     ? normalizeLanguage(template[0].language)
     : "python";
+
   const defaultCode = template?.length ? template[0].defaultCode : "";
 
   const [language, setLanguage] = useState(defaultLang);
   const [code, setCode] = useState(defaultCode);
 
-  /* Load defaultCode first, fallback to functionBody */
   const handleRun = async () => {
-    const runLang = language;
-    const currentCode = code;
-
     setOutput([]);
     const res = await runCode({
-      language: runLang,
-      code: currentCode,
+      language,
+      code,
       questionId,
     });
     setOutput(res.testCases);
   };
 
   const handleSubmit = async () => {
-    const runLang = language;
-    const currentCode = code;
-    const res = await submitCode({
-      language: runLang,
-      code: currentCode,
+    await submitCode({
+      language,
+      code,
       questionId,
     });
   };
+
   useEffect(() => {
     const tpl = templatesByLanguage[language];
     if (!tpl) return;
 
-    if (tpl.defaultCode && tpl.defaultCode.trim().length > 0) {
+    if (tpl.defaultCode?.trim()) {
       setCode(tpl.defaultCode);
     } else if (tpl.functionBody) {
       setCode(tpl.functionBody);
@@ -77,53 +76,87 @@ export default function CodeEditor({
     }
   }, [language, templatesByLanguage]);
 
-  const handleLanguageChange = (lang: string) => {
-    setLanguage(lang);
-  };
+  const theme = useTheme();
 
   return (
-    <div className="flex flex-col h-full w-full bg-[#1e1e1e] rounded-lg border border-[#2a2a2a] overflow-hidden">
+    <div
+      className={`
+        flex h-full w-full flex-col overflow-hidden
+        ${Colors.background.secondary}
+        ${Colors.border.defaultThin}
+      `}
+    >
       {/* Top Bar */}
-      <div className="flex items-center justify-between px-4 py-2 bg-[#262626] border-b border-[#333]">
-        <span className="text-sm font-semibold text-gray-300">Code</span>
+      <div
+        className={`
+          flex items-center justify-between px-4 py-2
+          ${Colors.background.primary}
+          ${Colors.border.default}
+        `}
+      >
+        {/* Left */}
+        <div className="flex items-center gap-3">
+          <span className={`text-sm font-semibold ${Colors.text.primary}`}>
+            Code Editor
+          </span>
 
-        <div className="flex">
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className={`
+              rounded-md px-3 py-1.5 text-xs outline-none cursor-pointer
+              ${Colors.background.secondary}
+              ${Colors.text.secondary}
+              ${Colors.border.fadedThin}
+            `}
+          >
+            {languageOptions
+              .filter((lang) => templatesByLanguage[lang.value])
+              .map((lang) => (
+                <option key={lang.value} value={lang.value} className="cursor-pointer">
+                  {lang.label}
+                </option>
+              ))}
+          </select>
+        </div>
+
+        {/* Right */}
+        <div className="flex items-center gap-2">
           <button
             onClick={handleRun}
-            className="px-3 ml-3 rounded-sm bg-secondary-bg text-md font-semibold"
+            className={`
+              flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium
+              ${Colors.background.heroSecondaryFaded}
+              ${Colors.text.primary}
+              hover:opacity-90 transition cursor-pointer
+            `}
           >
+            <Play size={14} />
             Run
           </button>
+
           <button
             onClick={handleSubmit}
-            className="px-3 ml-3 rounded-sm bg-secondary-hero text-md font-semibold"
+            className={`
+              flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium
+              ${Colors.background.heroPrimary}
+              ${Colors.text.black}
+              hover:opacity-90 transition cursor-pointer
+            `}
           >
+            <Send size={14} />
             Submit
           </button>
         </div>
-
-        <select
-          value={language}
-          onChange={(e) => handleLanguageChange(e.target.value)}
-          className="bg-[#1e1e1e] text-gray-300 text-sm px-3 py-1 rounded border border-[#333] outline-none"
-        >
-          {languageOptions
-            .filter((lang) => templatesByLanguage[lang.value])
-            .map((lang) => (
-              <option key={lang.value} value={lang.value}>
-                {lang.label}
-              </option>
-            ))}
-        </select>
       </div>
 
       {/* Editor */}
-      <div className="flex-1 p-4">
+      <div className="flex-1">
         <Editor
           language={language}
           value={code}
           onChange={(value) => setCode(value || "")}
-          theme="vs-dark"
+          theme={theme.theme==="Dark"?"vs-dark":"vs-light"}
           options={{
             fontSize: 14,
             fontFamily: "JetBrains Mono, Fira Code, monospace",
@@ -138,6 +171,7 @@ export default function CodeEditor({
             smoothScrolling: true,
             formatOnPaste: true,
             formatOnType: true,
+            padding: { top: 12 },
           }}
         />
       </div>

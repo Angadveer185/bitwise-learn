@@ -10,49 +10,58 @@ export default function TestCaseSection({ testCases }: { testCases: any[] }) {
   };
 
   return (
-    <div>
-      <div className="space-y-4">
-        {testCases.map((test: any, index: number) => {
-          const parsedInput = parseInput(test.input);
+    <div className="space-y-5">
+      {testCases.map((test: any, index: number) => {
+        const parsedInput = parseInput(test.input);
 
-          return (
-            <div
-              key={test.id}
-              className="bg-neutral-800 border border-neutral-700 rounded-lg p-4"
-            >
-              <p className="text-sm text-gray-400 mb-2">
+        return (
+          <div
+            key={test.id}
+            className="rounded-2xl border border-blue-500/20 bg-neutral-900 overflow-hidden"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-3 bg-neutral-950 border-b border-blue-500/20">
+              <span className="text-xs font-medium tracking-wide text-white uppercase">
                 {test.testType} {index + 1}
-              </p>
+              </span>
+            </div>
 
+            <div className="p-5 space-y-5 text-sm">
               {/* Input */}
-              <div className="text-sm space-y-2">
-                <div>
-                  <span className="font-medium text-gray-200">Input:</span>
-                  <div className="mt-1 space-y-1">
-                    {Object.entries(parsedInput).map(([key, value], idx) => (
-                      <div key={idx} className="text-[#facc15]">
-                        <span className="font-medium text-gray-300">{key}</span>
-                        {" : "}
-                        <span>
-                          {Array.isArray(value)
-                            ? JSON.stringify(value)
-                            : String(value)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+              <div className="rounded-xl bg-neutral-950 border border-blue-500/20">
+                <div className="px-4 py-2 border-b border-blue-500/20 text-xs font-semibold text-blue-400">
+                  Input
                 </div>
 
-                {/* Output */}
-                <div>
-                  <span className="font-medium text-gray-200">Output:</span>{" "}
-                  <code className="text-[#facc15]">{test.output}</code>
+                <div className="p-4 space-y-1 font-mono text-white text-sm">
+                  {Object.entries(parsedInput).map(([key, value], idx) => (
+                    <div key={idx} className="flex gap-2">
+                      <span className="text-white">{key}</span>
+                      <span className="text-white">:</span>
+                      <span className="break-all">
+                        {Array.isArray(value)
+                          ? JSON.stringify(value)
+                          : String(value)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Output */}
+              <div className="rounded-xl bg-neutral-950 border border-blue-500/20">
+                <div className="px-4 py-2 border-b border-blue-500/20 text-xs font-semibold text-blue-400">
+                  Output
+                </div>
+
+                <div className="p-4 font-mono text-white text-sm">
+                  {test.output}
                 </div>
               </div>
             </div>
-          );
-        })}
-      </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

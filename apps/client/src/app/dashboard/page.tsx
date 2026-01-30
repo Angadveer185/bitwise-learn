@@ -1,6 +1,10 @@
-import StudentDashboard from '@/component/Student-Dashboard/StudentDashboard'
-import React from 'react'
+"use client";
+import StudentDashboard from "@/component/Student-Dashboard/StudentDashboard";
+import { useStudent } from "@/store/studentStore";
+import React from "react";
 
 export default function page() {
-  return <StudentDashboard />
+  const studentInfo = useStudent().info;
+  console.log(studentInfo);
+  return <StudentDashboard />;
 }

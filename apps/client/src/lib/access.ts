@@ -2,6 +2,7 @@ export const URL_ACCESS_MAP: Record<string, string[]> = {
   STUDENT: [
     "/courses",
     "/problems",
+    "/problems/:id",
     "/dashboard",
     "/compiler",
     "/assessment",
@@ -84,5 +85,5 @@ export const URL_ACCESS_MAP: Record<string, string[]> = {
     "/admin-dashboard/batches/:batchId",
     "/admin-dashboard/courses",
     "/admin-dashboard/courses/:id",
-  ]
+  ],
 };

@@ -1,12 +1,29 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { match } from "path-to-regexp";
+
 import { URL_ACCESS_MAP } from "./lib/access";
 import { checkJWT } from "./lib/authJwt";
 
-export function proxy(request: NextRequest) {
-  const pathname = request.nextUrl.pathname;
+/**
+ * Matches a pathname against role-based route patterns
+ */
+function isRouteAllowed(pathname: string, routes: string[]) {
+  return routes.some((route) => {
+    const matcher = match(route, {
+      decode: decodeURIComponent,
+      end: true, // exact match, no extra segments
+    });
+    return matcher(pathname);
+  });
+}
 
-  // Public routes
+export function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  /**
+   * Public routes
+   */
   const PUBLIC_ROUTES = [
     "/",
     "/about",
@@ -14,44 +31,70 @@ export function proxy(request: NextRequest) {
     "/student-login",
     "/multi-login",
     "/admin-login",
-    "/api/run"
+    "/api/run",
   ];
+
   if (PUBLIC_ROUTES.includes(pathname)) {
     return NextResponse.next();
   }
-  const roleToken = request.cookies.get("token")?.value
-  const { type: role } = checkJWT(roleToken as string);
-  ;
 
-  // Not logged in
+  /**
+   * Auth check
+   */
+  const token = request.cookies.get("token")?.value;
+  const jwtData = token ? checkJWT(token) : null;
+  const role = jwtData?.type;
+
   if (!role) {
     return NextResponse.redirect(new URL("/student-login", request.url));
   }
 
+  /**
+   * Resolve allowed routes
+   */
   let allowedRoutes = URL_ACCESS_MAP[role];
+
+  // SUPERADMIN inherits ADMIN permissions
   if (role === "SUPERADMIN") {
-    URL_ACCESS_MAP["ADMIN"]
+    allowedRoutes = URL_ACCESS_MAP["ADMIN"];
   }
 
   if (!allowedRoutes) {
-    if (role === "ADMIN" || role === "SUPERADMIN") {
-      return NextResponse.redirect(new URL("/admin-dashboard", request.url));
-    } else if (role === "TEACHER") {
-      return NextResponse.redirect(new URL("/teacher-dashboard", request.url));
-    } else if (role === "STUDENT") {
-      return NextResponse.redirect(new URL("/student-dashboard", request.url));
-    } else if (role === "INSTITUTE") {
-      return NextResponse.redirect(new URL("/institute-dashboard", request.url));
-    } else if (role === "VENDOR") {
-      return NextResponse.redirect(new URL("/vendor-dashboard", request.url));
-    }
+    return NextResponse.redirect(new URL("/student-login", request.url));
   }
 
-  if (allowedRoutes.includes(pathname)) {
+  /**
+   * Authorization check
+   */
+  if (isRouteAllowed(pathname, allowedRoutes)) {
     return NextResponse.next();
   }
 
-  return NextResponse.redirect(new URL("/dashboard", request.url));
+  /**
+   * Fallback redirects per role
+   */
+  switch (role) {
+    case "ADMIN":
+    case "SUPERADMIN":
+      return NextResponse.redirect(new URL("/admin-dashboard", request.url));
+
+    case "TEACHER":
+      return NextResponse.redirect(new URL("/teacher-dashboard", request.url));
+
+    case "STUDENT":
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+
+    case "INSTITUTION":
+      return NextResponse.redirect(
+        new URL("/institution-dashboard", request.url),
+      );
+
+    case "VENDOR":
+      return NextResponse.redirect(new URL("/vendor-dashboard", request.url));
+
+    default:
+      return NextResponse.redirect(new URL("/", request.url));
+  }
 }
 
 export const config = {

@@ -62,6 +62,14 @@ function TabsTrigger({
         </span>
       )}
 
+            {/* Bottom indicator */}
+      <span
+        className={cn(
+          "absolute bottom-0 left-1/2 h-0.5 w-0 -translate-x-1/2 rounded-full bg-blue-400 transition-all duration-300",
+          "group-data-[state=active]:w-10",
+        )}
+      />
+
       <span className="relative z-10">{children}</span>
     </TabsPrimitive.Trigger>
   );

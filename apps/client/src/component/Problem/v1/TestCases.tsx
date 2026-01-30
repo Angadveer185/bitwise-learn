@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { useColors } from "@/component/general/(Color Manager)/useColors";
 
 type TestCase = {
   id: string;
@@ -16,9 +17,10 @@ function TestCases({
   testCases?: TestCase[];
   output: any[];
 }) {
-  const [mode, setMode] = useState<"example" | "custom" | "output">("example");
+  const Colors = useColors();
+
+  const [mode, setMode] = useState<"example" | "output">("example");
   const [activeCase, setActiveCase] = useState(0);
-  const [customInput, setCustomInput] = useState("");
 
   const exampleCases = useMemo(
     () => testCases.filter((t) => t.testType === "EXAMPLE"),
@@ -36,77 +38,102 @@ function TestCases({
   };
 
   return (
-    <div className="h-full flex flex-col bg-neutral-900 border-t border-neutral-700 text-sm">
+    <div
+      className={`
+        h-full flex flex-col
+        ${Colors.background.secondary}
+        ${Colors.border.default}
+        text-sm
+      `}
+    >
       {/* Top Tabs */}
-      <div className="flex gap-6 px-4 py-2 border-b border-neutral-700">
-        <button
-          onClick={() => setMode("example")}
-          className={`pb-1 ${
-            mode === "example"
-              ? "text-white border-b-2 border-indigo-500"
-              : "text-gray-400"
-          }`}
-        >
-          Example
-        </button>
+      <div
+        className={`
+          flex gap-6 px-4 py-2
+          ${Colors.background.primary}
+          ${Colors.border.default}
+        `}
+      >
+        {["example", "output"].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => {
+              setMode(tab as any);
+              setActiveCase(0);
+            }}
+            className={`
+              relative pb-1 text-sm font-medium transition
+              ${
+                mode === tab
+                  ? `${Colors.text.primary}`
+                  : `${Colors.text.secondary}`
+              }
+            `}
+          >
+            {tab === "example" ? "Example" : "Output"}
 
-        <button
-          onClick={() => setMode("output")}
-          className={`pb-1 ${
-            mode === "output"
-              ? "text-white border-b-2 border-indigo-500"
-              : "text-gray-400"
-          }`}
-        >
-          Output
-        </button>
+            {mode === tab && (
+              <span
+                className={`
+                  absolute left-0 -bottom-[9px] h-[2px] w-full
+                  ${Colors.background.heroPrimary}
+                `}
+              />
+            )}
+          </button>
+        ))}
       </div>
 
       {/* Content */}
-      <div
-        className="flex-1 overflow-y-auto"
-        style={{
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-          //@ts-ignore
-          WebkitScrollbar: { display: "none" },
-        }}
-      >
-        {/* ================= EXAMPLE TESTCASES ================= */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {/* ================= EXAMPLES ================= */}
         {mode === "example" && (
-          <div className="p-4 space-y-4">
-            {/* Testcase Tabs */}
-            <div className="flex gap-2 overflow-x-auto">
+          <>
+            {/* Testcase Selector */}
+            <div className="flex gap-2 overflow-x-auto pb-1">
               {exampleCases.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setActiveCase(index)}
-                  className={`px-3 py-1 rounded-md text-xs border ${
-                    activeCase === index
-                      ? "bg-neutral-700 border-neutral-500 text-white"
-                      : "bg-neutral-800 border-neutral-700 text-gray-400 hover:text-white"
-                  }`}
+                  className={`
+                    px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap
+                    transition
+                    ${
+                      activeCase === index
+                        ? `${Colors.background.heroSecondaryFaded} ${Colors.text.primary}`
+                        : `${Colors.background.primary} ${Colors.text.secondary} hover:${Colors.background.special}`
+                    }
+                    ${Colors.border.fadedThin}
+                  `}
                 >
                   Testcase {index + 1}
                 </button>
               ))}
             </div>
 
-            {/* Testcase Body */}
+            {/* Body */}
             {currentTest ? (
               <div className="space-y-4">
                 {/* Input */}
                 <div>
-                  <p className="text-gray-400 mb-1">Input</p>
-                  <div className="bg-neutral-800 border border-neutral-700 rounded-lg p-3 space-y-1">
+                  <p className={`mb-1 text-xs ${Colors.text.secondary}`}>
+                    Input
+                  </p>
+                  <div
+                    className={`
+                      rounded-lg p-3 space-y-1 font-mono text-sm
+                      ${Colors.background.primary}
+                      ${Colors.border.fadedThin}
+                    `}
+                  >
                     {Object.entries(parseInput(currentTest.input)).map(
                       ([key, value], idx) => (
-                        <div key={idx} className="text-[#facc15]">
-                          <span className="font-medium text-gray-300">
+                        <div key={idx}>
+                          <span className={`${Colors.text.primary}`}>
                             {key}
                           </span>
                           {" : "}
-                          <span>
+                          <span className={Colors.text.special}>
                             {Array.isArray(value)
                               ? JSON.stringify(value)
                               : String(value)}
@@ -119,37 +146,49 @@ function TestCases({
 
                 {/* Expected Output */}
                 <div>
-                  <p className="text-gray-400 mb-1">Expected Output</p>
-                  <pre className="bg-neutral-800 border border-neutral-700 rounded-lg p-3 text-[#facc15] overflow-x-auto">
+                  <p className={`mb-1 text-xs ${Colors.text.secondary}`}>
+                    Expected Output
+                  </p>
+                  <pre
+                    className={`
+                      rounded-lg p-3 text-sm font-mono overflow-x-auto
+                      ${Colors.background.primary}
+                      ${Colors.border.fadedThin}
+                      ${Colors.text.special}
+                    `}
+                  >
                     {currentTest.output}
                   </pre>
                 </div>
               </div>
             ) : (
-              <p className="text-gray-400">No test cases available.</p>
+              <p className={Colors.text.secondary}>No test cases available.</p>
             )}
-          </div>
+          </>
         )}
 
+        {/* ================= OUTPUT ================= */}
         {mode === "output" && (
-          <div className="p-4 space-y-4">
+          <>
             {output.length === 0 ? (
-              <p className="text-gray-400">No output available.</p>
+              <p className={Colors.text.secondary}>No output available.</p>
             ) : (
               <>
-                {/* Tabs */}
-                <div className="flex gap-2 overflow-x-auto mb-4">
+                {/* Selector */}
+                <div className="flex gap-2 overflow-x-auto pb-1">
                   {output.map((o, index) => (
                     <button
                       key={index}
                       onClick={() => setActiveCase(index)}
-                      className={`px-3 py-1 rounded-md text-xs border ${
-                        o.isCorrect ? "bg-green-700/40" : "bg-red-700/40"
-                      } ${
-                        activeCase === index
-                          ? "border-neutral-500 text-white"
-                          : "border-neutral-700 text-gray-400 hover:text-white"
-                      }`}
+                      className={`
+                        px-3 py-1.5 rounded-md text-xs font-medium
+                        ${Colors.border.fadedThin}
+                        ${
+                          activeCase === index
+                            ? `${Colors.background.heroSecondaryFaded} ${Colors.text.primary}`
+                            : `${Colors.background.primary} ${Colors.text.secondary}`
+                        }
+                      `}
                     >
                       Test {index + 1}
                     </button>
@@ -157,89 +196,119 @@ function TestCases({
                 </div>
 
                 {/* Active Output */}
-                {output[activeCase] &&
-                  (() => {
-                    const o = output[activeCase];
-                    const parsedInput = parseInput(o.input);
+                {output[activeCase] && (() => {
+                  const o = output[activeCase];
+                  const parsedInput = parseInput(o.input);
 
-                    return (
-                      <div className="p-3 border border-neutral-700 rounded-lg bg-neutral-800 space-y-3">
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-400 text-xs">
-                            Testcase {activeCase + 1}
-                          </span>
-                          <span
-                            className={`text-xs font-semibold ${
-                              o.isCorrect ? "text-green-400" : "text-red-400"
-                            }`}
-                          >
-                            {o.isCorrect ? "✔ Passed" : "✘ Failed"}
-                          </span>
+                  return (
+                    <div
+                      className={`
+                        rounded-xl p-4 space-y-4
+                        ${Colors.background.primary}
+                        ${Colors.border.fadedThin}
+                      `}
+                    >
+                      <div className="flex justify-between items-center">
+                        <span className={`text-xs ${Colors.text.secondary}`}>
+                          Testcase {activeCase + 1}
+                        </span>
+                        <span
+                          className={`text-xs font-semibold ${
+                            o.isCorrect
+                              ? Colors.text.special
+                              : Colors.text.secondary
+                          }`}
+                        >
+                          {o.isCorrect ? "Passed" : "Failed"}
+                        </span>
+                      </div>
+
+                      {/* Input */}
+                      <div>
+                        <p className={`mb-1 text-xs ${Colors.text.secondary}`}>
+                          Input
+                        </p>
+                        <div
+                          className={`
+                            rounded-md p-2 font-mono text-sm
+                            ${Colors.background.secondary}
+                            ${Colors.border.fadedThin}
+                          `}
+                        >
+                          {Object.entries(parsedInput).map(([key, value], i) => (
+                            <div key={i}>
+                              <span className={Colors.text.primary}>
+                                {key}
+                              </span>
+                              {" : "}
+                              <span className={Colors.text.special}>
+                                {Array.isArray(value)
+                                  ? JSON.stringify(value)
+                                  : String(value)}
+                              </span>
+                            </div>
+                          ))}
                         </div>
+                      </div>
 
-                        {/* Input */}
-                        <div>
-                          <p className="text-gray-400 mb-1 text-xs">Input</p>
-                          <div className="bg-neutral-900 border border-neutral-700 rounded-md p-2 text-sm">
-                            {Object.entries(parsedInput).map(
-                              ([key, value], i) => (
-                                <div key={i} className="text-[#facc15]">
-                                  <span className="font-medium text-gray-300">
-                                    {key}
-                                  </span>
-                                  {" : "}
-                                  <span>
-                                    {Array.isArray(value)
-                                      ? JSON.stringify(value)
-                                      : String(value)}
-                                  </span>
-                                </div>
-                              ),
-                            )}
-                          </div>
-                        </div>
+                      {/* Expected */}
+                      <div>
+                        <p className={`mb-1 text-xs ${Colors.text.secondary}`}>
+                          Expected Output
+                        </p>
+                        <pre
+                          className={`
+                            rounded-md p-2 font-mono text-sm
+                            ${Colors.background.secondary}
+                            ${Colors.border.fadedThin}
+                            ${Colors.text.primary}
+                          `}
+                        >
+                          {o.expectedOutput}
+                        </pre>
+                      </div>
 
-                        {/* Expected Output */}
-                        <div>
-                          <p className="text-gray-400 mb-1 text-xs">
-                            Expected Output
-                          </p>
-                          <pre className="bg-neutral-900 border border-neutral-700 rounded-md p-2 text-gray-300 text-sm">
-                            {o.expectedOutput}
-                          </pre>
-                        </div>
+                      {/* Actual */}
+                      <div>
+                        <p className={`mb-1 text-xs ${Colors.text.secondary}`}>
+                          Your Output
+                        </p>
+                        <pre
+                          className={`
+                            rounded-md p-2 font-mono text-sm
+                            ${Colors.background.secondary}
+                            ${Colors.border.fadedThin}
+                            ${o.isCorrect ? Colors.text.special : Colors.text.secondary}
+                          `}
+                        >
+                          {o.actualOutput || "—"}
+                        </pre>
+                      </div>
 
-                        {/* Actual Output */}
+                      {/* Error */}
+                      {o.stderr && (
                         <div>
-                          <p className="text-gray-400 mb-1 text-xs">
-                            Your Output
+                          <p className={`mb-1 text-xs ${Colors.text.secondary}`}>
+                            Error
                           </p>
                           <pre
-                            className={`bg-neutral-900 border rounded-md p-2 text-sm ${
-                              o.isCorrect
-                                ? "border-green-600 text-green-400"
-                                : "border-red-600 text-red-400"
-                            }`}
+                            className={`
+                              rounded-md p-2 font-mono text-sm
+                              ${Colors.background.secondary}
+                              ${Colors.border.specialThin}
+                              ${Colors.text.secondary}
+                            `}
                           >
-                            {o.actualOutput || "—"}
+                            {o.stderr}
                           </pre>
                         </div>
-
-                        {/* Stderr */}
-                        {o.stderr && o.stderr.trim() !== "" && (
-                          <div>
-                            <p className="text-gray-400 mb-1 text-xs">Error</p>
-                            <pre className="bg-neutral-900 border border-red-500 rounded-md p-2 text-red-400 overflow-x-auto text-sm">
-                              {o.stderr}
-                            </pre>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })()}
+                      )}
+                    </div>
+                  );
+                })()}
               </>
             )}
-          </div>
+          </>
         )}
       </div>
     </div>

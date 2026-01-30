@@ -76,6 +76,7 @@ export default function HeroSection() {
   const [filteredData, setFilteredData] = useState([]);
 
   const vendor = useVendor((state) => state.info);
+  console.log(vendor);
   const setVendor = useVendor((state) => state.setData);
 
   // FORCE UI TO WORK

@@ -6,6 +6,8 @@ import Description from "./Description";
 import Solution from "./Solution";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/component/ui/tabs";
 import Submission from "./Submission";
+import { useRouter } from "next/navigation";
+import { ChevronLeft } from "lucide-react";
 
 function V1Problem({ data }: any) {
   /* Sidebar */
@@ -18,6 +20,7 @@ function V1Problem({ data }: any) {
   const [editorRatio, setEditorRatio] = useState(60); // out of 100
   const rightPanelRef = useRef<HTMLDivElement>(null);
   const isEditorResizing = useRef(false);
+  const router = useRouter();
 
   /* Sidebar resize */
   const handleSidebarMouseDown = () => {
@@ -77,7 +80,24 @@ function V1Problem({ data }: any) {
         style={{ width: sidebarWidth }}
       >
         <Tabs defaultValue="description" className="flex flex-col h-full">
-          <TabsList className="border-b w-full border-neutral-700 bg-neutral-900 px-4">
+          <TabsList className="w-full bg-neutral-900 px-4">
+            <div className="px-6 pt-4">
+              <button
+                onClick={() => router.push("/problems")}
+                className="
+      group inline-flex items-center gap-2
+      text-sm font-medium
+      text-blue-400
+      hover:text-blue-300
+      transition-colors
+    "
+              >
+                <ChevronLeft
+                  size={22}
+                  className="cursor-pointer"
+                />
+              </button>
+            </div>
             <TabsTrigger value="description" className="">
               Description
             </TabsTrigger>
