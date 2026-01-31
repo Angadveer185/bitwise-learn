@@ -1,171 +1,80 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getAllStats } from "@/api/admins/get-admin-stats";
 import { User } from "lucide-react";
-import Link from "next/link";
 import { useColors } from "@/component/general/(Color Manager)/useColors";
-
-/* ---------------- TYPES ---------------- */
-
-type StatsMap = Record<string, number>;
-
-type HeaderProps = {
-  name: string;
-  email: string;
-};
-
-type EntityTabsProps = {
-  fields: string[];
-  data: StatsMap;
-};
-
-const Colors = useColors();
+import { useInstitution } from "@/store/institutionStore";
+import { getAllBatches } from "@/api/batches/get-all-batches";
+import DashboardInfo from "@/component/AllBatches/v1/DashboardInfo";
+import Filter from "@/component/general/Filter";
 
 /* ---------------- HEADER ---------------- */
-function Header({ name, email }: HeaderProps) {
+
+function Header() {
+  const Colors = useColors();
+  const institution = useInstitution();
+
+  if (!institution.info) return null;
+
+  const { name, email } = institution.info.data;
+
   return (
     <div className="flex justify-between p-4">
+      {/* Greeting */}
       <div>
-        <span className={`text-5xl ${Colors.text.special}`}>Greetings,</span>{" "}
-        <span className={`text-5xl ${Colors.text.primary}`}>Institute Manager</span>
-        <div className="mt-2 text-lg">
-          <span className={`${Colors.text.primary}`}>Enjoy managing</span>{" "}
-          <span className={`${Colors.text.special}`}>B</span>
-          <span className={`${Colors.text.primary}`}>itwise Learn</span>
-        </div>
+        <h1 className="text-5xl font-semibold">
+          <span className={Colors.text.special}>Greetings, </span>
+          <span className={Colors.text.primary}>{name}</span>
+        </h1>
+
+        <p className={`mt-2 text-lg ${Colors.text.primary}`}>
+          Enjoy managing{" "}
+          <span className={Colors.text.special}>Bitwise Learn</span>
+        </p>
       </div>
 
-      <div className="flex mr-11">
-        <div className="p-8 bg-white rounded-full flex justify-center items-center">
-          <User size={35} color="black" />
+      {/* Profile */}
+      <div className="flex items-center gap-4">
+        <div className="p-6 rounded-full bg-white flex items-center justify-center">
+          <User size={32} />
         </div>
-        <div className={` ${Colors.text.primary} flex flex-col mt-3 ml-4`}>
-          <h1 className={`${Colors.text.primary} text-3xl`}>{name}</h1>
-          <p>{email}</p>
+
+        <div className="leading-tight">
+          <p className={`text-2xl ${Colors.text.primary}`}>{name}</p>
+          <p className={Colors.text.secondary}>{email}</p>
         </div>
       </div>
     </div>
   );
 }
 
-/* ---------------- URL MAP ---------------- */
-const URL_MAP: Record<string, string> = {
-  admins: "/admin-dashboard/admins",
-  institutions: "/admin-dashboard/institutions",
-  batches: "/admin-dashboard/batches",
-  vendors: "/admin-dashboard/vendors",
-};
-
 /* ---------------- HERO SECTION ---------------- */
+
 export default function HeroSection() {
-  const [tabs, setTabs] = useState<StatsMap>({});
-  const [fields, setFields] = useState<string[]>([]);
+  const institution = useInstitution();
+  const Colors = useColors();
+
+  const institutionId = institution.info?.data.id;
+  const [batches, setBatches] = useState<any[]>([]);
+  const [filteredBatches, setFilteredBatches] = useState<any[]>([]);
 
   useEffect(() => {
-    getAllStats(setTabs);
-  }, []);
+    if (!institutionId) return;
 
-  useEffect(() => {
-    setFields(Object.keys(tabs));
-  }, [tabs]);
+    getAllBatches(setBatches, institutionId);
+  }, [institutionId]);
 
   return (
-    <>
-      <Header name="Britto Anand" email="brittoanand@example.com" />
+    <div className="space-y-8">
+      <Header />
 
-      <EntityTabs fields={fields} data={tabs} />
-    </>
-  );
-}
-
-/* ---------------- ENTITY TABS ---------------- */
-import { School, Handshake, ShieldCheck } from "lucide-react";
-
-const ENTITY_META: Record<
-  string,
-  {
-    icon: any;
-    label: string;
-    tagline: string;
-    accent: string;
-  }
-> = {
-  institutions: {
-    icon: School,
-    label: "Institutions",
-    tagline: "Education centers associated with us",
-    accent: "from-blue-500/20 to-blue-500/5",
-  },
-  vendors: {
-    icon: Handshake,
-    label: "Vendors",
-    tagline: "Industry trainers who got involved",
-    accent: "from-emerald-500/20 to-emerald-500/5",
-  },
-  admins: {
-    icon: ShieldCheck,
-    label: "Admins",
-    tagline: "People maintaining our platform",
-    accent: "from-orange-500/20 to-orange-500/5",
-  },
-};
-
-function EntityTabs({ fields, data }: EntityTabsProps) {
-  if (!fields.length) {
-    return <p className="text-white/60 text-center mt-6">Loading dashboard…</p>;
-  }
-
-  return (
-    <div className="mx-20 mt-8 grid grid-cols-1 gap-3">
-      {fields.map((field) => {
-        const meta = ENTITY_META[field];
-        const href = URL_MAP[field];
-        if (!meta || !href) return null;
-
-        const Icon = meta.icon;
-
-        return (
-          <Link
-            key={field}
-            href={href}
-            className={`
-                            group relative rounded-2xl p-6
-              ${Colors.background.secondary} overflow-hidden
-              hover:shadow-2xl hover:-translate-y-1
-              transition-all duration-300
-              `}
-          >
-            {/* Gradient depth layer */}
-            <div
-              className={`absolute inset-0 bg-gradient-to-br ${meta.accent} opacity-0 group-hover:opacity-100 transition`}
-            />
-
-            {/* Content */}
-            <div className="relative z-10 flex flex-col gap-4">
-              {/* Icon + Count */}
-              <div className="flex items-center justify-between">
-                <div className={`p-3 rounded-xl ${Colors.background.primary}`}>
-                  <Icon className={`text-primaryBlue`} size={28} />
-                </div>
-                <span className={`text-3xl font-bold ${Colors.text.primary}`}>
-                  {data[field] ?? 0}
-                </span>
-              </div>
-
-              {/* Text */}
-              <div>
-                <h3 className={`text-lg font-semibold ${Colors.text.primary}`}>
-                  {meta.label}
-                </h3>
-                <p className={`text-sm mt-1 leading-snug ${Colors.text.secondary}`}>
-                  {meta.tagline}
-                </p>
-              </div>
-            </div>
-          </Link>
-        );
-      })}
+      <div className="flex flex-col gap-10 px-4">
+        <div className="flex flex-col gap-3">
+        <h1 className={`${Colors.text.special} text-3xl font-semibold`}>Batches</h1>
+        <Filter data={batches} setFilteredData={setFilteredBatches} />
+        </div>
+        <DashboardInfo data={filteredBatches} />
+      </div>
     </div>
   );
 }

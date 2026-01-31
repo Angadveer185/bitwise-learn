@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 interface Institute {
+  data: {
   email: string;
   id: string;
   name: string;
@@ -9,6 +10,7 @@ interface Institute {
   tagline: string;
   websiteLink: string;
   phoneNumber: string;
+  }
 }
 interface InstituteStore {
   info: Institute | null;

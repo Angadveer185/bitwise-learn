@@ -2,18 +2,22 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 interface Student {
-  email: string;
-  name: string;
-  rollNumber: string;
-  batch: {
-    batchname: string;
-    branch: string;
-    batchEndYear: string;
-  };
-  insitution: {
+  data: {
+    email: string;
     name: string;
-    tagline: string;
-    websiteLink: string;
+    rollNumber: string;
+    batch: {
+      id: string;
+      batchname: string;
+      branch: string;
+      batchEndYear: string;
+    };
+    insitution: {
+      id: string;
+      name: string;
+      tagline: string;
+      websiteLink: string;
+    };
   };
 }
 

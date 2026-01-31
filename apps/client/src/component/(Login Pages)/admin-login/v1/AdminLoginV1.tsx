@@ -242,7 +242,7 @@ export default function AdminLoginV1() {
           {step === "RESET" && (
             <ResetPasswordForm
               role={ROLE}
-              onSuccess={() => router.push("/admin-dashboard")}
+              onSuccess={() => router.push("/admin-login")}
             />
           )}
         </motion.div>

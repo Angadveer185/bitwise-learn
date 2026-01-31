@@ -145,6 +145,7 @@ export default function AdminLoginV1() {
         data: { email, password, role: role },
       });
       toast.success("login successful");
+      router.push(`/${role.toLowerCase()}-dashboard`);
     } catch (err) {
       setError("Invalid email or password");
       toast.error("login failed");
@@ -287,7 +288,7 @@ export default function AdminLoginV1() {
             email={email}
             onVerified={() => setStep("RESET")} />}
           {step === "RESET" && <ResetPasswordForm role={role}
-            onSuccess={() => router.push("/dashboard")} />}
+            onSuccess={() => router.push("/multi-login")} />}
         </motion.div>
 
       </div>

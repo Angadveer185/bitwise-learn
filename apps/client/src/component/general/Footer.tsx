@@ -72,7 +72,7 @@ export default function Footer() {
             Logins
           </h4>
           <ul className={`space-y-2 ${Colors.text.secondary}`}>
-            {["Vendor", "Institution", "Teacher", "Student"].map((item) => (
+            {["Vendor", "Institution", "Teacher"].map((item) => (
               <li key={item}>
                 <Link
                   href={`/multi-login`}

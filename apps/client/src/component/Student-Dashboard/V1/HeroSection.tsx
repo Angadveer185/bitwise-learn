@@ -1,36 +1,53 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getAllStats } from "@/api/admins/get-admin-stats";
-import { User } from "lucide-react";
-import Link from "next/link";
+import { User, Clock, Search } from "lucide-react";
 import { useColors } from "@/component/general/(Color Manager)/useColors";
+import { useStudent } from "@/store/studentStore";
+import { allBatchCourses } from "@/api/courses/course/enrollments/get-all-batch-courses";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 /* ---------------- TYPES ---------------- */
 
-type StatsMap = Record<string, number>;
+type CourseLevel = "Basic" | "Intermediate" | "Advanced";
 
-type HeaderProps = {
+interface Course {
+  id: string;
   name: string;
-  email: string;
-};
+  description: string;
+  isPublished: string;
+  level: CourseLevel;
+  duration?: string;
+  thumbnail?: string | null;
+  instructorName: string;
+}
 
-type EntityTabsProps = {
-  fields: string[];
-  data: StatsMap;
-};
+/* ---------------- HELPERS ---------------- */
 
-const Colors = useColors();
+function normalizeLevel(level: string): CourseLevel {
+  switch (level) {
+    case "BASIC":
+      return "Basic";
+    case "INTERMEDIATE":
+      return "Intermediate";
+    case "ADVANCED":
+      return "Advanced";
+    default:
+      return "Basic";
+  }
+}
 
 /* ---------------- HEADER ---------------- */
-function Header({ name, email }: HeaderProps) {
+function Header({ name, email }: { name: string; email: string }) {
+  const Colors = useColors();
   return (
     <div className="flex justify-between p-4">
       <div>
         <span className={`text-5xl ${Colors.text.special}`}>Greetings,</span>{" "}
-        <span className={`text-5xl ${Colors.text.primary}`}>Student</span>
+        <span className={`text-5xl ${Colors.text.primary}`}>{name}</span>
         <div className="mt-2 text-lg">
-          <span className={`${Colors.text.primary}`}>Enjoy managing</span>{" "}
+          <span className={`${Colors.text.primary}`}>Welcome back to</span>{" "}
           <span className={`${Colors.text.special}`}>B</span>
           <span className={`${Colors.text.primary}`}>itwise Learn</span>
         </div>
@@ -49,123 +66,253 @@ function Header({ name, email }: HeaderProps) {
   );
 }
 
-/* ---------------- URL MAP ---------------- */
-const URL_MAP: Record<string, string> = {
-  admins: "/admin-dashboard/admins",
-  institutions: "/admin-dashboard/institutions",
-  batches: "/admin-dashboard/batches",
-  vendors: "/admin-dashboard/vendors",
-};
-
 /* ---------------- HERO SECTION ---------------- */
 export default function HeroSection() {
-  const [tabs, setTabs] = useState<StatsMap>({});
-  const [fields, setFields] = useState<string[]>([]);
+  const Colors = useColors();
+  const student = useStudent();
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredCourses = courses.filter((course) =>
+    course.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+
+  const batchID = student.info?.data?.batch?.id;
 
   useEffect(() => {
-    getAllStats(setTabs);
-  }, []);
+    if (!batchID) return;
 
-  useEffect(() => {
-    setFields(Object.keys(tabs));
-  }, [tabs]);
+    const fetchCourses = async () => {
+      try {
+        setLoading(true);
+        const data = await allBatchCourses(batchID);
+
+        const normalized: Course[] = data.map((course: any) => ({
+          ...course,
+          level: normalizeLevel(course.level),
+        }));
+
+        setCourses(normalized);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, [batchID]);
 
   return (
     <>
-      <Header name="Britto Anand" email="brittoanand@example.com" />
+      <Header
+        name={student.info?.data.name ?? "Student"}
+        email={student.info?.data.email ?? ""}
+      />
 
-      <EntityTabs fields={fields} data={tabs} />
+      <section className="px-6 mt-10">
+        {loading && (
+          <p className={`${Colors.text.secondary} text-center`}>
+            Loading courses…
+          </p>
+        )}
+
+        {!loading && courses.length === 0 && (
+          <p className={`${Colors.text.secondary} text-center`}>
+            No courses available for your batch.
+          </p>
+        )}
+
+        <div className=" flex flex-col gap-6">
+          <div className="flex flex-col gap-3">
+            <h1 className={`${Colors.text.special} text-3xl font-semibold`}>
+              Courses
+            </h1>
+
+            <div className="w-full flex">
+              <div className="relative mb-3 w-1/3">
+                <Search
+                  size={16}
+                  className={`absolute left-3 top-1/2 -translate-y-1/2 ${Colors.text.special}`}
+                />
+                <input
+                  placeholder="Search..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className={`w-full pl-9 pr-3 py-2 ${Colors.background.secondary} ${Colors.text.primary} rounded-lg outline-none focus:ring-1 focus:ring-primaryBlue`}
+                />
+              </div>
+            </div>
+          </div>
+          {!loading && filteredCourses.length === 0 && courses.length > 0 && (
+            <p className={`${Colors.text.secondary} text-center`}>
+              No courses match your search.
+            </p>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+            {filteredCourses.map((course) => (
+              <CourseCard key={course.id} course={course} />
+            ))}
+          </div>
+        </div>
+      </section>
     </>
   );
 }
 
-/* ---------------- ENTITY TABS ---------------- */
-import { School, Handshake, ShieldCheck } from "lucide-react";
+function CourseCard({ course }: { course: Course }) {
+  const Colors = useColors();
+  const router = useRouter();
 
-const ENTITY_META: Record<
-  string,
-  {
-    icon: any;
-    label: string;
-    tagline: string;
-    accent: string;
-  }
-> = {
-  institutions: {
-    icon: School,
-    label: "Institutions",
-    tagline: "Education centers associated with us",
-    accent: "from-blue-500/20 to-blue-500/5",
-  },
-  vendors: {
-    icon: Handshake,
-    label: "Vendors",
-    tagline: "Industry trainers who got involved",
-    accent: "from-emerald-500/20 to-emerald-500/5",
-  },
-  admins: {
-    icon: ShieldCheck,
-    label: "Admins",
-    tagline: "People maintaining our platform",
-    accent: "from-orange-500/20 to-orange-500/5",
-  },
-};
-
-function EntityTabs({ fields, data }: EntityTabsProps) {
-  if (!fields.length) {
-    return <p className="text-white/60 text-center mt-6">Loading dashboard…</p>;
-  }
+  const levelStyles =
+    course.level === "Basic"
+      ? Colors.text.primary
+      : course.level === "Intermediate"
+        ? "text-yellow-400"
+        : "text-red-400";
 
   return (
-    <div className="mx-20 mt-8 grid grid-cols-1 gap-3">
-      {fields.map((field) => {
-        const meta = ENTITY_META[field];
-        const href = URL_MAP[field];
-        if (!meta || !href) return null;
+    <div
+      onClick={() => router.push(`/courses/${course.id}`)}
+      className={`${Colors.background.secondary} rounded-xl p-4 flex flex-col gap-3 cursor-pointer
+      hover:scale-[1.02]
+      border border-transparent hover:border-[#64ACFF]/40
+      transition-all duration-300`}
+    >
+      <div
+        className={`${Colors.background.primary} relative w-full aspect-video rounded-lg overflow-hidden`}
+      >
+        <Image
+          src={course.thumbnail || "/images/jsCard.jpg"}
+          alt={course.name}
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, 33vw"
+        />
+      </div>
 
-        const Icon = meta.icon;
+      <h3 className={`${Colors.text.primary} text-lg font-semibold`}>
+        {course.name}
+      </h3>
 
-        return (
-          <Link
-            key={field}
-            href={href}
-            className={`
-                            group relative rounded-2xl p-6
-              ${Colors.background.secondary} overflow-hidden
-              hover:shadow-2xl hover:-translate-y-1
-              transition-all duration-300
-              `}
-          >
-            {/* Gradient depth layer */}
-            <div
-              className={`absolute inset-0 bg-gradient-to-br ${meta.accent} opacity-0 group-hover:opacity-100 transition`}
-            />
+      <div className="flex items-center justify-between text-xs">
+        <span
+          className={`px-2 py-0.5 rounded-md ${Colors.background.primary} font-medium ${levelStyles}`}
+        >
+          {course.level.charAt(0) + course.level.slice(1).toLowerCase()}
+        </span>
 
-            {/* Content */}
-            <div className="relative z-10 flex flex-col gap-4">
-              {/* Icon + Count */}
-              <div className="flex items-center justify-between">
-                <div className={`p-3 rounded-xl ${Colors.background.primary}`}>
-                  <Icon className={`text-primaryBlue`} size={28} />
-                </div>
-                <span className={`text-3xl font-bold ${Colors.text.primary}`}>
-                  {data[field] ?? 0}
-                </span>
-              </div>
+        {course.duration && (
+          <span className={`${Colors.text.secondary} flex items-center gap-2`}>
+            <Clock size={18} />
+            {course.duration}
+          </span>
+        )}
+      </div>
 
-              {/* Text */}
-              <div>
-                <h3 className={`text-lg font-semibold ${Colors.text.primary}`}>
-                  {meta.label}
-                </h3>
-                <p className={`text-sm mt-1 leading-snug ${Colors.text.secondary}`}>
-                  {meta.tagline}
-                </p>
-              </div>
-            </div>
-          </Link>
-        );
-      })}
+      <p className={`${Colors.text.secondary} text-sm line-clamp-2`}>
+        {course.description}
+      </p>
+
+      <div className="flex items-center justify-end gap-2 mt-auto">
+        <div className="w-7 h-7 rounded-full bg-yellow-400 flex items-center justify-center text-black font-semibold">
+          {course.instructorName.charAt(0)}
+        </div>
+        <span className={`${Colors.text.primary} text-sm font-medium`}>
+          {course.instructorName}
+        </span>
+      </div>
     </div>
   );
 }
+
+/* ---------------- ENTITY TABS ---------------- */
+// import { School, Handshake, ShieldCheck } from "lucide-react";
+
+// const ENTITY_META: Record<
+//   string,
+//   {
+//     icon: any;
+//     label: string;
+//     tagline: string;
+//     accent: string;
+//   }
+// > = {
+//   institutions: {
+//     icon: School,
+//     label: "Institutions",
+//     tagline: "Education centers associated with us",
+//     accent: "from-blue-500/20 to-blue-500/5",
+//   },
+//   vendors: {
+//     icon: Handshake,
+//     label: "Vendors",
+//     tagline: "Industry trainers who got involved",
+//     accent: "from-emerald-500/20 to-emerald-500/5",
+//   },
+//   admins: {
+//     icon: ShieldCheck,
+//     label: "Admins",
+//     tagline: "People maintaining our platform",
+//     accent: "from-orange-500/20 to-orange-500/5",
+//   },
+// };
+
+// function EntityTabs({ fields, data }: EntityTabsProps) {
+//   if (!fields.length) {
+//     return <p className="text-white/60 text-center mt-6">Loading dashboard…</p>;
+//   }
+
+//   return (
+//     <div className="mx-20 mt-8 grid grid-cols-1 gap-3">
+//       {fields.map((field) => {
+//         const meta = ENTITY_META[field];
+//         const href = URL_MAP[field];
+//         if (!meta || !href) return null;
+
+//         const Icon = meta.icon;
+
+//         return (
+//           <Link
+//             key={field}
+//             href={href}
+//             className={`
+//                             group relative rounded-2xl p-6
+//               ${Colors.background.secondary} overflow-hidden
+//               hover:shadow-2xl hover:-translate-y-1
+//               transition-all duration-300
+//               `}
+//           >
+//             {/* Gradient depth layer */}
+//             <div
+//               className={`absolute inset-0 bg-gradient-to-br ${meta.accent} opacity-0 group-hover:opacity-100 transition`}
+//             />
+
+//             {/* Content */}
+//             <div className="relative z-10 flex flex-col gap-4">
+//               {/* Icon + Count */}
+//               <div className="flex items-center justify-between">
+//                 <div className={`p-3 rounded-xl ${Colors.background.primary}`}>
+//                   <Icon className={`text-primaryBlue`} size={28} />
+//                 </div>
+//                 <span className={`text-3xl font-bold ${Colors.text.primary}`}>
+//                   {data[field] ?? 0}
+//                 </span>
+//               </div>
+
+//               {/* Text */}
+//               <div>
+//                 <h3 className={`text-lg font-semibold ${Colors.text.primary}`}>
+//                   {meta.label}
+//                 </h3>
+//                 <p className={`text-sm mt-1 leading-snug ${Colors.text.secondary}`}>
+//                   {meta.tagline}
+//                 </p>
+//               </div>
+//             </div>
+//           </Link>
+//         );
+//       })}
+//     </div>
+//   );
+// }

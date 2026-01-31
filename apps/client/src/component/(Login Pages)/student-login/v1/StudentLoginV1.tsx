@@ -107,6 +107,7 @@ export default function StudentLoginV1() {
       await handleLogin({
         data: { email, password, role: "STUDENT" },
       });
+      toast.success("Login successful");
       router.push("/dashboard");
     } catch (err) {
       console.error("Login failed", err);
@@ -228,7 +229,7 @@ export default function StudentLoginV1() {
           {step === "RESET" && (
             <ResetPasswordForm
               role={ROLE}
-              onSuccess={() => router.push("/dashboard")}
+              onSuccess={() => router.push("/student-login")}
             />
           )}
         </motion.div>

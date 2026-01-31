@@ -17,7 +17,7 @@ export default function ThemeSwitcher() {
         relative
         w-14 h-8
         rounded-full
-        transition-colors duration-500 ease-in-out
+        transition-colors duration-500 ease-in-out cursor-pointer
         ${isDark ? "bg-neutral-900" : "bg-neutral-300"}
       `}
     >

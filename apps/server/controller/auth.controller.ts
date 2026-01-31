@@ -409,7 +409,7 @@ class AuthController {
         id: student.id,
         type: "STUDENT",
       });
-      const dbStudent = await prismaClient.student.findUnique({
+       const dbStudent = await prismaClient.student.findUnique({
         where: { id: student.id },
         select: {
           email: true,

@@ -2,18 +2,20 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 interface Teacher {
-  name: string;
-  email: string;
-  phoneNumber: string;
-  institution: {
-    id: string;
-    name: string;
-  };
-  batch: {
-    id: string;
-    batchName: string;
-    branch: string;
-  };
+  data: {
+      name: string;
+      email: string;
+      phoneNumber: string;
+      institution: {
+        id: string;
+        name: string;
+      };
+      batch: {
+        id: string;
+        batchName: string;
+        branch: string;
+      };
+  }
 }
 interface TeacherStore {
   info: Teacher | null;
