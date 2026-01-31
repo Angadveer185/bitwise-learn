@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useRef, useState, useEffect } from "react";
 import CodeEditor from "./Editor";
 import TestCases from "./TestCases";
@@ -8,34 +9,37 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/component/ui/tabs";
 import Submission from "./Submission";
 import { useRouter } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
+import { useColors } from "@/component/general/(Color Manager)/useColors";
+import { useTheme } from "@/component/general/(Color Manager)/ThemeController";
 
 function V1Problem({ data }: any) {
+  const Colors = useColors();
+  const theme = useTheme();
+
   /* Sidebar */
   const [sidebarWidth, setSidebarWidth] = useState(720);
   const [output, setOutput] = useState([]);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const isSidebarResizing = useRef(false);
 
-  /* Editor split (flex ratio instead of %) */
-  const [editorRatio, setEditorRatio] = useState(60); // out of 100
+  /* Editor split */
+  const [editorRatio, setEditorRatio] = useState(60);
   const rightPanelRef = useRef<HTMLDivElement>(null);
   const isEditorResizing = useRef(false);
+
   const router = useRouter();
 
-  /* Sidebar resize */
   const handleSidebarMouseDown = () => {
     isSidebarResizing.current = true;
     document.body.style.cursor = "col-resize";
   };
 
-  /* Editor resize */
   const handleEditorMouseDown = () => {
     isEditorResizing.current = true;
     document.body.style.cursor = "row-resize";
   };
 
   const handleMouseMove = (e: MouseEvent) => {
-    /* Sidebar */
     if (isSidebarResizing.current && sidebarRef.current) {
       const left = sidebarRef.current.getBoundingClientRect().left;
       const width = e.clientX - left;
@@ -44,12 +48,10 @@ function V1Problem({ data }: any) {
       }
     }
 
-    /* Editor split */
     if (isEditorResizing.current && rightPanelRef.current) {
       const rect = rightPanelRef.current.getBoundingClientRect();
       const y = e.clientY - rect.top;
       const ratio = (y / rect.height) * 100;
-
       if (ratio >= 30 && ratio <= 75) {
         setEditorRatio(ratio);
       }
@@ -72,39 +74,51 @@ function V1Problem({ data }: any) {
   }, []);
 
   return (
-    <div className="h-screen flex bg-neutral-900 text-white overflow-hidden">
+    <div
+      className={`
+        h-screen flex overflow-hidden
+        ${Colors.background.secondary}
+        ${Colors.text.primary}
+      `}
+    >
       {/* Sidebar */}
       <div
         ref={sidebarRef}
-        className="border-r border-neutral-700 flex flex-col relative"
         style={{ width: sidebarWidth }}
+        className={`
+          flex flex-col relative
+          ${Colors.background.primary}
+          ${Colors.border.defaultRight}
+        `}
       >
         <Tabs defaultValue="description" className="flex flex-col h-full">
-          <TabsList className="w-full bg-neutral-900 px-4">
+          {/* Tabs Header */}
+          <TabsList
+            className={`
+              w-full px-4
+              ${Colors.background.primary}
+              ${Colors.border.default}
+            `}
+          >
             <div className="px-6 pt-4">
               <button
                 onClick={() => router.push("/problems")}
-                className="
-      group inline-flex items-center gap-2
-      text-sm font-medium
-      text-blue-400
-      hover:text-blue-300
-      transition-colors
-    "
+                className={`
+                  inline-flex items-center gap-2 text-sm font-medium
+                  ${Colors.text.special}
+                  hover:opacity-80 transition
+                `}
               >
-                <ChevronLeft
-                  size={22}
-                  className="cursor-pointer"
-                />
+                <ChevronLeft size={22} />
               </button>
             </div>
-            <TabsTrigger value="description" className="">
-              Description
-            </TabsTrigger>
+
+            <TabsTrigger value="description">Description</TabsTrigger>
             <TabsTrigger value="solution">Solution</TabsTrigger>
             <TabsTrigger value="submission">Submission</TabsTrigger>
           </TabsList>
 
+          {/* Tabs Content */}
           <div
             className="flex-1 overflow-y-auto px-6 py-4"
             style={{
@@ -117,9 +131,11 @@ function V1Problem({ data }: any) {
             <TabsContent value="description">
               <Description content={data} />
             </TabsContent>
+
             <TabsContent value="solution">
               <Solution content={data.solution} />
             </TabsContent>
+
             <TabsContent value="submission">
               <Submission id={data.id} />
             </TabsContent>
@@ -129,7 +145,11 @@ function V1Problem({ data }: any) {
         {/* Sidebar Resize */}
         <div
           onMouseDown={handleSidebarMouseDown}
-          className="absolute right-0 top-0 h-full w-1 cursor-col-resize bg-neutral-700 hover:bg-neutral-500"
+          className={`
+            absolute right-0 top-0 h-full w-1 cursor-col-resize
+            ${Colors.background.accent}
+            hover:opacity-80
+          `}
         />
       </div>
 
@@ -144,10 +164,14 @@ function V1Problem({ data }: any) {
           />
         </div>
 
-        {/* Resize Handle */}
+        {/* Editor Resize */}
         <div
           onMouseDown={handleEditorMouseDown}
-          className="h-1 cursor-row-resize bg-neutral-700 hover:bg-neutral-500"
+          className={`
+            h-1 cursor-row-resize
+            ${Colors.background.accent}
+            hover:opacity-80
+          `}
         />
 
         {/* Test Cases */}

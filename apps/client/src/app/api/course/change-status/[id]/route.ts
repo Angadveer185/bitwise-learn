@@ -18,6 +18,7 @@ export async function POST(
     if (body.currentStatus === "DONE") {
       res = await axiosInstance.post(
         `${process.env.BACKEND_URL}/api/v1/courses/mark-content-as-done/${id}`,
+        {},
         {
           headers: {
             Cookie: cookieHeader || "",
@@ -27,7 +28,8 @@ export async function POST(
       );
     } else {
       res = await axiosInstance.post(
-        `${process.env.BACKEND_URL}/api/v1/courses/mark-content-as-done/${id}`,
+        `${process.env.BACKEND_URL}/api/v1/courses/unmark-content-as-done/${id}`,
+        {},
         {
           headers: {
             Cookie: cookieHeader || "",

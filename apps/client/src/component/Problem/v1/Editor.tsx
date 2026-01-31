@@ -2,8 +2,8 @@
 
 import { runCode, submitCode } from "@/api/problems/run-code";
 import { Editor } from "@monaco-editor/react";
-import React, { useEffect, useMemo, useState } from "react";
-import { Play, Send } from "lucide-react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Play, Send, Timer, Pause, RotateCcw } from "lucide-react";
 import { useColors } from "@/component/general/(Color Manager)/useColors";
 import { useTheme } from "@/component/general/(Color Manager)/ThemeController";
 
@@ -27,6 +27,7 @@ export default function CodeEditor({
   output: any;
 }) {
   const Colors = useColors();
+  const theme = useTheme();
 
   const templatesByLanguage = useMemo(() => {
     const map: Record<string, any> = {};
@@ -45,7 +46,41 @@ export default function CodeEditor({
   const [language, setLanguage] = useState(defaultLang);
   const [code, setCode] = useState(defaultCode);
 
+  /* ---------------- TIMER STATE ---------------- */
+  const [time, setTime] = useState(0);
+  const [running, setRunning] = useState(false);
+  const [showTimer, setShowTimer] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const toggleTimer = () => {
+    if (running) {
+      if (timerRef.current) clearInterval(timerRef.current);
+      timerRef.current = null;
+      setRunning(false);
+    } else {
+      setRunning(true);
+      timerRef.current = setInterval(() => {
+        setTime((t) => t + 1);
+      }, 1000);
+    }
+  };
+
+  const resetTimer = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = null;
+    setTime(0);
+    setRunning(false);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+  /* ------------------------------------------------ */
+
   const handleRun = async () => {
+    resetTimer();
     setOutput([]);
     const res = await runCode({
       language,
@@ -75,8 +110,6 @@ export default function CodeEditor({
       setCode("");
     }
   }, [language, templatesByLanguage]);
-
-  const theme = useTheme();
 
   return (
     <div
@@ -113,7 +146,7 @@ export default function CodeEditor({
             {languageOptions
               .filter((lang) => templatesByLanguage[lang.value])
               .map((lang) => (
-                <option key={lang.value} value={lang.value} className="cursor-pointer">
+                <option key={lang.value} value={lang.value}>
                   {lang.label}
                 </option>
               ))}
@@ -122,6 +155,40 @@ export default function CodeEditor({
 
         {/* Right */}
         <div className="flex items-center gap-2">
+          {/* Stopwatch */}
+          <div
+            className={`
+              flex items-center gap-2 rounded-md px-2 py-1
+              ${Colors.background.secondary}
+              ${Colors.border.fadedThin}
+            `}
+          >
+            <Timer
+              size={16}
+              className="cursor-pointer"
+              onClick={() => setShowTimer((p) => !p)}
+            />
+
+            {showTimer && (
+              <>
+                <button onClick={toggleTimer}>
+                  {running ? <Pause size={14} /> : <Play size={14} />}
+                </button>
+
+                <RotateCcw
+                  size={14}
+                  className="cursor-pointer"
+                  onClick={resetTimer}
+                />
+
+                <span className="text-xs font-mono tabular-nums">
+                  {String(Math.floor(time / 60)).padStart(2, "0")}:
+                  {String(time % 60).padStart(2, "0")}
+                </span>
+              </>
+            )}
+          </div>
+
           <button
             onClick={handleRun}
             className={`
@@ -156,7 +223,7 @@ export default function CodeEditor({
           language={language}
           value={code}
           onChange={(value) => setCode(value || "")}
-          theme={theme.theme==="Dark"?"vs-dark":"vs-light"}
+          theme={theme.theme === "Dark" ? "vs-dark" : "vs-light"}
           options={{
             fontSize: 14,
             fontFamily: "JetBrains Mono, Fira Code, monospace",

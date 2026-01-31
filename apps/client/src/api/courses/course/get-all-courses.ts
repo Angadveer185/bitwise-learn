@@ -6,3 +6,11 @@ export const getAllCourses = async (publishedOnly: boolean = false) => {
   );
   return res.data;
 };
+
+
+export const getStudentCourses = async ()=>{
+  const res = await axiosInstance.get(
+    "/api/course/get-student-courses",
+  );
+  return res.data;
+}

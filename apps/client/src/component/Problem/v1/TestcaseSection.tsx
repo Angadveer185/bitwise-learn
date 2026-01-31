@@ -1,4 +1,10 @@
+"use client";
+
+import { useColors } from "@/component/general/(Color Manager)/useColors";
+
 export default function TestCaseSection({ testCases }: { testCases: any[] }) {
+  const Colors = useColors();
+
   if (!testCases || testCases.length === 0) return null;
 
   const parseInput = (input: string) => {
@@ -17,27 +23,51 @@ export default function TestCaseSection({ testCases }: { testCases: any[] }) {
         return (
           <div
             key={test.id}
-            className="rounded-2xl border border-blue-500/20 bg-neutral-900 overflow-hidden"
+            className={`
+              rounded-2xl overflow-hidden
+              ${Colors.background.primary}
+              ${Colors.border.fadedThin}
+            `}
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-3 bg-neutral-950 border-b border-blue-500/20">
-              <span className="text-xs font-medium tracking-wide text-white uppercase">
+            <div
+              className={`
+                flex items-center justify-between px-5 py-3
+                ${Colors.background.secondary}
+                ${Colors.border.default}
+              `}
+            >
+              <span
+                className={`text-xs font-medium tracking-wide uppercase ${Colors.text.primary}`}
+              >
                 {test.testType} {index + 1}
               </span>
             </div>
 
-            <div className="p-5 space-y-5 text-sm">
+            <div className={`p-5 space-y-5 text-sm ${Colors.text.secondary}`}>
               {/* Input */}
-              <div className="rounded-xl bg-neutral-950 border border-blue-500/20">
-                <div className="px-4 py-2 border-b border-blue-500/20 text-xs font-semibold text-blue-400">
+              <div
+                className={`
+                  rounded-xl
+                  ${Colors.background.secondary}
+                  ${Colors.border.fadedThin}
+                `}
+              >
+                <div
+                  className={`
+                    px-4 py-2 text-xs font-semibold
+                    ${Colors.border.default}
+                    ${Colors.text.special}
+                  `}
+                >
                   Input
                 </div>
 
-                <div className="p-4 space-y-1 font-mono text-white text-sm">
+                <div className="p-4 space-y-1 font-mono text-sm">
                   {Object.entries(parsedInput).map(([key, value], idx) => (
                     <div key={idx} className="flex gap-2">
-                      <span className="text-white">{key}</span>
-                      <span className="text-white">:</span>
+                      <span className={Colors.text.primary}>{key}</span>
+                      <span className={Colors.text.primary}>:</span>
                       <span className="break-all">
                         {Array.isArray(value)
                           ? JSON.stringify(value)
@@ -49,12 +79,24 @@ export default function TestCaseSection({ testCases }: { testCases: any[] }) {
               </div>
 
               {/* Output */}
-              <div className="rounded-xl bg-neutral-950 border border-blue-500/20">
-                <div className="px-4 py-2 border-b border-blue-500/20 text-xs font-semibold text-blue-400">
+              <div
+                className={`
+                  rounded-xl
+                  ${Colors.background.secondary}
+                  ${Colors.border.fadedThin}
+                `}
+              >
+                <div
+                  className={`
+                    px-4 py-2 text-xs font-semibold
+                    ${Colors.border.default}
+                    ${Colors.text.special}
+                  `}
+                >
                   Output
                 </div>
 
-                <div className="p-4 font-mono text-white text-sm">
+                <div className="p-4 font-mono text-sm">
                   {test.output}
                 </div>
               </div>

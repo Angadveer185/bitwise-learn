@@ -22,6 +22,7 @@ export async function GET(
     );
 
     const data = await res.json();
+    console.log(data)
     return NextResponse.json(data, { status: res.status });
   } catch (error: any) {
     console.error(error);

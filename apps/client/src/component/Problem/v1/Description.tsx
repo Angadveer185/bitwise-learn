@@ -4,76 +4,82 @@ import { useState } from "react";
 import { ChevronRight, Lightbulb } from "lucide-react";
 import TestCaseSection from "./TestcaseSection";
 import MarkdownEditor from "@/component/ui/MarkDownEditor";
+import { useColors } from "@/component/general/(Color Manager)/useColors";
+import { useTheme } from "@/component/general/(Color Manager)/ThemeController";
 
 function Description({ content }: { content: any }) {
   if (!content) return null;
 
   const { name, description, hints, testCases, problemTopics } = content;
+  const colors = useColors();
+  const theme = useTheme();
 
   return (
-    <div className="flex flex-col gap-8 text-gray-300">
+    <div className={`flex flex-col gap-8 ${colors.text.secondary}`}>
       {/* Title */}
-      <div className="border-b border-neutral-800 pb-4">
-        <h1 className="text-2xl font-semibold text-white tracking-tight">
+      <div className={`pb-4 ${colors.border.default}`}>
+        <h1
+          className={`text-2xl font-semibold tracking-tight ${colors.text.primary}`}
+        >
           {name}
         </h1>
       </div>
 
-{/* Description */}
-<section
-  className="
-    rounded-2xl
-    bg-neutral-950
-    border border-neutral-800
-    overflow-hidden
-    transition-all
-    hover:border-blue-500/30
-  "
->
-  {/* Header */}
-  <div
-    className="
-      flex items-center justify-between
-      px-5 py-4
-      bg-neutral-900
-      border-b border-neutral-800
-    "
-  >
-    <div className="flex items-center gap-3">
-      {/* Accent bar */}
-      <span className="h-6 w-1 rounded-full bg-blue-500/70" />
+      {/* Description */}
+      <section
+        className={`
+          rounded-2xl
+          overflow-hidden
+          transition-all
+          ${colors.background.primary}
+          ${colors.border.defaultThin}
+        `}
+      >
+        {/* Header */}
+        <div
+          className={`
+            flex items-center justify-between
+            px-5 py-4
+            ${colors.background.secondary}
+            ${colors.border.faded}
+          `}
+        >
+          <div className="flex items-center gap-3">
+            <span className="h-6 w-1 rounded-full bg-(--accent-primary)" />
+            <h2
+              className={`text-sm font-semibold tracking-wide ${colors.text.primary}`}
+            >
+              Problem Description
+            </h2>
+          </div>
+        </div>
 
-      <h2 className="text-sm font-semibold tracking-wide text-white">
-        Problem Description
-      </h2>
-    </div>
-  </div>
-
-  {/* Content */}
-  <div className="p-5">
-    <div
-      className="
-        rounded-xl
-        bg-neutral-900
-        border border-neutral-800
-        p-4
-      "
-    >
-      <MarkdownEditor
-        height={500}
-        value={description}
-        mode={"preview"}
-        hideToolbar={true}
-        theme="dark"
-      />
-    </div>
-  </div>
-</section>
-
+        {/* Content */}
+        <div className="p-5">
+          <div
+            className={`
+              rounded-xl
+              p-4
+              ${colors.background.secondary}
+              ${colors.border.defaultThin}
+            `}
+          >
+            <MarkdownEditor
+              height={500}
+              value={description}
+              mode="preview"
+              hideToolbar={true}
+              theme={theme.theme === "Dark"?"dark":"light"}
+            />
+          </div>
+        </div>
+      </section>
 
       {/* Test Cases */}
       <section>
-        <h2 className="text-lg font-semibold text-white mb-3">
+        <h2
+          className={`text-lg font-semibold mb-3 ${colors.text.primary}`}
+        >
           Sample Test Cases
         </h2>
         <TestCaseSection testCases={testCases} />
@@ -81,25 +87,35 @@ function Description({ content }: { content: any }) {
 
       {/* Topics */}
       {problemTopics?.length > 0 && (
-        <section className="rounded-2xl bg-neutral-900 p-3">
+        <section
+          className={`
+            rounded-2xl
+            p-3
+            ${colors.background.secondary}
+          `}
+        >
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-white">Topics</h2>
+            <h2
+              className={`text-xl font-semibold ${colors.text.primary}`}
+            >
+              Topics
+            </h2>
           </div>
 
           <div className="flex flex-wrap gap-2.5">
             {problemTopics[0].tagName.map((tag: string) => (
               <span
                 key={tag}
-                className="
-          group inline-flex items-center gap-2
-          rounded-full px-4 py-1.5 text-xs font-medium
-          bg-neutral-950
-          border border-blue-500/20
-          text-gray-200
-          transition-all
-          hover:border-blue-400/60
-          hover:bg-blue-500/5
-        "
+                className={`
+                  inline-flex items-center gap-2
+                  rounded-full px-4 py-1.5
+                  text-xs font-medium
+                  transition-all
+                  ${colors.background.primary}
+                  ${colors.border.specialThin}
+                  ${colors.text.secondary}
+                  ${colors.hover.textSpecial}
+                `}
               >
                 {tag}
               </span>
@@ -113,7 +129,11 @@ function Description({ content }: { content: any }) {
         <section>
           <div className="flex items-center gap-2 mb-2">
             <Lightbulb size={18} className="text-yellow-400" />
-            <h2 className="text-xl font-semibold text-white p-1">Hints</h2>
+            <h2
+              className={`text-xl font-semibold p-1 ${colors.text.primary}`}
+            >
+              Hints
+            </h2>
           </div>
 
           <div className="space-y-3">
@@ -131,6 +151,7 @@ export default Description;
 
 function HintItem({ hint, index }: { hint: string; index: number }) {
   const [open, setOpen] = useState(false);
+  const colors = useColors();
 
   return (
     <div
@@ -138,19 +159,23 @@ function HintItem({ hint, index }: { hint: string; index: number }) {
         if (open) setOpen(false);
       }}
       className={`
-        group rounded-xl border border-blue-400/50 bg-neutral-950
+        group rounded-xl cursor-pointer
         transition-all duration-300
-        hover:border-blue-700/50 hover:shadow-[0_4px_20px_rgba(0,0,0,0.4)]
-        cursor-pointer
+        ${colors.background.primary}
+        ${colors.border.specialThin}
       `}
     >
       {/* Header */}
       <button
         onClick={(e) => {
-          e.stopPropagation(); // prevent outer click
+          e.stopPropagation();
           setOpen(!open);
         }}
-        className="flex w-full items-center justify-between px-4 py-3 text-sm text-gray-300 cursor-pointer"
+        className={`
+          flex w-full items-center justify-between
+          px-4 py-3 text-sm
+          ${colors.text.secondary}
+        `}
       >
         <div className="flex items-center gap-3">
           <ChevronRight
@@ -160,7 +185,6 @@ function HintItem({ hint, index }: { hint: string; index: number }) {
               ${open ? "rotate-90 text-yellow-400" : "text-gray-400"}
             `}
           />
-
           <span className="font-medium tracking-tight">
             Hint {index + 1}
           </span>
@@ -169,7 +193,7 @@ function HintItem({ hint, index }: { hint: string; index: number }) {
         <span
           className={`
             text-xs transition-opacity duration-300
-            ${open ? "text-gray-500" : "text-gray-600 group-hover:text-gray-500"}
+            ${open ? "text-gray-500" : "text-gray-600"}
           `}
         >
           {open ? "Click anywhere to close" : "Reveal"}
@@ -184,7 +208,12 @@ function HintItem({ hint, index }: { hint: string; index: number }) {
         `}
       >
         <div className="overflow-hidden">
-          <div className="px-4 pb-4 text-sm text-gray-400 leading-relaxed animate-hint-fade">
+          <div
+            className={`
+              px-4 pb-4 text-sm leading-relaxed
+              ${colors.text.secondary}
+            `}
+          >
             {hint}
           </div>
         </div>
@@ -192,4 +221,3 @@ function HintItem({ hint, index }: { hint: string; index: number }) {
     </div>
   );
 }
-

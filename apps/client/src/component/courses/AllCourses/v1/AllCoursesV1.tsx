@@ -10,6 +10,8 @@ import { useRef } from "react";
 import axiosInstance from "@/lib/axios";
 import { useColors } from "@/component/general/(Color Manager)/useColors";
 import StudentSideBar from "@/component/general/StudentSidebar";
+import { useAdmin } from "@/store/adminStore";
+import { getStudentCourses } from "@/api/courses/course/get-all-courses";
 
 type CourseLevel = "Basic" | "Intermediate" | "Advanced" | "ALL";
 
@@ -157,13 +159,19 @@ export default function AllCoursesV1() {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const [visibleCount, setVisibleCount] = useState(6);
+  const adminInfo = useAdmin().info;
 
   useEffect(() => {
     async function loadCourses() {
       try {
         setLoading(true);
-
-        const res = await getAllCourses();
+        let res;
+        if(adminInfo?.id && adminInfo.id.length>0){
+          res = await getAllCourses();
+        }
+        else{
+          res = await getStudentCourses();
+        }
         console.log(res);
         const mappedCourses: Course[] = res.map((course: any) => ({
           id: course.id,

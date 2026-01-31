@@ -188,6 +188,8 @@ class CourseAssignmentController {
         },
       });
 
+      console.log(assignment)
+
       if (!assignment) throw new Error("assignment not found");
 
       const mappedAssignment = {

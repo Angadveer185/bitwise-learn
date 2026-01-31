@@ -207,4 +207,10 @@ router.delete(
   authMiddleware,
   courseEnrollmentController.removeEnrollment,
 );
+
+router.get(
+  "/get-student-courses",
+  authMiddleware,
+  courseController.getStudentCourses
+)
 export default router;

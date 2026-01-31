@@ -262,6 +262,41 @@ class CoursesController {
       return res.status(200).json(apiResponse(500, error.message, null));
     }
   }
+  async getStudentCourses(req:Request, res:Response){
+    try {
+      const userId = req.user?.id;
+      if(!userId) throw new Error("userId is required");
+
+      const dbBatch = await prismaClient.student.findUnique({
+        where:{id:userId}
+      })
+
+      if(!dbBatch) throw new Error("no such student found");
+
+      const dbCourses = await prismaClient.courseEnrollment.findMany({
+        where:{ batchId: dbBatch.batchId },
+        select:{
+          courseId:true
+        }
+      });
+
+      let fetchedCourses:any = [];
+
+      for(let i=0;i<dbCourses.length;i++){
+        const courseDetails = await prismaClient.course.findUnique({
+          where:{ id: dbCourses[i]?.courseId }
+        });
+        if(courseDetails){
+          fetchedCourses.push(courseDetails);
+        }
+      }
+
+      return res.json(apiResponse(200, "courses fetched successfully", fetchedCourses));
+    } catch (error: any) {
+      console.log(error);
+      return res.status(200).json(apiResponse(500, error.message, null));
+    }
+  }
   async getCourseById(req: Request, res: Response) {
     try {
       if (!req.user) throw new Error("user not authenticated");
@@ -269,11 +304,7 @@ class CoursesController {
       const courseId = req.params.id;
       if (!userId) throw new Error("userId is required");
       if (!courseId) throw new Error("courseId is required");
-      const dbAdmin = await prismaClient.user.findFirst({
-        where: { id: userId },
-      });
-
-      if (!dbAdmin) throw new Error("no such user found!");
+      
       const dbCourse = await prismaClient.course.findUnique({
         where: { id: courseId as string },
       });

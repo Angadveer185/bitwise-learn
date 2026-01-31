@@ -2,11 +2,19 @@
 
 import MDEditor from "@uiw/react-md-editor";
 import { PlayCircle, FileText } from "lucide-react";
+import { useColors } from "@/component/general/(Color Manager)/useColors";
+import { useTheme } from "@/component/general/(Color Manager)/ThemeController";
 
 function Solution({ content }: any) {
+  const Colors = useColors();
+  const theme = useTheme();
+  const isDark = theme.theme === "Dark";
+
   if (!content) {
     return (
-      <div className="flex items-center justify-center h-full text-sm text-gray-500">
+      <div
+        className={`flex items-center justify-center h-full text-sm ${Colors.text.secondary}`}
+      >
         No solution available.
       </div>
     );
@@ -14,7 +22,7 @@ function Solution({ content }: any) {
 
   return (
     <div
-      className="h-full overflow-y-auto px-6 py-5 space-y-8"
+      className={`h-full overflow-y-auto px-6 py-5 space-y-8 ${Colors.text.secondary}`}
       style={{
         scrollbarWidth: "none",
         msOverflowStyle: "none",
@@ -24,16 +32,37 @@ function Solution({ content }: any) {
     >
       {/* Video Solution */}
       {content.videoSolution && (
-        <section className="rounded-2xl border border-neutral-800 bg-linear-to-b from-neutral-900 to-neutral-950 overflow-hidden">
-          <div className="flex items-center gap-2 px-4 py-3 border-b border-neutral-800">
+        <section
+          className={`
+            rounded-2xl overflow-hidden transition-all
+            ${Colors.background.secondary}
+            ${Colors.border.defaultThin}
+            hover:border-blue-500/30
+          `}
+        >
+          <div
+            className={`
+              flex items-center gap-3 px-5 py-4
+              ${Colors.background.primary}
+              ${Colors.border.default}
+            `}
+          >
+            <span className="h-6 w-1 rounded-full bg-blue-500/70" />
             <PlayCircle size={18} className="text-blue-400" />
-            <h2 className="text-sm font-semibold text-white tracking-wide">
+            <h2 className={`text-sm font-semibold tracking-wide ${Colors.text.primary}`}>
               Video Solution
             </h2>
           </div>
 
-          <div className="p-4">
-            <div className="aspect-video rounded-xl overflow-hidden border border-neutral-700 bg-black shadow-lg">
+          <div className="p-5">
+            <div
+              className={`
+                aspect-video rounded-xl overflow-hidden
+                ${Colors.background.primary}
+                ${Colors.border.defaultThin}
+                shadow-lg
+              `}
+            >
               <video
                 src={content.videoSolution}
                 className="w-full h-full"
@@ -46,30 +75,53 @@ function Solution({ content }: any) {
 
       {/* Written Solution */}
       {content.solution && (
-        <section className="rounded-2xl border border-neutral-800 bg-neutral-950 overflow-hidden">
-          <div className="flex items-center gap-2 px-4 py-3 border-b border-neutral-800">
+        <section
+          className={`
+            rounded-2xl overflow-hidden transition-all
+            ${Colors.background.secondary}
+            ${Colors.border.defaultThin}
+            hover:border-blue-500/30
+          `}
+        >
+          <div
+            className={`
+              flex items-center gap-3 px-5 py-4
+              ${Colors.background.primary}
+              ${Colors.border.default}
+            `}
+          >
+            <span className="h-6 w-1 rounded-full bg-blue-500/70" />
             <FileText size={18} className="text-blue-400" />
-            <h2 className="text-sm font-semibold text-white tracking-wide">
+            <h2 className={`text-sm font-semibold tracking-wide ${Colors.text.primary}`}>
               Written Solution
             </h2>
           </div>
 
-          <div className="p-4">
-            <MDEditor
-              height={700}
-              //@ts-ignore
-              value={content.solution as string}
-              onChange={() => {}}
-              preview="preview"
-              hideToolbar={true}
-              spellCheck
-              style={{
-                backgroundColor: "#0a0a0a",
-                color: "white",
-                borderRadius: "12px",
-                padding: "12px",
-              }}
-            />
+          <div className="p-5">
+            <div
+              className={`
+                rounded-xl p-4
+                ${Colors.background.primary}
+                ${Colors.border.defaultThin}
+              `}
+            >
+              <MDEditor
+                height={700}
+                //@ts-ignore
+                value={content.solution as string}
+                onChange={() => {}}
+                preview="preview"
+                hideToolbar
+                spellCheck
+                data-color-mode={isDark ? "dark" : "light"}
+                style={{
+                  backgroundColor: isDark ? "#0a0a0a" : "#ffffff",
+                  color: isDark ? "#ffffff" : "#000000",
+                  borderRadius: "12px",
+                  padding: "12px",
+                }}
+              />
+            </div>
           </div>
         </section>
       )}
