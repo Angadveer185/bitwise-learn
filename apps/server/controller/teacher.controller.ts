@@ -333,7 +333,11 @@ class TeacherController {
       if (!req.user) throw new Error("user not authenticated");
       const userId = req.user.id;
       const batchId = req.params.id;
-
+      if (
+        req.user.type === "STUDENT"
+      ) {
+        throw new Error("not authorized");
+      }
       if (!batchId) throw new Error("batch id is required");
 
       // const dbUser = await prismaClient.user.findFirst({
@@ -356,14 +360,7 @@ class TeacherController {
       });
       if (!teachers) throw new Error("teachers not found");
 
-      if (
-        req.user.type !== "SUPERADMIN" &&
-        req.user.type !== "ADMIN"
-        // req.user.type !== "INSTITUTION" &&
-        // req.user.type !== "VENDOR"
-      ) {
-        throw new Error("not authorized");
-      }
+
 
       return res
         .status(200)

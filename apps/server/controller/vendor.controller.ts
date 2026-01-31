@@ -12,7 +12,7 @@ class VendorController {
       const data: CreateVendorBody = req.body;
       if (!data) throw new Error("Please Provide all required fields");
 
-      if (req.user.type !== "INSTITUTION" && req.user.type !== "SUPERADMIN") {
+      if (req.user.type !== "ADMIN" && req.user.type !== "SUPERADMIN") {
         throw new Error("only institution can create vendors");
       }
       const existingVendor = await prismaClient.vendor.findFirst({

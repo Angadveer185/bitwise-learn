@@ -7,6 +7,7 @@ import { getTeachersByBatch } from "@/api/teachers/get-teachers-by-batch";
 import { deleteEntity, updateEntity } from "@/api/institutions/entity";
 import { getCourseEnrollments } from "@/api/courses/course/enrollments/get-all-enrollment";
 import { allBatchCourses } from "@/api/courses/course/enrollments/get-all-batch-courses";
+import { getAssessmentsByBatch } from "@/api/assessments/get-assessments-by-batch";
 // import { getAllAssessments } from "@/api/vendors/get-all-vendors";
 
 type EntityListProps = {
@@ -83,8 +84,9 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
             }, batchId as string);
             break;
           case "Assessments":
-            setEntities([]);
-            break;
+            await getAssessmentsByBatch((data: any) => {
+              setEntities(Array.isArray(data) ? data : []);
+            }, batchId as string);
             break;
           case "Courses":
             // TODO: Add courses API when available
@@ -298,15 +300,13 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
                       {cells.map((cell, index) => (
                         <td
                           key={index}
-                          className={`px-6 py-4 ${
-                            index === 0 ? "font-medium" : ""
-                          } ${
-                            index === cells.length - 1
+                          className={`px-6 py-4 ${index === 0 ? "font-medium" : ""
+                            } ${index === cells.length - 1
                               ? "text-white/60"
                               : index === 0
                                 ? ""
                                 : "text-white/70 truncate"
-                          }`}
+                            }`}
                         >
                           {cell}
                         </td>

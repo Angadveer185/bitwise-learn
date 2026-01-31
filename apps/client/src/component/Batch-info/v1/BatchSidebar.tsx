@@ -7,6 +7,7 @@ import { updateEntity, deleteEntity } from "@/api/institutions/entity";
 import { useRouter } from "next/navigation";
 import { uploadBatches } from "@/api/batches/create-batches";
 import toast from "react-hot-toast";
+import useLogs from "@/lib/useLogs";
 
 type BatchSidebarProps = {
   batch: any;
@@ -62,7 +63,7 @@ const BatchSidebar = ({ batch }: BatchSidebarProps) => {
   const [formData, setFormData] = useState(batch);
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-
+  const { loading: logsLoading, role: logRole } = useLogs();
   const handleBulkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
       const file = e.target.files?.[0];
@@ -197,52 +198,56 @@ const BatchSidebar = ({ batch }: BatchSidebarProps) => {
       </div>
 
       {/* Actions */}
-      <div className="mt-8 flex gap-3">
-        {isEditing ? (
-          <>
-            <button
-              onClick={handleSave}
-              className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded"
-            >
-              <Save size={16} />
-              Save
-            </button>
+      {!logsLoading && logRole && logRole < 4 &&
+        <>
+          <div className="mt-8 flex gap-3">
+            {isEditing ? (
+              <>
+                <button
+                  onClick={handleSave}
+                  className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded"
+                >
+                  <Save size={16} />
+                  Save
+                </button>
 
-            <button
-              onClick={() => setIsEditing(false)}
-              className="flex-1 flex items-center justify-center gap-2 bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded"
-            >
-              <X size={16} />
-              Cancel
-            </button>
-          </>
-        ) : (
-          <>
-            <button
-              onClick={() => setIsEditing(true)}
-              className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded"
-            >
-              <Pencil size={16} />
-              Edit
-            </button>
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="flex-1 flex items-center justify-center gap-2 bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded"
+                >
+                  <X size={16} />
+                  Cancel
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded"
+                >
+                  <Pencil size={16} />
+                  Edit
+                </button>
 
-            <button
-              onClick={handleDelete}
-              className="flex-1 flex items-center justify-center gap-2 text-white border border-white px-4 py-2 rounded"
-            >
-              <Trash size={16} />
-              Delete
-            </button>
-          </>
-        )}
-      </div>
-      <button
-        onClick={() => fileInputRef.current?.click()}
-        className="flex-1 mt-4 w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded"
-      >
-        <Upload size={16} />
-        upload cloud credentials
-      </button>
+                <button
+                  onClick={handleDelete}
+                  className="flex-1 flex items-center justify-center gap-2 text-white border border-white px-4 py-2 rounded"
+                >
+                  <Trash size={16} />
+                  Delete
+                </button>
+              </>
+            )}
+          </div>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="flex-1 mt-4 w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded"
+          >
+            <Upload size={16} />
+            upload cloud credentials
+          </button>
+        </>}
+
     </aside>
   );
 };

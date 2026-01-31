@@ -280,10 +280,7 @@ class StudentController {
       // }
 
       if (
-        req.user.type !== "SUPERADMIN" &&
-        req.user.type !== "ADMIN"
-        // req.user.type !== "INSTITUTION" &&
-        // req.user.type !== "VENDOR"
+        req.user.type === "STUDENT"
       ) {
         throw new Error("not authorized");
       }

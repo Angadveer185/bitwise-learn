@@ -61,7 +61,6 @@ const VendorSidebar = ({
 }: VendorSidebarProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(vendor);
-  console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++=")
   console.log(vendor.name);
   useEffect(() => {
     setFormData(vendor);

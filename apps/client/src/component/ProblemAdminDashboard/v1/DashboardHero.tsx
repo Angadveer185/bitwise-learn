@@ -1,10 +1,16 @@
 "use client";
 
 import { User } from "lucide-react";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import ProblemSubmissionForm from "./ProblemSubmissionForm";
 import { getAllProblemCount } from "@/api/problems/get-problem-count";
 import { useColors } from "@/component/general/(Color Manager)/useColors";
+import useLogs from "@/lib/useLogs";
+import useVendor from "@/store/vendorStore";
+import { useInstitution } from "@/store/institutionStore";
+import { useAdmin } from "@/store/adminStore";
+import { useTeacher } from "@/store/teacherStore";
+import { log } from "console";
 
 type ProblemCount = {
   easy: number;
@@ -14,6 +20,8 @@ type ProblemCount = {
 };
 
 const Colors = useColors();
+
+
 
 function DashboardHero() {
   const [showForm, setShowForm] = useState(false);
@@ -28,10 +36,61 @@ function DashboardHero() {
 export default DashboardHero;
 
 function HeroSection({ showForm, setShowForm }: any) {
-  const admin_name = "Britto Anand";
-  const admin_email = "brittoanand@example.com";
+  const { loading: logsLoading, role: logRole } = useLogs();
 
+  const { info: adminInfo } = useAdmin();
+  const { info: vendorInfo } = useVendor();
+  const { info: institutionInfo } = useInstitution();
+  const { info: teacherInfo } = useTeacher();
+
+  const [admin_name, setName] = useState("");
+  const [admin_email, setEmail] = useState("");
   const [data, setData] = useState<ProblemCount | null>(null);
+
+  useEffect(() => {
+    if (logsLoading || logRole === null) return;
+
+    let name = "";
+    let email = "";
+
+    switch (logRole) {
+      case 0:
+      case 1:
+        if (!adminInfo) return;
+        name = adminInfo.name;
+        email = adminInfo.email;
+        break;
+
+      case 2:
+        if (!vendorInfo) return;
+        name = vendorInfo.name;
+        email = vendorInfo.email;
+        break;
+
+      case 3:
+        if (!institutionInfo?.data) return;
+        name = institutionInfo.data.name;
+        email = institutionInfo.data.email;
+        break;
+
+      case 4:
+        if (!teacherInfo?.data) return;
+        name = teacherInfo.data.name;
+        email = teacherInfo.data.email;
+        break;
+    }
+
+    setName(name);
+    setEmail(email);
+  }, [
+    logsLoading,
+    logRole,
+    adminInfo,
+    vendorInfo,
+    institutionInfo,
+    teacherInfo,
+  ]);
+
 
   useEffect(() => {
     getAllProblemCount(setData);
@@ -59,12 +118,12 @@ function HeroSection({ showForm, setShowForm }: any) {
           option below to continue.
         </p>
 
-        <button
+        {!logsLoading && logRole != null && logRole < 4 && <button
           onClick={() => setShowForm(true)}
           className={`${Colors.background.special} mt-6 ${Colors.text.primary} px-6 py-3 rounded-lg font-medium shadow-md hover:opacity-90`}
         >
           Add New Question
-        </button>
+        </button>}
       </div>
 
       {/* RIGHT */}

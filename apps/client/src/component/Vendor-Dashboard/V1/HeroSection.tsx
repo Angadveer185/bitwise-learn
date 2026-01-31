@@ -47,7 +47,7 @@ export default function HeroSection() {
 
   console.log(vendor)
 
-  if(!vendor) return null;
+  if (!vendor) return null;
 
   const [institutionData, setInstitutionData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -70,9 +70,9 @@ export default function HeroSection() {
   return (
     <>
       <Header
-        name={vendor.info?.name}
-        email={vendor.info?.email}
-        tagline={vendor.info?.tagline}
+        name={vendor.info?.data.name}
+        email={vendor.info?.data.email}
+        tagline={vendor.info?.data.tagline}
       />
 
       <div className="p-10 w-full">

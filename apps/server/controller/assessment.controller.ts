@@ -3,6 +3,7 @@ import type { CreateAssessment, UpdateAssessment } from "../utils/type";
 import prismaClient from "../utils/prisma";
 import apiResponse from "../utils/apiResponse";
 import MQClient from "../utils/producer";
+import prisma from "@bitwiselearn/prisma";
 class AssessmentController {
   async createAssessment(req: Request, res: Response) {
     try {
@@ -173,6 +174,45 @@ class AssessmentController {
       return res.status(200).json(apiResponse(200, error.message, null));
     }
   }
+  async getAssessmentsByBatch(req: Request, res: Response) {
+    try {
+      const batchId = req.params.id;
+      if (!req.user) throw new Error("User not authenticated");
+      if (req.user.type === "STUDENT") {
+        const batchStudent = await prisma.student.findUnique({
+          where: { id: req.user.id },
+        });
+        if (batchStudent?.batchId !== batchId) throw new Error("Student Does not belongs to this batch");
+      }
+      const assessment = await prismaClient.assessment.findMany({
+        where: { batchId: batchId as string },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          instruction: true,
+          startTime: true,
+          endTime: true,
+          individualSectionTimeLimit: true,
+          status: true,
+          batchId: true,
+          sections: {
+            include: {
+              questions: true,
+            },
+          },
+        },
+      });
+      if (!assessment) throw new Error("assessment not found");
+
+      return res
+        .status(200)
+        .json(apiResponse(200, "Batch Assessment Fetched Successfully", assessment));
+    } catch (error: any) {
+      console.log(error);
+      return res.status(200).json(apiResponse(200, error.message, null));
+    }
+  }
   async getAssessmentById(req: Request, res: Response) {
     try {
       const assessmentId = req.params.id;
@@ -292,5 +332,6 @@ class AssessmentController {
       return res.status(200).json(apiResponse(500, error.message, null));
     }
   }
+
 }
 export default new AssessmentController();

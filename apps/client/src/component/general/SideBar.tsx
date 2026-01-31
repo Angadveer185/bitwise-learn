@@ -9,12 +9,14 @@ import {
   ClipboardCheck,
   LogOut,
   LibraryBig,
+  Terminal,
 } from "lucide-react";
 import ThemeSwitcher from "./(Color Manager)/ThemeSwitcher";
 import { useColors } from "./(Color Manager)/useColors";
 import { useRole } from "./useRole";
 import { useRouter } from "next/navigation";
 import { logoutUser } from "@/lib/logout";
+import useLogs from "@/lib/useLogs";
 
 const MIN_WIDTH = 60;
 const MAX_WIDTH = 420;
@@ -22,7 +24,7 @@ const MAX_WIDTH = 420;
 export default function SideBar() {
   const Colors = useColors();
   const role = useRole();
-
+  const { loading: logsLoading, role: logRole } = useLogs();
   const [width, setWidth] = useState(220);
   const isResizing = useRef(false);
   const sidebarRef = useRef<HTMLElement | null>(null);
@@ -111,30 +113,36 @@ export default function SideBar() {
           label="Dashboard"
           collapsed={isCollapsed}
         />
-        <NavLink
+        {!logsLoading && logRole != null && logRole < 2 && <NavLink
           href={`/admin-dashboard/courses`}
           icon={<NotebookPen size={20} />}
           label="Courses"
           collapsed={isCollapsed}
-        />
-        <NavLink
+        />}
+        {<NavLink
           href={`/admin-dashboard/problems`}
           icon={<Code2 size={20} />}
           label="Problems"
           collapsed={isCollapsed}
-        />
-        <NavLink
+        />}
+        {!logsLoading && logRole != null && logRole <= 3 && <NavLink
           href={`/admin-dashboard/reports`}
           icon={<ClipboardCheck size={20} />}
           label="Reports"
           collapsed={isCollapsed}
-        />
-        <NavLink
+        />}
+        {!logsLoading && logRole != null && logRole < 4 && logRole !== 2 && <NavLink
           href={`/admin-dashboard/assessments`}
           icon={<LibraryBig size={20} />}
           label="Assessments"
           collapsed={isCollapsed}
-        />
+        />}
+        {<NavLink
+          href={`/admin-dashboard/compiler`}
+          icon={<Terminal size={20} />}
+          label="Compiler"
+          collapsed={isCollapsed}
+        />}
       </nav>
 
       {/* Footer */}
