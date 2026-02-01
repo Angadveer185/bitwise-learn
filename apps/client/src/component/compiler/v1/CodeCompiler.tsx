@@ -13,6 +13,8 @@ import {
   ChevronUp,
 } from "lucide-react";
 import React, { useEffect, useState, useRef } from "react";
+import Image from "next/image";
+import logo from "../../../../public/images/Logo.png"
 
 const LANGUAGE_CONFIG: Record<string, any> = {
   python: {
@@ -236,9 +238,9 @@ function CodeCompiler() {
     <div className={`flex flex-col w-full h-screen ${Colors.background.primary} ${Colors.text.primary}`}>
       {/* Header */}
       <div className={`flex items-center justify-between px-6 py-3 border-b border-slate-700 ${Colors.background.primary}`}>
-        <div className="flex gap-3">
-          <div className={`h-7 w-7 flex items-center justify-center rounded ${Colors.background.heroSecondary} font-bold`}>
-            B
+        <div className="flex gap-2 items-center">
+          <div className="mt-1">
+          <Image src={logo} alt="Logo" height={40}/>
           </div>
           <h1 className="font-semibold text-xl tracking-wide">
             Bitwise Learn Compiler

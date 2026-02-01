@@ -25,7 +25,7 @@ router.get(
   institutionController.getInstitutionByVendor,
 );
 router.put(
-  "/update-insitituion-by-id/:id",
+  "/update-insititution-by-id/:id",
   authMiddleware,
   institutionController.updateInstitution,
 );

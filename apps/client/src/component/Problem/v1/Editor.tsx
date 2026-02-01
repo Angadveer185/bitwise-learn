@@ -6,6 +6,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Play, Send, Timer, Pause, RotateCcw } from "lucide-react";
 import { useColors } from "@/component/general/(Color Manager)/useColors";
 import { useTheme } from "@/component/general/(Color Manager)/ThemeController";
+import toast from "react-hot-toast";
 
 const languageOptions = [
   { label: "JavaScript", value: "javascript" },
@@ -80,22 +81,26 @@ export default function CodeEditor({
   /* ------------------------------------------------ */
 
   const handleRun = async () => {
-    resetTimer();
     setOutput([]);
+    toast.loading("Running TestCase", { id: "run" });
+    resetTimer();
     const res = await runCode({
       language,
       code,
       questionId,
     });
     setOutput(res.testCases);
+    toast.success("Execution Completed", { id: "run" });
   };
 
   const handleSubmit = async () => {
+    toast.loading("Submitting Code", { id: "submit" });
     await submitCode({
       language,
       code,
       questionId,
     });
+    toast.success("Code Submitted", { id: "submit" });
   };
 
   useEffect(() => {
@@ -110,6 +115,21 @@ export default function CodeEditor({
       setCode("");
     }
   }, [language, templatesByLanguage]);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === "'") {
+        e.preventDefault();
+        handleRun();
+      }
+      if (e.ctrlKey && e.key === "Enter") {
+        e.preventDefault();
+        handleSubmit();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [code, language]);
 
   return (
     <div
@@ -189,31 +209,63 @@ export default function CodeEditor({
             )}
           </div>
 
-          <button
-            onClick={handleRun}
-            className={`
-              flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium
-              ${Colors.background.heroSecondaryFaded}
-              ${Colors.text.primary}
-              hover:opacity-90 transition cursor-pointer
-            `}
-          >
-            <Play size={14} />
-            Run
-          </button>
+          <div className="relative group">
+            <button
+              onClick={handleRun}
+              className={`
+      flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium
+      ${Colors.background.heroSecondaryFaded}
+      ${Colors.text.primary}
+      hover:opacity-90 transition cursor-pointer
+    `}
+            >
+              <Play size={14} />
+              Run
+            </button>
 
-          <button
-            onClick={handleSubmit}
-            className={`
-              flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium
-              ${Colors.background.heroPrimary}
-              ${Colors.text.black}
-              hover:opacity-90 transition cursor-pointer
-            `}
-          >
-            <Send size={14} />
-            Submit
-          </button>
+            <div
+              className={`
+      pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2
+      whitespace-nowrap rounded-md px-3 py-0.5 text-[13px]
+      opacity-0 group-hover:opacity-100 transition
+      ${Colors.background.primary}
+      ${Colors.border.fadedThin}
+      ${Colors.text.secondary}
+      z-10
+    `}
+            >
+              Ctrl + '
+            </div>
+          </div>
+
+          <div className="relative group">
+            <button
+              onClick={handleSubmit}
+              className={`
+      flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium
+      ${Colors.background.heroPrimary}
+      ${Colors.text.black}
+      hover:opacity-90 transition cursor-pointer
+    `}
+            >
+              <Send size={14} />
+              Submit
+            </button>
+
+            <div
+              className={`
+      pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2
+      whitespace-nowrap rounded-md px-3 py-0.5 text-[13px]
+      opacity-0 group-hover:opacity-100 transition
+      ${Colors.background.primary}
+      ${Colors.border.fadedThin}
+      ${Colors.text.secondary}
+      z-10
+    `}
+            >
+              Ctrl + Enter
+            </div>
+          </div>
         </div>
       </div>
 

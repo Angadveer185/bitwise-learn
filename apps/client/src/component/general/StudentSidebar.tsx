@@ -14,6 +14,8 @@ import {
 import { useStudent } from "@/store/studentStore";
 import { useColors } from "./(Color Manager)/useColors";
 import ThemeSwitcher from "./(Color Manager)/ThemeSwitcher";
+import { logoutUser } from "@/lib/logout";
+import { useRouter } from "next/navigation";
 
 
 const MIN_WIDTH = 60;
@@ -29,6 +31,13 @@ export default function StudentSideBar() {
   const student = useStudent();
 
   const isCollapsed = width <= 80;
+
+  const router = useRouter();
+
+    const handleLogout = async () => {
+      await logoutUser();
+      router.replace("/");
+    };
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -134,7 +143,7 @@ export default function StudentSideBar() {
       <div className="mt-auto px-2 py-4">
       <ThemeSwitcher />
         <button
-          onClick={logout}
+          onClick={handleLogout}
           className={`
             w-full flex items-center
             ${isCollapsed ? "justify-center px-2" : "gap-3 px-4"}

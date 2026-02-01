@@ -284,25 +284,6 @@ function TestCases({
                           {o.actualOutput || "—"}
                         </pre>
                       </div>
-
-                      {/* Error */}
-                      {o.stderr && (
-                        <div>
-                          <p className={`mb-1 text-xs ${Colors.text.secondary}`}>
-                            Error
-                          </p>
-                          <pre
-                            className={`
-                              rounded-md p-2 font-mono text-sm
-                              ${Colors.background.secondary}
-                              ${Colors.border.specialThin}
-                              ${Colors.text.secondary}
-                            `}
-                          >
-                            {o.stderr}
-                          </pre>
-                        </div>
-                      )}
                     </div>
                   );
                 })()}

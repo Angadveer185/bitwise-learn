@@ -303,7 +303,7 @@ export default function AdminLoginV1() {
           {step === "RESET" && (
             <ResetPasswordForm
               role={role}
-              onSuccess={() => router.push("/multi-login")}
+              onSuccess={() => window.location.href=("/multi-login")}
             />
           )}
         </motion.div>

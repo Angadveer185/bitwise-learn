@@ -17,13 +17,21 @@ class InstitutionController {
       if (!data) throw new Error("Please Provide all required fields");
       const userId = req.user.id;
 
-      const dbAdmin = await prismaClient.user.findFirst({
-        where: { id: userId },
-      });
+      let dbAdmin;
+      let userType = req.user?.type;
+      if (userType === "ADMIN" || userType === "SUPERADMIN") {
+        dbAdmin = await prismaClient.user.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "VENDOR") {
+        dbAdmin = await prismaClient.vendor.findUnique({
+          where: { id: userId },
+        });
+      }
 
-      if (!dbAdmin) throw new Error("no such user found!");
+      if (!dbAdmin) throw new Error("no such admin found!");
 
-      if (dbAdmin.ROLE !== "ADMIN" && dbAdmin.ROLE !== "SUPERADMIN") {
+      if (userType !== "ADMIN" && userType !== "SUPERADMIN" && userType !== "VENDOR") {
         throw new Error("only admin/superadmin can view institutions");
       }
       const existingInstitute = await prismaClient.institution.findFirst({
@@ -233,13 +241,21 @@ class InstitutionController {
 
       if (!institutionId) throw new Error("institution id is required");
 
-      const dbAdmin = await prismaClient.user.findFirst({
-        where: { id: userId },
-      });
+           let dbAdmin;
+      let userType = req.user?.type;
+      if (userType === "ADMIN" || userType === "SUPERADMIN") {
+        dbAdmin = await prismaClient.user.findUnique({
+          where: { id: userId },
+        });
+      } else if (userType === "VENDOR") {
+        dbAdmin = await prismaClient.vendor.findUnique({
+          where: { id: userId },
+        });
+      }
 
-      if (!dbAdmin) throw new Error("no such user found!");
+      if (!dbAdmin) throw new Error("no such admin found!");
 
-      if (dbAdmin.ROLE !== "ADMIN" && dbAdmin.ROLE !== "SUPERADMIN") {
+      if (userType !== "ADMIN" && userType !== "SUPERADMIN" && userType !== "VENDOR") {
         throw new Error("only admin/superadmin can view institutions");
       }
 

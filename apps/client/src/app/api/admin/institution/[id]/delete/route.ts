@@ -19,7 +19,7 @@ export async function POST(
     const cookieHeader = req.headers.get("cookie");
 
     const response = await axiosInstance.delete(
-      `${backendUrl}/api/v1/institutions/delete-insitituion-by-id/${id}`,
+      `${backendUrl}/api/v1/institutions/delete-institution-by-id/${id}`,
       {
         headers: {
           Cookie: cookieHeader || "",

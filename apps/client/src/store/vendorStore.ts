@@ -2,12 +2,14 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 interface Vendor {
+  data:{
   email: string;
   id: string;
   name: string;
   tagline: string;
   websiteLink: string;
   phoneNumber: string;
+  }
 }
 interface VendorStore {
   info: Vendor | null;

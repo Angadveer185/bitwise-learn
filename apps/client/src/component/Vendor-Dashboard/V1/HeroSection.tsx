@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { User } from "lucide-react";
+import { User, Plus } from "lucide-react";
 import { useColors } from "@/component/general/(Color Manager)/useColors";
 import useVendor from "@/store/vendorStore";
 import { getVendorDashboard } from "@/api/vendors/get-vendor-dashboard";
 import { getAllInstitutions } from "@/api/institutions/get-all-institutions";
 import DashboardInfo from "@/component/AllInstitutions/v1/DashboardInfo";
 import Filter from "@/component/general/Filter";
+import InstitutionForm from "@/component/AllInstitutions/v1/InstitutionForm";
+import { createInstitution } from "@/api/institutions/create-institution";
+import toast from "react-hot-toast";
 
 function Header({ name, email, tagline }: any) {
   const Colors = useColors();
@@ -47,10 +50,10 @@ export default function HeroSection() {
 
   if (!vendor) return null;
 
-  const [institutionData, setInstitutionData] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
+  const [institutionData, setInstitutionData] = useState<any>([]);
+  const [filteredData, setFilteredData] = useState<any>([]);
+  const [addNew, setAddNew] = useState(false);
 
-  // ✅ Fetch vendor ONCE
   useEffect(() => {
     if (!vendor) {
       getVendorDashboard(setVendor);
@@ -61,12 +64,38 @@ export default function HeroSection() {
     getAllInstitutions(setInstitutionData);
   }, []);
 
+  const handleCreateInstitution = async (data: any) => {
+    const toastId = toast.loading("Creating Institute...");
+
+    try {
+      const res = await createInstitution(data);
+      console.log(res)
+      setAddNew(false);
+      toast.success("Institute Created Successfully", { id: toastId });
+      await getAllInstitutions(setInstitutionData);
+
+    } catch (err: any) {
+      toast.error(
+        err?.response?.data?.message || err.message || "Error creating Institute",
+        { id: toastId }
+      );
+      console.error(err);
+    }
+  };
+
   if (!vendor) {
     return <div className="p-10">Loading dashboard...</div>;
   }
 
   return (
     <>
+      {addNew && (
+        <InstitutionForm
+          openForm={setAddNew}
+          onSubmit={handleCreateInstitution}
+        />
+      )}
+
       <Header
         name={vendor.info?.data.name}
         email={vendor.info?.data.email}
@@ -74,9 +103,19 @@ export default function HeroSection() {
       />
 
       <div className="p-10 w-full">
-        <h2 className={`text-2xl font-semibold mb-4 ${Colors.text.special}`}>
-          Institutions
-        </h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className={`text-2xl font-semibold ${Colors.text.special}`}>
+            Institutions
+          </h2>
+
+          <button
+            onClick={() => setAddNew(true)}
+            className={`flex gap-2 border p-2 rounded-xl ${Colors.text.special} ${Colors.border.default} ${Colors.hover.special} cursor-pointer`}
+          >
+            <Plus />
+            Add Institution
+          </button>
+        </div>
 
         <div className="flex flex-col gap-10">
           <Filter data={institutionData} setFilteredData={setFilteredData} />

@@ -92,5 +92,6 @@ export const URL_ACCESS_MAP: Record<string, string[]> = {
     "/admin-dashboard/batches/:batchId",
     "/admin-dashboard/courses",
     "/admin-dashboard/courses/:id",
+    "/admin-dashboard/compiler"
   ],
 };

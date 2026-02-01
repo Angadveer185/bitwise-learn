@@ -2,6 +2,8 @@ import { Facebook, Github, Instagram, Linkedin } from "lucide-react";
 import Link from "next/link";
 import BitwiseImage from "@/app/images/BitwiseImage.png";
 import { useColors } from "@/component/general/(Color Manager)/useColors";
+import Image from "next/image";
+import logo from "../../../public/images/Logo.png"
 
 export default function Footer() {
   const Colors = useColors();
@@ -14,11 +16,7 @@ export default function Footer() {
         {/* Company Info & Social Media */}
         <div className="flex flex-col items-center sm:items-start text-center sm:text-left">
           <Link href="/">
-            <img
-              src={BitwiseImage.src}
-              alt="Bitwise Logo"
-              className="h-10 mb-4 transition-transform hover:scale-105"
-            />
+          <Image src={logo} alt="Logo" height={40}/>
           </Link>
           <p className={`text-sm max-w-62.5 mb-4 ${Colors.text.special}`}>
             Learn, Code, Grow.

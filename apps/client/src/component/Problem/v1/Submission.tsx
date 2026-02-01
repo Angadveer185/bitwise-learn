@@ -42,6 +42,24 @@ function Submission({ id }: SubmissionProps) {
     );
   }
 
+  const parseFailedCase = (raw?: string) => {
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  };
+
+  const parseInputString = (input?: string) => {
+    if (!input) return null;
+    try {
+      return JSON.parse(input);
+    } catch {
+      return null;
+    }
+  };
+
   if (content.length === 0) {
     return (
       <div
@@ -85,14 +103,15 @@ function Submission({ id }: SubmissionProps) {
                 key={item.id}
                 onClick={() => setSelected(index)}
                 className={`
-                  px-4 py-3 cursor-pointer ${Colors.border.faded}
-                  transition-all
-                  ${
-                    isSelected
-                      ? Colors.background.special
-                      : Colors.hover.special
-                  }
-                `}
+  px-4 py-3 cursor-pointer
+  border-b ${Colors.border.faded}
+  transition-all
+  ${
+    isSelected
+      ? "bg-neutral-800/60 border-l-2 border-neutral-500"
+      : "hover:bg-neutral-800/40"
+  }
+`}
               >
                 <div className="flex justify-between items-center">
                   <span
@@ -119,9 +138,11 @@ function Submission({ id }: SubmissionProps) {
                   </span>
                 </div>
 
-                <div className={`flex justify-between text-xs ${Colors.text.secondary} mt-2`}>
-                  <span>{item.runtime || "--"} ms</span>
-                  <span>{item.memory || "--"} MB</span>
+                <div
+                  className={`flex justify-between text-xs ${Colors.text.secondary} mt-2`}
+                >
+                  <span>{item.runtime || "--"}</span>
+                  <span>{item.memory.replace("MB","KB") || "--"}</span>
                 </div>
               </li>
             );
@@ -135,8 +156,12 @@ function Submission({ id }: SubmissionProps) {
           <>
             {/* Header */}
             <div
-              className={`px-4 py-3 ${Colors.border.faded}
-              flex items-center gap-6 text-sm ${Colors.background.primary}`}
+              className={`
+    px-4 py-3 flex items-center gap-6 text-sm
+    ${Colors.background.primary}
+    ${Colors.border.faded}
+    backdrop-blur
+  `}
             >
               <span
                 className={`inline-flex items-center gap-2 font-semibold ${
@@ -153,39 +178,115 @@ function Submission({ id }: SubmissionProps) {
                 {selectedSubmission.status}
               </span>
 
-              <span className={`inline-flex items-center gap-1.5 ${Colors.text.secondary}`}>
+              <span
+                className={`inline-flex items-center gap-1.5 ${Colors.text.secondary}`}
+              >
                 <Clock size={14} />
-                {selectedSubmission.runtime ?? "--"} ms
+                {selectedSubmission.runtime ?? "--"}
               </span>
 
-              <span className={`inline-flex items-center gap-1.5 ${Colors.text.secondary}`}>
+              <span
+                className={`inline-flex items-center gap-1.5 ${Colors.text.secondary}`}
+              >
                 <MemoryStick size={14} />
-                {selectedSubmission.memory ?? "--"} MB
+                {selectedSubmission.memory.replace("MB","KB") ?? "--"}
               </span>
             </div>
 
             {/* Failed test case */}
-            {selectedSubmission.status === "FAILED" && (
-              <div
-                className={`mx-4 mt-4 rounded-xl ${Colors.border.specialThin}
-                ${Colors.background.special} p-3 text-sm text-red-300`}
-              >
-                <div className="font-semibold mb-1">Failed Test Case</div>
-                <pre className="whitespace-pre-wrap text-xs text-red-200">
-                  {selectedSubmission.failedTestCase}
-                </pre>
-              </div>
-            )}
+            {selectedSubmission.status === "FAILED" &&
+              (() => {
+                const failed = parseFailedCase(
+                  selectedSubmission.failedTestCase,
+                );
+
+                return (
+                  <div
+                    className={`
+        mx-4 mt-4 rounded-xl p-4 space-y-4
+        border border-red-500/30
+        bg-red-500/5
+      `}
+                  >
+                    <div className="flex items-center gap-2 text-red-400 font-semibold">
+                      <XCircle size={16} />
+                      Failed Test Case
+                    </div>
+
+                    {failed?.input &&
+                      (() => {
+                        const parsedInput = parseInputString(failed.input);
+
+                        return parsedInput ? (
+                          <div>
+                            <p className="text-xs text-red-300 mb-1">Input</p>
+                            <div className="rounded-md bg-black/30 p-2 text-xs font-mono text-red-200 space-y-1">
+                              {Object.entries(parsedInput).map(
+                                ([key, value]) => (
+                                  <div key={key}>
+                                    <span className="text-red-300">{key}</span>
+                                    {" : "}
+                                    <span className="text-red-200">
+                                      {Array.isArray(value)
+                                        ? JSON.stringify(value)
+                                        : String(value)}
+                                    </span>
+                                  </div>
+                                ),
+                              )}
+                            </div>
+                          </div>
+                        ) : null;
+                      })()}
+
+                    {failed?.output && (
+                      <div>
+                        <p className="text-xs text-red-300 mb-1">
+                          Expected Output
+                        </p>
+                        <pre className="rounded-md bg-black/30 p-2 text-xs font-mono text-green-300">
+                          {failed.output}
+                        </pre>
+                      </div>
+                    )}
+
+                    {failed?.yourOutput && (
+                      <div>
+                        <p className="text-xs text-red-300 mb-1">Your Output</p>
+                        <pre className="rounded-md bg-black/30 p-2 text-xs font-mono text-red-300">
+                          {failed.yourOutput}
+                        </pre>
+                      </div>
+                    )}
+
+                    {failed?.stderr && (
+                      <div>
+                        <p className="text-xs text-red-400 mb-1">Error</p>
+                        <pre className="rounded-md bg-red-950/40 p-2 text-xs font-mono text-red-400">
+                          {failed.stderr}
+                        </pre>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
             {/* Code */}
             <div
-              className={`flex-1 mt-4 mx-4 mb-4 rounded-xl
-              ${Colors.border.fadedThin}
-              ${Colors.background.secondary} overflow-auto`}
+              className={`
+    flex-1 mt-4 mx-4 mb-4 rounded-xl
+    border border-neutral-700
+    bg-black/60
+    overflow-auto
+  `}
             >
               <pre
-                className={`p-4 text-sm ${Colors.text.primary}
-                whitespace-pre-wrap font-mono`}
+                className={`
+      p-4 text-sm font-mono
+      text-neutral-200
+      leading-relaxed
+      whitespace-pre-wrap
+    `}
               >
                 {selectedSubmission.code}
               </pre>
