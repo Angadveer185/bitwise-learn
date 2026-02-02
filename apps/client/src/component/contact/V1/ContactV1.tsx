@@ -34,7 +34,6 @@ export default function ContactV1() {
     const name = formData.get("name");
     const email = formData.get("email");
     const message = formData.get("message");
-    (name, email, message);
   }
 
   return (

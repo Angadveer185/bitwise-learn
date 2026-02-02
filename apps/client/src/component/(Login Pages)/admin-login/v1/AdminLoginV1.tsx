@@ -93,7 +93,9 @@ function WelcomeTypewriter() {
 const ROLE = "ADMIN" as const;
 
 export default function AdminLoginV1() {
-  const [step, setStep] = useState<"LOGIN" | "EMAIL" | "OTP" | "RESET">("LOGIN");
+  const [step, setStep] = useState<"LOGIN" | "EMAIL" | "OTP" | "RESET">(
+    "LOGIN",
+  );
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
@@ -115,7 +117,7 @@ export default function AdminLoginV1() {
       });
       router.push("/admin-dashboard");
     } catch (err) {
-      console.error("Login failed", err);
+      // console.error("Login failed", err);
     } finally {
       setLoading(false);
     }
@@ -153,7 +155,6 @@ export default function AdminLoginV1() {
           animate="show"
           className="relative w-full md:w-[60%] bg-divBg mt-10 md:mt-16 md:ml-16 rounded-3xl p-8"
         >
-
           {step === "LOGIN" && (
             <>
               <h1 className="text-2xl font-bold mb-6">
@@ -161,7 +162,11 @@ export default function AdminLoginV1() {
                 <span className="text-primaryBlue">in</span>
               </h1>
 
-              <motion.form variants={stagger} onSubmit={fetchLoginData} className="space-y-6">
+              <motion.form
+                variants={stagger}
+                onSubmit={fetchLoginData}
+                className="space-y-6"
+              >
                 <motion.div variants={slideUp}>
                   <label className="text-lg text-white">Email Address</label>
                   <div className="relative">

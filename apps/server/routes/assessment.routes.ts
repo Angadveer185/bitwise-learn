@@ -33,6 +33,11 @@ router.get(
   authMiddleware,
   AssessmentController.getAssessmentsByBatch,
 );
+router.get(
+  "/get-assessment-by-institution/:id",
+  authMiddleware,
+  AssessmentController.getAssessmentsByInstitution,
+);
 router.put(
   "/update-assessment-by-id/:id",
   authMiddleware,

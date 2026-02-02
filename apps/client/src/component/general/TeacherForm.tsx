@@ -25,7 +25,11 @@ type Props = {
   onSubmit?: (data: TeacherFormData) => void;
 };
 
-export default function TeacherForm({ openForm, institutionId, onSubmit }: Props) {
+export default function TeacherForm({
+  openForm,
+  institutionId,
+  onSubmit,
+}: Props) {
   const [formData, setFormData] = useState<TeacherFormData>({
     name: "",
     email: "",
@@ -48,7 +52,7 @@ export default function TeacherForm({ openForm, institutionId, onSubmit }: Props
         setBatches(data || []);
         setLoadingBatches(false);
       }, institutionId).catch((error) => {
-        console.error("Failed to fetch batches:", error);
+        // console.error("Failed to fetch batches:", error);
         toast.error("Failed to load batches");
         setLoadingBatches(false);
       });
@@ -95,7 +99,9 @@ export default function TeacherForm({ openForm, institutionId, onSubmit }: Props
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
   ) => {
     const { name, value } = e.target;
     const nextData = { ...formData, [name]: value } as TeacherFormData;
@@ -123,13 +129,12 @@ export default function TeacherForm({ openForm, institutionId, onSubmit }: Props
         instituteId: institutionId,
       });
 
-      toast.success("Teacher created successfully",{id:toastId});
+      toast.success("Teacher created successfully", { id: toastId });
       onSubmit?.(formData);
       openForm(false);
-
     } catch (error) {
-      console.error("Failed to create teacher", error);
-      toast.error("Failed to create teacher", {id:toastId});
+      // console.error("Failed to create teacher", error);
+      toast.error("Failed to create teacher", { id: toastId });
     }
   };
 
@@ -184,14 +189,21 @@ export default function TeacherForm({ openForm, institutionId, onSubmit }: Props
             disabled={loadingBatches || batches.length === 0}
             className={`mt-1 w-full rounded-lg border ${Colors.background.primary} px-3 py-2 text-sm ${Colors.text.primary} focus:ring-2 focus:ring-primaryBlue ${errors.batchId ? "border-red-500 focus:ring-red-500" : "border-white/10"} disabled:opacity-50 disabled:cursor-not-allowed`}
             style={{
-              colorScheme: 'dark',
+              colorScheme: "dark",
             }}
           >
-            <option value="" className={`${Colors.background.primary} ${Colors.text.primary}`}>
+            <option
+              value=""
+              className={`${Colors.background.primary} ${Colors.text.primary}`}
+            >
               {loadingBatches ? "Loading batches..." : "Select a batch"}
             </option>
             {batches.map((batch) => (
-              <option key={batch.id} value={batch.id} className={`${Colors.background.primary} ${Colors.text.primary}`}>
+              <option
+                key={batch.id}
+                value={batch.id}
+                className={`${Colors.background.primary} ${Colors.text.primary}`}
+              >
                 {batch.batchname} - {batch.branch} ({batch.batchEndYear})
               </option>
             ))}

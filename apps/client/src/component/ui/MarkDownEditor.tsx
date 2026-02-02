@@ -13,7 +13,7 @@ export const THEME_MAP = {
   },
   dark: {
     backgroundColor: "#171717",
-    color: "white",
+    color: "#ffffff",
   },
 };
 export default function MarkdownEditor({
@@ -41,7 +41,7 @@ export default function MarkdownEditor({
       }}
     >
       <MDEditor
-        data-color-mode={theme}
+        // data-color-mode={theme}
         height={height}
         value={value}
         onChange={(val) => setValue(val ?? "")}

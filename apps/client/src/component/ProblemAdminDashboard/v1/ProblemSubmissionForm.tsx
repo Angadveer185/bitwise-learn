@@ -109,6 +109,7 @@ Output:
                 value={description}
                 setValue={setDescription}
                 mode={"live"}
+                theme="light"
                 hideToolbar={false}
               />
             </div>

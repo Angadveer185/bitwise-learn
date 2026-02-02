@@ -22,7 +22,11 @@ const pageFade: Variants = {
 
 const slideUp: Variants = {
   hidden: { opacity: 0, y: 30 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut" as const } },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.7, ease: "easeOut" as const },
+  },
 };
 
 const stagger: Variants = {
@@ -38,7 +42,6 @@ const imageReveal: Variants = {
     transition: { duration: 0.9, ease: "easeOut" as const },
   },
 };
-
 
 /* ================= TYPEWRITER ================= */
 const ROLE = "STUDENT" as const;
@@ -72,10 +75,12 @@ function WelcomeTypewriter() {
   const renderText = () =>
     text.split(/(Learn|Grow)/g).map((part, i) =>
       part === "Learn" || part === "Grow" ? (
-        <span key={i} className="text-primaryBlue">{part}</span>
+        <span key={i} className="text-primaryBlue">
+          {part}
+        </span>
       ) : (
         <span key={i}>{part}</span>
-      )
+      ),
     );
 
   return (
@@ -91,7 +96,9 @@ function WelcomeTypewriter() {
 /* ================= MAIN COMPONENT ================= */
 
 export default function StudentLoginV1() {
-  const [step, setStep] = useState<"LOGIN" | "EMAIL" | "OTP" | "RESET">("LOGIN");
+  const [step, setStep] = useState<"LOGIN" | "EMAIL" | "OTP" | "RESET">(
+    "LOGIN",
+  );
   const [showPassword, setShowPassword] = useState(false);
 
   const [email, setEmail] = useState("");
@@ -110,7 +117,7 @@ export default function StudentLoginV1() {
       toast.success("Login successful");
       router.push("/dashboard");
     } catch (err) {
-      console.error("Login failed", err);
+      // console.error("Login failed", err);
       toast.error("login failed");
     } finally {
       setLoading(false);
@@ -124,10 +131,16 @@ export default function StudentLoginV1() {
       className="bg-bg min-h-screen w-screen flex flex-col md:flex-row"
     >
       {/* LEFT */}
-      <motion.div variants={stagger} initial="hidden" animate="show"
+      <motion.div
+        variants={stagger}
+        initial="hidden"
+        animate="show"
         className="flex-1 flex flex-col px-6 py-10 md:p-16"
       >
-        <motion.h1 variants={slideUp} className="text-3xl text-center md:text-left">
+        <motion.h1
+          variants={slideUp}
+          className="text-3xl text-center md:text-left"
+        >
           <span className="text-primaryBlue font-bold">B</span>
           <span className="font-bold text-white">itwise</span>{" "}
           <span className="text-white">Learn</span>
@@ -140,7 +153,6 @@ export default function StudentLoginV1() {
           animate="show"
           className="relative w-full md:w-[60%] bg-divBg mt-10 md:mt-16 md:ml-16 rounded-3xl p-8"
         >
-
           {step === "LOGIN" && (
             <>
               <h1 className="text-2xl font-bold mb-6">
@@ -148,7 +160,11 @@ export default function StudentLoginV1() {
                 <span className="text-primaryBlue">in</span>
               </h1>
 
-              <motion.form variants={stagger} onSubmit={fetchLoginData} className="space-y-6">
+              <motion.form
+                variants={stagger}
+                onSubmit={fetchLoginData}
+                className="space-y-6"
+              >
                 <motion.div variants={slideUp}>
                   <label className="text-lg text-white">Email Address</label>
                   <div className="relative">
@@ -244,7 +260,12 @@ export default function StudentLoginV1() {
         animate="show"
         className="relative hidden lg:block lg:w-[38%] lg:h-screen"
       >
-        <Image src={StudentLoginIMG} alt="Login Illustration" fill className="object-cover" />
+        <Image
+          src={StudentLoginIMG}
+          alt="Login Illustration"
+          fill
+          className="object-cover"
+        />
       </motion.div>
     </motion.div>
   );

@@ -72,9 +72,7 @@ function BatchesForm({ openForm, institutionId, onSubmit }: Props) {
     return nextErrors;
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     const nextData = { ...formData, [name]: value } as BatchFormData;
     setFormData(nextData);
@@ -104,13 +102,13 @@ function BatchesForm({ openForm, institutionId, onSubmit }: Props) {
     const toastId = toast.loading("Creating Batch...");
     try {
       await createBatch({ ...formData, institutionId });
-      toast.success("Batch created successfully", {id: toastId});
+      toast.success("Batch created successfully", { id: toastId });
       setFormData({ batchname: "", branch: "", batchEndYear: "" });
       onSubmit?.(formData);
       openForm(false);
     } catch (error) {
-      console.error("Failed to create batch", error);
-      toast.error("Failed to create batch", {id: toastId});
+      // console.error("Failed to create batch", error);
+      toast.error("Failed to create batch", { id: toastId });
     } finally {
       setSubmitting(false);
     }
@@ -181,7 +179,9 @@ function BatchesForm({ openForm, institutionId, onSubmit }: Props) {
 function Label({ children }: { children: React.ReactNode }) {
   const Colors = useColors();
   return (
-    <label className={`text-[11px] uppercase tracking-wide ${Colors.text.special}`}>
+    <label
+      className={`text-[11px] uppercase tracking-wide ${Colors.text.special}`}
+    >
       {children}
     </label>
   );

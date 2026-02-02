@@ -18,6 +18,7 @@ export const updateContentToSection = async (
   if (data.videoUrl) formData.append("videoUrl", data.videoUrl);
   if (data.transcript) formData.append("transcript", data.transcript);
 
+  // console.log("content id is: ", contentId);
   const res = await axiosInstance.put(
     `/api/course/update-content-by-sectionId/${contentId}`,
     formData,

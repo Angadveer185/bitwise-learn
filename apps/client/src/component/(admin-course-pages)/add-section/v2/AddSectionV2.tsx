@@ -637,7 +637,7 @@ const AddSectionV2 = ({
       toast.success("Topic Deleted", { id: toastId });
       onSectionDeleted();
     } catch (error) {
-      console.error(error);
+      // console.error(error);
       toast.error("Failed to delete topic", { id: toastId });
     } finally {
       setShowDeleteTopicConfirm(false);
@@ -654,7 +654,7 @@ const AddSectionV2 = ({
         const res = await getAssignmentsBySection(sectionId);
         setAssignments(res.data || []);
       } catch (error) {
-        console.error(error);
+        // console.error(error);
         toast.error("Failed to Fetch Assignments");
       } finally {
         setAssignmentLoading(false);
@@ -674,7 +674,7 @@ const AddSectionV2 = ({
       const res = await getAssignmentsBySection(sectionId);
       setAssignments(res.data || []);
     } catch (error) {
-      console.error(error);
+      // console.error(error);
       toast.error("Failed to delete Assignment", { id: toastId });
     } finally {
       setDeletingAssignment(false);
@@ -1030,7 +1030,7 @@ const AddSectionV2 = ({
               setIsUpdateTopicOpen(false);
               setSelectedTopic(null);
             } catch (err) {
-              console.error(err);
+              // console.error(err);
               toast.error("Failed to update topic");
             }
           }}
@@ -1075,7 +1075,7 @@ const AddSectionV2 = ({
               const res = await getAssignmentsBySection(sectionId);
               setAssignments(res.data || []);
             } catch (error) {
-              console.error(error);
+              // console.error(error);
               toast.error("Failed to update Assignment", { id: toastId });
             }
           }}

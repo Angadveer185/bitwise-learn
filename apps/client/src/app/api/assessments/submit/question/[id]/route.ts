@@ -6,18 +6,21 @@ export async function POST(
 ) {
   try {
     const { id } = await context.params;
-    const token = req.cookies.get("accessToken")?.value;
     const input = await req.json();
-    console.log(input);
+    const token = req.cookies.get("token") || "";
+    if (!token) throw new Error("Token not found");
+    const cookieHeader = req.headers.get("cookie");
+
     const res = await fetch(
       `${process.env.BACKEND_URL}/api/v1/assessments/submit-assessment-question-by-id/${id}`,
       {
         method: "POST",
         body: JSON.stringify(input),
         headers: {
-          Authorization: token || "",
           "Content-Type": "application/json",
+          Cookie: cookieHeader || "",
         },
+        credentials: "include",
       },
     );
 

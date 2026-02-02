@@ -20,24 +20,24 @@ function V1AllInstitutions() {
   }, []);
 
   const handleCreateInstitution = async (data: any) => {
-  const toastId = toast.loading("Creating Institute...");
+    const toastId = toast.loading("Creating Institute...");
 
-  try {
-    await createInstitution(data);
+    try {
+      await createInstitution(data);
 
-    setAddNew(false);
-    toast.success("Institute Created Successfully", { id: toastId });
-    await getAllInstitutions(setData);
-
-  } catch (err: any) {
-    toast.error(
-      err?.response?.data?.message || err.message || "Error creating Institute",
-      { id: toastId }
-    );
-    console.error(err);
-  }
-};
-
+      setAddNew(false);
+      toast.success("Institute Created Successfully", { id: toastId });
+      await getAllInstitutions(setData);
+    } catch (err: any) {
+      toast.error(
+        err?.response?.data?.message ||
+          err.message ||
+          "Error creating Institute",
+        { id: toastId },
+      );
+      // console.error(err);
+    }
+  };
 
   return (
     <div className={`flex ${Colors.background.primary}`}>
@@ -53,7 +53,9 @@ function V1AllInstitutions() {
 
       <div className="ml-10 mt-10 w-full">
         <div className="w-[80%] mx-auto mb-5 flex justify-between">
-          <h1 className={`text-3xl ml-3 ${Colors.text.primary}`}>Manage Institutions</h1>
+          <h1 className={`text-3xl ml-3 ${Colors.text.primary}`}>
+            Manage Institutions
+          </h1>
           <button
             onClick={() => setAddNew(true)}
             className={`text-primaryBlue flex gap-2 border-primaryBlue border p-2 rounded-xl ${Colors.text.primary} ${Colors.border.fadedThin} ${Colors.hover.special} cursor-pointer`}

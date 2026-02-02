@@ -5,7 +5,6 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import { createQuestion } from "@/api/assessments/create-question";
 
-
 type Question = {
   id: string;
   question?: string;
@@ -13,7 +12,6 @@ type Question = {
   correctOption: number;
   maxMarks: number;
 };
-
 
 interface AddAssessmentMCQProps {
   open: boolean;
@@ -80,12 +78,11 @@ const AddAssessmentMCQ = ({
       onClose();
     } catch (err) {
       toast.error("Failed to add question");
-      console.error(err);
+      // console.error(err);
     } finally {
       setLoading(false);
     }
   };
-
 
   return (
     <div
@@ -98,9 +95,7 @@ const AddAssessmentMCQ = ({
       >
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-white">
-            Add MCQ Question
-          </h2>
+          <h2 className="text-lg font-semibold text-white">Add MCQ Question</h2>
           <button
             onClick={onClose}
             className="text-white/50 hover:text-white transition"
@@ -128,9 +123,10 @@ const AddAssessmentMCQ = ({
               <div
                 key={index}
                 className={`flex items-center gap-3 rounded-lg border px-4 py-3 transition cursor-pointer
-                  ${isCorrect
-                    ? "border-[#1DA1F2] bg-[#1DA1F2]/10"
-                    : "border-white/10 bg-[#181A1A]"
+                  ${
+                    isCorrect
+                      ? "border-[#1DA1F2] bg-[#1DA1F2]/10"
+                      : "border-white/10 bg-[#181A1A]"
                   }`}
                 onClick={() => setCorrectAnswer(index)}
               >
@@ -138,9 +134,7 @@ const AddAssessmentMCQ = ({
                   type="text"
                   placeholder={`Option ${index + 1}`}
                   value={option}
-                  onChange={(e) =>
-                    handleOptionChange(index, e.target.value)
-                  }
+                  onChange={(e) => handleOptionChange(index, e.target.value)}
                   className="flex-1 bg-transparent text-sm text-white placeholder:text-white/40 focus:outline-none"
                 />
 

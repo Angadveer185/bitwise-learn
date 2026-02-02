@@ -191,7 +191,7 @@ const DeleteSectionModal = ({
       onDeleted();
       onClose();
     } catch (err) {
-      console.error(err);
+      // console.error(err);
       toast.error("Failed to delete section");
     } finally {
       setLoading(false);
@@ -378,7 +378,7 @@ const DeleteQuestionModal = ({
       onDeleted();
       onClose();
     } catch (err) {
-      console.error(err);
+      // console.error(err);
       toast.error("Failed to delete question");
     } finally {
       setLoading(false);
@@ -488,7 +488,7 @@ const UpdateSectionModal = ({
       onUpdated();
       onClose();
     } catch (err) {
-      console.error(err);
+      // console.error(err);
       toast.error("Failed to update section");
     } finally {
       setLoading(false);
@@ -604,7 +604,7 @@ const UpdateQuestionModal = ({
       onUpdated(updated);
       onClose();
     } catch (err) {
-      console.error(err);
+      // console.error(err);
       toast.error("Failed to update question");
     } finally {
       setLoading(false);
@@ -732,7 +732,7 @@ const PublishAssessmentModal = ({
       onStatusChange(nextStatus);
       onClose();
     } catch (err) {
-      console.error(err);
+      // console.error(err);
       toast.error("Failed to publish assessment");
     } finally {
       setLoading(false);

@@ -46,7 +46,7 @@ function Solution() {
       });
       alert("Solution saved successfully ✅");
     } catch (error) {
-      console.error(error);
+      // console.error(error);
       alert("Failed to save solution ❌");
     } finally {
       setLoading(false);

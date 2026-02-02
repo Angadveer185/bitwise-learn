@@ -10,7 +10,6 @@ import useVendor from "@/store/vendorStore";
 import { useInstitution } from "@/store/institutionStore";
 import { useAdmin } from "@/store/adminStore";
 import { useTeacher } from "@/store/teacherStore";
-import { log } from "console";
 
 type ProblemCount = {
   easy: number;
@@ -20,8 +19,6 @@ type ProblemCount = {
 };
 
 const Colors = useColors();
-
-
 
 function DashboardHero() {
   const [showForm, setShowForm] = useState(false);
@@ -46,8 +43,9 @@ function HeroSection({ showForm, setShowForm }: any) {
   const [admin_name, setName] = useState("");
   const [admin_email, setEmail] = useState("");
   const [data, setData] = useState<ProblemCount | null>(null);
-
+  const [role, setRole] = useState("");
   useEffect(() => {
+    setRole(localStorage.getItem("role") || "");
     if (logsLoading || logRole === null) return;
 
     let name = "";
@@ -57,8 +55,8 @@ function HeroSection({ showForm, setShowForm }: any) {
       case 0:
       case 1:
         if (!adminInfo) return;
-        name = adminInfo.name;
-        email = adminInfo.email;
+        name = adminInfo.data.name;
+        email = adminInfo.data.email;
         break;
 
       case 2:
@@ -91,39 +89,46 @@ function HeroSection({ showForm, setShowForm }: any) {
     teacherInfo,
   ]);
 
-
   useEffect(() => {
     getAllProblemCount(setData);
   }, []);
 
   return (
-    <div className={`w-full rounded-2xl px-8 py-10 flex flex-col md:flex-row items-center justify-between ${Colors.background.secondary} shadow-sm`}>
+    <div
+      className={`w-full rounded-2xl px-8 py-10 flex flex-col md:flex-row items-center justify-between ${Colors.background.secondary} shadow-sm`}
+    >
       {showForm && <ProblemSubmissionForm setOpen={setShowForm} />}
 
       {/* LEFT */}
       <div className="text-center md:text-left space-y-4">
         <h1 className="text-4xl font-semibold">
           <span className={`${Colors.text.special}`}>Greetings,</span>{" "}
-          <span className={`${Colors.text.primary}`}>Admin</span>
+          <span className={`${Colors.text.primary}`}>{role}</span>
         </h1>
 
         <p className={`${Colors.text.primary} text-lg`}>
           Enjoy managing{" "}
-          <span className={`${Colors.text.special} font-semibold`}>Bitwise Learn</span>
+          <span className={`${Colors.text.special} font-semibold`}>
+            Bitwise Learn
+          </span>
         </p>
 
-        <p className={`${Colors.text.primary} max-w-lg text-base leading-relaxed`}>
+        <p
+          className={`${Colors.text.primary} max-w-lg text-base leading-relaxed`}
+        >
           Want to <span className="font-medium">add a new question</span> or{" "}
           <span className="font-medium">update an existing one</span>? Select an
           option below to continue.
         </p>
 
-        {!logsLoading && logRole != null && logRole < 4 && <button
-          onClick={() => setShowForm(true)}
-          className={`${Colors.background.special} mt-6 ${Colors.text.primary} px-6 py-3 rounded-lg font-medium shadow-md hover:opacity-90`}
-        >
-          Add New Question
-        </button>}
+        {!logsLoading && logRole != null && logRole < 4 && (
+          <button
+            onClick={() => setShowForm(true)}
+            className={`${Colors.background.special} mt-6 ${Colors.text.primary} px-6 py-3 rounded-lg font-medium shadow-md hover:opacity-90`}
+          >
+            Add New Question
+          </button>
+        )}
       </div>
 
       {/* RIGHT */}
@@ -133,8 +138,12 @@ function HeroSection({ showForm, setShowForm }: any) {
         </div>
 
         <div className={`${Colors.text.primary} text-center`}>
-          <h2 className={` ${Colors.text.primary} text-xl font-medium`}>{admin_name}</h2>
-          <p className={`${Colors.text.secondary} text-sm opacity-90`}>{admin_email}</p>
+          <h2 className={` ${Colors.text.primary} text-xl font-medium`}>
+            {admin_name}
+          </h2>
+          <p className={`${Colors.text.secondary} text-sm opacity-90`}>
+            {admin_email}
+          </p>
         </div>
 
         {/* STATS */}

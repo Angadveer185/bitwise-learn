@@ -65,9 +65,9 @@ const CourseForm: React.FC<CourseFormProps> = ({ onClose, onSuccess }) => {
 
       onSuccess();
     } catch (error: any) {
-      console.error("Course creation failed", error);
+      // console.error("Course creation failed", error);
 
-      // ✅ ADDED
+      // ADDED
       setFormError(
         error?.response?.data?.message ||
           "Something went wrong while creating the course.",
@@ -78,7 +78,9 @@ const CourseForm: React.FC<CourseFormProps> = ({ onClose, onSuccess }) => {
   };
 
   return (
-    <div className={`w-full rounded-2xl p-8 ${Colors.text.primary} shadow-2xl relative ${Colors.background.secondary}`}>
+    <div
+      className={`w-full rounded-2xl p-8 ${Colors.text.primary} shadow-2xl relative ${Colors.background.secondary}`}
+    >
       {/* Close Button */}
       <button
         onClick={(e) => {
@@ -101,7 +103,7 @@ const CourseForm: React.FC<CourseFormProps> = ({ onClose, onSuccess }) => {
             setFormData({ ...formData, name: e.target.value });
             setFormError(null); // ADDED
           }}
-            className={`w-full rounded-lg ${Colors.background.primary} px-4 py-3 outline-none focus:ring-1 focus:ring-[#64ACFF]`}
+          className={`w-full rounded-lg ${Colors.background.primary} px-4 py-3 outline-none focus:ring-1 focus:ring-[#64ACFF]`}
           placeholder="Course title"
         />
 

@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 // colors ------------------------------------------------------------------
 import { useColors } from "@/component/general/(Color Manager)/useColors";
 import { useStudent } from "@/store/studentStore";
+import { getAssessmentsByBatch } from "@/api/assessments/get-assessments-by-batch";
 const Colors = useColors();
 
 // types -------------------------------------------------------------------
@@ -207,21 +208,26 @@ const StudentAssesmentv1 = () => {
   const [searchText, setSearchText] = useState("");
   const [selectedAssessment, setSelectedAssessment] =
     useState<StudentAssessment | null>(null);
+
   const { info: studentInfo } = useStudent();
   const fetchAssessments = async () => {
     try {
       setLoading(true);
-      const batchId = studentInfo?.data.batch.id!;
-      const res = await getAllStudentAssessment(batchId as string);
+      let normalizedData: any[] = [];
+      const studentId = studentInfo?.data.batch.id;
+      if (!studentId) return;
+      await getAssessmentsByBatch((data: any) => {
+        normalizedData = data;
+      }, studentId as any);
 
-      const normalizedData = (res.data || []).map((a: any) => ({
+      //@ts-ignore
+      normalizedData = normalizedData.map((a: any) => ({
         ...a,
         instructions: a.instruction,
       }));
 
       setAssessments(normalizedData);
     } catch (error) {
-      toast.error("Failed to load Assessments");
     } finally {
       setLoading(false);
     }

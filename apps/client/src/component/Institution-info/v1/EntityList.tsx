@@ -33,8 +33,7 @@ export const EntityList = ({ type, institutionId }: EntityListProps) => {
 
   const isEditableEntity = type === "Teachers";
 
-  const backendEntityType =
-    type === "Teachers" ? "teacher" : null;
+  const backendEntityType = type === "Teachers" ? "teacher" : null;
 
   const formatDate = (date?: string) =>
     date ? new Date(date).toLocaleDateString() : "—";
@@ -70,7 +69,7 @@ export const EntityList = ({ type, institutionId }: EntityListProps) => {
             setEntities([]);
         }
       } catch (err) {
-        console.error(err);
+        // console.error(err);
         setEntities([]);
       } finally {
         setLoading(false);
@@ -174,15 +173,21 @@ export const EntityList = ({ type, institutionId }: EntityListProps) => {
         />
 
         {loading ? (
-          <div className={`py-12 text-center ${Colors.text.secondary}`}>Loading...</div>
+          <div className={`py-12 text-center ${Colors.text.secondary}`}>
+            Loading...
+          </div>
         ) : filteredEntities.length === 0 ? (
           <div className={`py-12 text-center ${Colors.text.secondary}`}>
             No {type.toLowerCase()} found
           </div>
         ) : (
-          <div className={`border ${Colors.border.defaultThick} ${Colors.background.secondary} rounded-lg overflow-hidden`}>
+          <div
+            className={`border ${Colors.border.defaultThick} ${Colors.background.secondary} rounded-lg overflow-hidden`}
+          >
             <table className="w-full">
-              <thead className={`${Colors.background.primary} text-xs ${Colors.text.primary}`}>
+              <thead
+                className={`${Colors.background.primary} text-xs ${Colors.text.primary}`}
+              >
                 <tr>
                   <th className="px-6 py-4 text-left">Name</th>
                   <th className="px-6 py-4 text-left">Created</th>
@@ -192,7 +197,9 @@ export const EntityList = ({ type, institutionId }: EntityListProps) => {
               <tbody className="divide-y divide-white/5">
                 {filteredEntities.map((entity) => (
                   <tr key={entity.id || entity._id}>
-                    <td className={`px-6 py-4  font-medium ${Colors.text.primary}`}>
+                    <td
+                      className={`px-6 py-4  font-medium ${Colors.text.primary}`}
+                    >
                       {entity.name || entity.batchname}
                     </td>
                     <td className={`px-6 py-4 ${Colors.text.secondary}`}>
@@ -217,7 +224,9 @@ export const EntityList = ({ type, institutionId }: EntityListProps) => {
       {/* ===================== MODAL ===================== */}
       {selectedEntity && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className={`relative w-full max-w-xl ${Colors.background.primary} p-6 rounded-xl`}>
+          <div
+            className={`relative w-full max-w-xl ${Colors.background.primary} p-6 rounded-xl`}
+          >
             <button
               onClick={() => setSelectedEntity(null)}
               className={`absolute right-4 top-4 ${Colors.text.secondary} cursor-pointer hover:text-red-700`}
@@ -234,7 +243,9 @@ export const EntityList = ({ type, institutionId }: EntityListProps) => {
                 .filter(([key]) => !["_id", "id", "createdAt"].includes(key))
                 .map(([key, value]) => (
                   <div key={key}>
-                    <p className={`text-xs uppercase ${Colors.text.special} mb-1`}>
+                    <p
+                      className={`text-xs uppercase ${Colors.text.special} mb-1`}
+                    >
                       {key}
                     </p>
                     {isEditing ? (
@@ -244,7 +255,9 @@ export const EntityList = ({ type, institutionId }: EntityListProps) => {
                         className={`w-full ${Colors.background.secondary} border border-white/10 px-3 py-2 text-sm ${Colors.text.primary} rounded`}
                       />
                     ) : (
-                      <p className={`text-sm ${Colors.text.primary}`}>{formatValue(value)}</p>
+                      <p className={`text-sm ${Colors.text.primary}`}>
+                        {formatValue(value)}
+                      </p>
                     )}
                   </div>
                 ))}

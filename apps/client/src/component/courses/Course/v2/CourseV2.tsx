@@ -61,6 +61,7 @@ const Colors = useColors();
 export default function CourseV2() {
   const params = useParams();
   const htmlRef = useRef(null);
+  const [generatingCertificate, setGeneratingCertificate] = useState(false);
   const [sections, setSections] = useState<Section[]>([]);
   const [activeTopic, setActiveTopic] = useState<Topic | null>(null);
   const [activeAssignment, setActiveAssignment] = useState<Assignment | null>(
@@ -230,13 +231,16 @@ export default function CourseV2() {
             <SectionNav
               sections={sections}
               mode={mode}
-              onCertificate={() =>
+              generatingCertificate={generatingCertificate}
+              onCertificate={() => {
+                setGeneratingCertificate(true);
                 createCertificate(
                   courseName,
                   info?.data.name as string,
                   htmlRef,
-                )
-              }
+                );
+                setGeneratingCertificate(false);
+              }}
               setMode={setMode}
               completedSection={completedSection}
               totalTopics={totalTopics}
@@ -513,8 +517,10 @@ function SectionNav({
   completedSection,
   totalTopics,
   onCertificate,
+  generatingCertificate,
 }: {
   sections: Section[];
+  generatingCertificate: boolean;
   mode: "LEARNING" | "ASSIGNEMENT";
   setMode: (m: "LEARNING" | "ASSIGNEMENT") => void;
   onCertificate: () => void;
@@ -525,7 +531,6 @@ function SectionNav({
   totalTopics: number;
 }) {
   const completedCount = completedSection.length;
-
   const progressPercent =
     totalTopics === 0 ? 0 : Math.round((completedCount / totalTopics) * 100);
 
@@ -638,7 +643,7 @@ function SectionNav({
           hover:scale-105 transition cursor-pointer`}
             onClick={onCertificate}
           >
-            Get Certificate
+            {generatingCertificate ? "generating..." : "Get Certificate"}
           </button>
         </div>
       )}

@@ -299,6 +299,7 @@ export default function AttemptV1({
   };
   const handleSubmitTest = async () => {
     await submitTest(id, { tabSwitchCount: tabSwitchCount });
+    router.push("/assessments");
   };
 
   return (

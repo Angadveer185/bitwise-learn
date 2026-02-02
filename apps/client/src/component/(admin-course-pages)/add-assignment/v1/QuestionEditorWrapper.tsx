@@ -72,7 +72,7 @@ export default function QuestionEditorWrapper({
 
         setQuestions(mappedQuestions);
       } catch (error) {
-        console.error("Failed to fetch assignment questions", error);
+        // console.error("Failed to fetch assignment questions", error);
         setQuestions([emptyQuestion()]);
       } finally {
         setLoading(false);
@@ -86,41 +86,44 @@ export default function QuestionEditorWrapper({
     setQuestions((prev) => prev.map((q, i) => (i === index ? updated : q)));
   };
 
-const handleSaveAllQuestions = async () => {
-  const toastId = toast.loading(editMode ? "Updating questions..." : "Saving questions...");
+  const handleSaveAllQuestions = async () => {
+    const toastId = toast.loading(
+      editMode ? "Updating questions..." : "Saving questions...",
+    );
 
-  try {
-    for (const q of questions) {
-      if (!q.text.trim()) continue;
+    try {
+      for (const q of questions) {
+        if (!q.text.trim()) continue;
 
-      const correctOptions = q.options.filter((o: any) => o.isCorrect);
-      if (correctOptions.length === 0) continue;
+        const correctOptions = q.options.filter((o: any) => o.isCorrect);
+        if (correctOptions.length === 0) continue;
 
-      const payload = {
-        question: q.text.trim(),
-        options: q.options.map((o: any) => o.text.trim()).filter(Boolean),
-        correctAnswer: correctOptions.map((o: any) => o.text.trim()),
-      };
+        const payload = {
+          question: q.text.trim(),
+          options: q.options.map((o: any) => o.text.trim()).filter(Boolean),
+          correctAnswer: correctOptions.map((o: any) => o.text.trim()),
+        };
 
-      if (!q.isNew) {
-        await updateAssignmentQuestion(q.id, payload);
-      } else {
-        await addAssignmentQuestion(assignmentId, {
-          assignmentId,
-          ...payload,
-        });
+        if (!q.isNew) {
+          await updateAssignmentQuestion(q.id, payload);
+        } else {
+          await addAssignmentQuestion(assignmentId, {
+            assignmentId,
+            ...payload,
+          });
+        }
       }
+
+      toast.success(editMode ? "Questions updated" : "Questions saved", {
+        id: toastId,
+      });
+      setEditMode(false);
+      onClose();
+    } catch (err) {
+      // console.error(err);
+      toast.error("Failed to save questions", { id: toastId });
     }
-
-    toast.success(editMode ? "Questions updated" : "Questions saved", { id: toastId });
-    setEditMode(false);
-    onClose();
-  } catch (err) {
-    console.error(err);
-    toast.error("Failed to save questions", { id: toastId });
-  }
-};
-
+  };
 
   if (loading) return null;
 
@@ -132,7 +135,7 @@ const handleSaveAllQuestions = async () => {
       total={questions.length}
       saveQuestion={saveQuestion}
       locked={locked}
-      onEdit={()=>setEditMode(true)}
+      onEdit={() => setEditMode(true)}
       onPrev={() => setIndex((i) => Math.max(i - 1, 0))}
       onNext={() => setIndex((i) => Math.min(i + 1, questions.length - 1))}
       onNew={() => {

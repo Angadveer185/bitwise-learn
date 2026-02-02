@@ -48,7 +48,7 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
       setIsEditing(false);
       setSelectedEntity(editedEntity); // update UI after success
     } catch (error) {
-      console.error("Update failed", error);
+      // console.error("Update failed", error);
     }
   };
 
@@ -64,7 +64,7 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
       setShowDeleteConfirm(false);
       setSelectedEntity(null);
     } catch (error) {
-      console.error("Delete failed", error);
+      // console.error("Delete failed", error);
     }
   };
 
@@ -85,6 +85,7 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
             break;
           case "Assessments":
             await getAssessmentsByBatch((data: any) => {
+              // console.log(data);
               setEntities(Array.isArray(data) ? data : []);
             }, batchId as string);
             break;
@@ -97,7 +98,7 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
             setEntities([]);
         }
       } catch (error) {
-        console.error(`Error fetching ${type}:`, error);
+        // console.error(`Error fetching ${type}:`, error);
         setEntities([]);
       } finally {
         setLoading(false);
@@ -212,7 +213,7 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
       case "Teachers":
         return ["Name", "Email", "Phone", "Created"];
       case "Assessments":
-        return ["Name", "Email", "Phone", "Created"];
+        return ["Name", "Instruction", "Status", "Created"];
       case "Courses":
         return ["Name", "Instructor", "Level", "Created"];
       default:
@@ -239,9 +240,9 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
       case "Assessments":
         return [
           entity.name || "Unknown Vendor",
-          entity.email || "—",
-          entity.phoneNumber || "—",
-          formatDate(entity.createdAt),
+          entity.instruction || "—",
+          formatDate(entity.startTime),
+          formatDate(entity.endTime),
         ];
       case "Courses":
         return [
@@ -373,7 +374,7 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
                           setIsEditing(false);
                           setEditedEntity(null);
                         } catch (err) {
-                          console.error("Update failed", err);
+                          // console.error("Update failed", err);
                         }
                       }}
                       className="rounded-md bg-primaryBlue px-3 py-1 text-sm text-white"
@@ -424,7 +425,8 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
                       key !== "_id" &&
                       key != "thumbnail" &&
                       key != "certificate" &&
-                      key != "createdBy",
+                      key != "createdBy" &&
+                      key != "section",
                   )
                   .map(([key, value]) => (
                     <div key={key}>
@@ -484,7 +486,7 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
                         setShowDeleteConfirm(false);
                         setSelectedEntity(null);
                       } catch (err) {
-                        console.error("Delete failed", err);
+                        // console.error("Delete failed", err);
                       }
                     }}
                     className="rounded-md bg-red-500 px-4 py-2 text-white"

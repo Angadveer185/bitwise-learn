@@ -20,7 +20,7 @@ const AddCodeQuestion = () => {
       const res = await axios.get(`/api/code-questions?search=${search}`);
       setQuestions(res.data);
     } catch (err) {
-      console.error(err);
+      // console.error(err);
     } finally {
       setLoading(false);
     }

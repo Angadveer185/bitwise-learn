@@ -11,6 +11,9 @@ import { useRouter } from "next/navigation";
 import { useColors } from "../../general/(Color Manager)/useColors";
 import { getAllInstitutions } from "@/api/institutions/get-all-institutions";
 import { getAllBatches } from "@/api/batches/get-all-batches";
+import { useStudent } from "@/store/studentStore";
+import { getAssessmentsByInstitution } from "@/api/assessments/get-assessments-by-batch";
+import { useInstitution } from "@/store/institutionStore";
 
 // colors ------------------------------------------------------------------
 const Colors = useColors();
@@ -145,7 +148,7 @@ const AddAssessmentModal = ({
       try {
         await getAllInstitutions(setInstitutes);
       } catch (err) {
-        console.error("Failed to load institutes", err);
+        // console.error("Failed to load institutes", err);
       }
     };
 
@@ -163,7 +166,7 @@ const AddAssessmentModal = ({
       try {
         await getAllBatches(setBatches, selectedInstitute);
       } catch (err) {
-        console.error("Failed to load batches", err);
+        // console.error("Failed to load batches", err);
       }
     };
 
@@ -482,12 +485,21 @@ const AssessmentsV1 = () => {
   const [loading, setLoading] = useState(true);
   const [openCreateAssessment, setOpenCreateAssessment] = useState(false);
   const [searchText, setSearchText] = useState("");
-
+  const { info: instituteInfo } = useInstitution();
   const fetchAssessments = async () => {
     try {
       setLoading(true);
-      const res = await getAllAssessments();
-      setAssessments(res.data || []);
+      // console.log(instituteInfo?.data.id);
+      if (!instituteInfo?.data.id) {
+        const res = await getAllAssessments();
+        setAssessments(res.data || []);
+      } else {
+        const res = await getAssessmentsByInstitution((data: any) => {
+          // console.log(data);
+          //@ts-ignore
+          setAssessments(res.data || []);
+        }, instituteInfo.data.id);
+      }
     } catch (error) {
       toast.error("Failed to load Assessments");
     } finally {
@@ -496,8 +508,8 @@ const AssessmentsV1 = () => {
   };
 
   useEffect(() => {
-    const assessmentData = fetchAssessments();
-  }, []);
+    fetchAssessments();
+  }, [instituteInfo?.data.id]);
 
   const filteredAssessments = assessments.filter((assessment) => {
     if (!searchText.trim()) return true;
@@ -590,7 +602,7 @@ const AssessmentsV1 = () => {
 
             await fetchAssessments();
           } catch (error) {
-            console.error("Create assessment error:", error);
+            // console.error("Create assessment error:", error);
 
             toast.error("Unable to create assessment", {
               id: toastId,

@@ -164,8 +164,76 @@ class AssessmentController {
         if (batchStudent?.batchId !== batchId)
           throw new Error("Student Does not belongs to this batch");
       }
+
+      let allowedStatus = [];
+      if (req.user.type === "STUDENT") {
+        allowedStatus = ["LIVE"];
+      } else {
+        allowedStatus = ["LIVE", "ENDED", "UPCOMING"];
+      }
       const assessment = await prismaClient.assessment.findMany({
-        where: { batchId: batchId as string },
+        where: {
+          batchId: batchId as string,
+          status: {
+            in: allowedStatus as any,
+          },
+        },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          instruction: true,
+          startTime: true,
+          endTime: true,
+          individualSectionTimeLimit: true,
+          status: true,
+          batchId: true,
+          sections: {
+            include: {
+              questions: true,
+            },
+          },
+        },
+      });
+      if (!assessment) throw new Error("assessment not found");
+
+      return res
+        .status(200)
+        .json(
+          apiResponse(200, "Batch Assessment Fetched Successfully", assessment),
+        );
+    } catch (error: any) {
+      console.log(error);
+      return res.status(200).json(apiResponse(200, error.message, null));
+    }
+  }
+  async getAssessmentsByInstitution(req: Request, res: Response) {
+    try {
+      if (!req.user) throw new Error("User not authenticated");
+      if (req.user.type === "STUDENT") {
+        throw new Error("unAuthorized");
+      }
+      const batches = await prismaClient.batch.findMany({
+        where: { institutionId: req.user.id },
+        select: { id: true },
+      });
+
+      let batchesId: string[] = batches.map((batch) => {
+        return batch.id;
+      });
+
+      if (batchesId.length === 0) {
+        return res
+          .status(200)
+          .json(apiResponse(200, "Batch Assessment Fetched Successfully", []));
+      }
+
+      const assessment = await prismaClient.assessment.findMany({
+        where: {
+          batchId: {
+            in: batchesId,
+          },
+        },
         select: {
           id: true,
           name: true,
@@ -200,6 +268,13 @@ class AssessmentController {
       const assessmentId = req.params.id;
       if (!req.user) throw new Error("User not authenticated");
 
+      if (req.user.type === "STUDENT") {
+        const dbAssessment = await prismaClient.assessmentSubmission.findFirst({
+          where: { studentId: req.user.id },
+        });
+
+        if (dbAssessment) throw new Error("already submitted");
+      }
       const assessment = await prismaClient.assessment.findUnique({
         where: { id: assessmentId as string },
         select: {
@@ -220,8 +295,7 @@ class AssessmentController {
         },
       });
       if (!assessment) throw new Error("assessment not found");
-      if (assessment.status !== "LIVE")
-        throw new Error("wait for test to start");
+      if (assessment.status !== "LIVE") throw new Error("assessment not found");
       return res
         .status(200)
         .json(apiResponse(200, "Assessment Fetched Successfully", assessment));

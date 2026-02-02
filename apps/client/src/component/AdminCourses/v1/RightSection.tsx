@@ -33,7 +33,7 @@ const RightSection = () => {
       const data = await getAllCourses();
       setCourses(data);
     } catch (error) {
-      console.error("Failed to fetch courses", error);
+      // console.error("Failed to fetch courses", error);
       toast.error("Failed to fetch Courses");
     } finally {
       setLoading(false);
@@ -240,7 +240,11 @@ const RightSection = () => {
                   >
                     {[
                       { label: "All Levels", value: "ALL" },
-                      { label: "Basic", value: "BASIC", color: Colors.text.primary },
+                      {
+                        label: "Basic",
+                        value: "BASIC",
+                        color: Colors.text.primary,
+                      },
                       {
                         label: "Intermediate",
                         value: "INTERMEDIATE",

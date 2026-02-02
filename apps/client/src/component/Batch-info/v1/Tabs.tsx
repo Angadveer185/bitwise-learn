@@ -92,7 +92,7 @@ export const Tabs = ({
         id: "bulk-upload",
       });
     } catch (error) {
-      console.error(error);
+      // console.error(error);
       toast.error("Bulk upload failed", {
         id: "bulk-upload",
       });
@@ -154,15 +154,19 @@ export const Tabs = ({
         ))}
 
         {/* Add New */}
-        {!logsLoading && logRole != null && logRole != 5 && logRole != 4 && (
-          <button
-            onClick={() => setAddNew(true)}
-            className="flex items-center gap-2 border border-primaryBlue px-3 py-2 rounded text-white hover:bg-primaryBlue/10"
-          >
-            <Plus size={18} />
-            Add New {value}
-          </button>
-        )}
+        {!logsLoading &&
+          logRole != null &&
+          logRole != 5 &&
+          value != "Assessments" &&
+          logRole != 4 && (
+            <button
+              onClick={() => setAddNew(true)}
+              className="flex items-center gap-2 border border-primaryBlue px-3 py-2 rounded text-white hover:bg-primaryBlue/10"
+            >
+              <Plus size={18} />
+              Add New {value}
+            </button>
+          )}
 
         {/* Bulk Upload (Students only) */}
         {value === "Students" &&

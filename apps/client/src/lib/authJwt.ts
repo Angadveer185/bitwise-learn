@@ -22,10 +22,6 @@ export function checkJWT(token: string): any {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    // if (typeof decoded === "string") {
-    //     throw new Error("Invalid token payload");
-    // }
-
     return decoded;
   } catch (error) {
     throw new Error("Invalid or expired token");

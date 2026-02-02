@@ -24,16 +24,18 @@ function V1AllAdmins() {
     try {
       await createAdmin(data);
       setAddNew(false);
-      toast.success("Admin Created Successfully",{id:toastId});
+      toast.success("Admin Created Successfully", { id: toastId });
       getAllAdmins(setData);
     } catch (err) {
-      toast.error("Error creating Admin", {id:toastId});
-      console.error(err);
+      toast.error("Error creating Admin", { id: toastId });
+      // console.error(err);
     }
   };
   return (
     <div className={`flex ${Colors.background.primary}`}>
-      {addNew && <AdminForm openForm={setAddNew} onSubmit={handleCreateAdmin} />}
+      {addNew && (
+        <AdminForm openForm={setAddNew} onSubmit={handleCreateAdmin} />
+      )}
 
       <div className="h-screen">
         <SideBar />
@@ -41,7 +43,9 @@ function V1AllAdmins() {
 
       <div className="ml-10 mt-10 w-full">
         <div className="w-[80%] mx-auto mb-5 flex justify-between">
-          <h1 className={`text-3xl ml-3 ${Colors.text.secondary}`}>Manage Admins</h1>
+          <h1 className={`text-3xl ml-3 ${Colors.text.secondary}`}>
+            Manage Admins
+          </h1>
           <button
             onClick={() => setAddNew(true)}
             className={`${Colors.text.special} flex gap-2 border-primaryBlue border p-2 rounded-xl cursor-pointer ${Colors.hover.special} transition`}

@@ -60,7 +60,7 @@ const AddAssessmentCode = ({
       setQuestions([]);
       setSelectedQuestion(null);
     } catch (err) {
-      console.error(err);
+      // console.error(err);
     } finally {
       setSubmitting(false);
     }

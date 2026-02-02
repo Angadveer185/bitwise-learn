@@ -180,7 +180,7 @@ const defaultTemplate = `
 	position: absolute;
 	white-space: nowrap;
 	font-size: 1.932599em;
-	left:12.8983em;
+	left:14.8983em;
 	top:12em;
 }
 .name-text {

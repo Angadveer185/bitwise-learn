@@ -25,7 +25,7 @@ function V1AllVendors() {
       getAllVendors(setData);
     } catch (err) {
       toast.error("Error creating Vendor");
-      console.error(err);
+      // console.error(err);
     }
   };
   const Colors = useColors();
@@ -40,7 +40,9 @@ function V1AllVendors() {
 
       <div className="ml-10 mt-10 w-full">
         <div className="w-[80%] mx-auto mb-5 flex justify-between">
-          <h1 className={`text-3xl ml-3 ${Colors.text.secondary}`}>Manage Vendors</h1>
+          <h1 className={`text-3xl ml-3 ${Colors.text.secondary}`}>
+            Manage Vendors
+          </h1>
           <button
             onClick={() => setAddNew(true)}
             className={`${Colors.text.special} flex gap-2 border-primaryBlue border p-2 rounded-xl cursor-pointer ${Colors.hover.special}`}
@@ -52,8 +54,8 @@ function V1AllVendors() {
         <Filter data={data} setFilteredData={setFilteredData} />
         <DashboardInfo
           data={filteredData}
-          onUpdate={() => { }}
-          onDelete={() => { }}
+          onUpdate={() => {}}
+          onDelete={() => {}}
         />
       </div>
     </div>

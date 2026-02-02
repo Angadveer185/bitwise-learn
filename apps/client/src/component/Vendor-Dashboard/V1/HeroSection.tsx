@@ -50,7 +50,7 @@ export default function HeroSection() {
   const [institutionData, setInstitutionData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
 
-  // ✅ Fetch vendor ONCE
+  //  Fetch vendor ONCE
   useEffect(() => {
     if (!vendor) {
       getVendorDashboard(setVendor);

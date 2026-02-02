@@ -194,7 +194,7 @@ export default function AllCoursesV1() {
 
         setCourses(filteredCourses);
       } catch (error) {
-        console.error("Failed to load courses", error);
+        // console.error("Failed to load courses", error);
       } finally {
         setLoading(false);
       }

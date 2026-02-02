@@ -43,7 +43,7 @@ function CourseForm({ batchId }: { batchId: string }) {
       alert("Institution enrolled successfully 🎉");
       setSelectedCourses([]);
     } catch (error) {
-      console.error(error);
+      // console.error(error);
       alert("Something went wrong while enrolling courses");
     } finally {
       setLoading(false);

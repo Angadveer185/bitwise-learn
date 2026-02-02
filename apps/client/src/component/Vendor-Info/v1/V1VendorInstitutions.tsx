@@ -29,7 +29,7 @@ function V1VendorInstitutions({ vendorId }: V1VendorInstitutionsProps) {
       getVendorInstitutions(setData, vendorId);
     } catch (err) {
       toast.error("Error creating Institute");
-      console.error(err);
+      // console.error(err);
     }
   };
 

@@ -11,3 +11,12 @@ export const getAssessmentsByBatch = async (statefn: any, paramId: string) => {
     toast.error("error getting assessments");
   }
 };
+export const getAssessmentsByInstitution = async (
+  statefn: any,
+  paramId: string,
+) => {
+  const getAssessments = await axiosInstance.get(
+    "/api/assessments/get-by-institution/" + paramId,
+  );
+  statefn(getAssessments.data);
+};
