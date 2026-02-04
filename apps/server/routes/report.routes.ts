@@ -20,7 +20,7 @@ router.get(
   ReportController.getCourseReport,
 );
 router.get(
-  "/assessment-report/:id",
+  "/full-assessment-report/:id",
   authMiddleware,
   assessmentController.assessmentReportRequest,
 );

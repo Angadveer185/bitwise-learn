@@ -2,155 +2,199 @@ import prismaClient from "@bitwiselearn/prisma";
 import * as XLSX from "xlsx";
 import path from "path";
 import { uploadToCloudinary } from "./file-upload";
+import fs from "fs/promises";
 
 /** Sleep helper */
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export default async function assessmentProcessing(payload: { id: string }) {
-  const BATCH_SIZE = 50;
-  let lastId: string | null = null;
-  let hasMore = true;
+export default async function assessmentProcessing(payload: string) {
+  const assessment = JSON.parse(payload);
+  try {
+    const BATCH_SIZE = 50;
 
-  const rows: any[] = [];
+    let lastId: string | null = null;
+    let hasMore = true;
 
-  while (hasMore) {
-    const submissions: any = await prismaClient.assessmentSubmission.findMany({
-      take: BATCH_SIZE,
-      ...(lastId && {
-        skip: 1,
-        cursor: { id: lastId },
-      }),
-      where: {
-        assessmentId: payload.id,
-        isSubmitted: true,
-      },
-      orderBy: {
-        id: "asc",
-      },
-      include: {
-        student: {
-          select: {
-            name: true,
-            email: true,
-            instituteId: true,
-            batchId: true,
-            batch: true,
-          },
-        },
-        assessmentQuestionSubmissions: {
+    const rows: any[] = [];
+    const dbAssessment = await prismaClient.assessment.findUnique({
+      where: { id: assessment.id },
+      select: {
+        startTime: true,
+        sections: {
           include: {
-            question: {
-              include: {
-                section: true,
-              },
-            },
+            questions: true,
           },
         },
       },
     });
 
-    if (submissions.length === 0) {
-      hasMore = false;
-      break;
+    if (!dbAssessment) {
+      throw new Error("Assessment not found");
     }
+    const assessmentTotalMarks = dbAssessment.sections.reduce(
+      (sum, section) =>
+        sum +
+        section.questions.reduce(
+          (qSum, q) => qSum + (q.maxMarks ?? section.marksPerQuestion ?? 0),
+          0,
+        ),
+      0,
+    );
 
-    for (const submission of submissions) {
-      const questionSubs = submission.assessmentQuestionSubmissions;
+    const assessmentTotalQuestions = dbAssessment.sections.reduce(
+      (sum, section) => sum + section.questions.length,
+      0,
+    );
 
-      let solved = 0;
-      let partiallySolved = 0;
-      let notSolved = 0;
-      let totalPossibleMarks = 0;
+    while (hasMore) {
+      const submissions: any = await prismaClient.assessmentSubmission.findMany(
+        {
+          take: BATCH_SIZE,
+          ...(lastId && {
+            skip: 1,
+            cursor: { id: lastId },
+          }),
+          where: {
+            assessmentId: assessment.id,
+            isSubmitted: true,
+          },
+          orderBy: { id: "asc" },
+          include: {
+            student: {
+              select: {
+                name: true,
+                email: true,
+                instituteId: true,
+                batchId: true,
+                batch: true,
+              },
+            },
+          },
+        },
+      );
 
-      for (const qs of questionSubs) {
-        const maxMarks =
-          qs.question.section.marksPerQuestion ?? qs.question.maxMarks ?? 0;
-
-        totalPossibleMarks += maxMarks;
-
-        if (!qs.marksObtained) {
-          notSolved++;
-        } else if (qs.marksObtained === maxMarks) {
-          solved++;
-        } else {
-          partiallySolved++;
-        }
+      if (submissions.length === 0) {
+        hasMore = false;
+        break;
       }
 
-      const totalPercentage =
-        totalPossibleMarks > 0
-          ? ((submission.totalMarks ?? 0) / totalPossibleMarks) * 100
-          : 0;
+      for (const submission of submissions) {
+        const questionSubs =
+          await prismaClient.assessmentQuestionSubmission.findMany({
+            where: {
+              assessmentId: submission.assessmentId,
+              studentId: submission.studentId,
+            },
+            include: {
+              question: {
+                include: {
+                  section: true,
+                },
+              },
+            },
+          });
 
-      const timeSpent =
-        submission.submittedAt && submission.startedAt
-          ? Math.floor(
-              (new Date(submission.submittedAt).getTime() -
-                new Date(submission.startedAt).getTime()) /
-                1000,
+        let correct = 0;
+        let incorrect = 0;
+
+        for (const qs of questionSubs) {
+          const maxMarks =
+            qs.question.maxMarks ?? qs.question.section.marksPerQuestion ?? 0;
+
+          if (qs.marksObtained === maxMarks) {
+            correct++;
+          } else if (qs.marksObtained > 0 || qs.marksObtained === 0) {
+            incorrect++;
+          }
+        }
+
+        const totalMarks = submission.totalMarks ?? 0;
+
+        const totalPercentage =
+          assessmentTotalMarks > 0
+            ? (totalMarks / assessmentTotalMarks) * 100
+            : 0;
+
+        const totalTimeSpent = submission.createdAt
+          ? Number(
+              (
+                (submission.submittedAt.getTime() -
+                  dbAssessment.startTime.getTime()) /
+                (1000 * 60)
+              ).toFixed(2),
             )
           : null;
 
-      rows.push({
-        Name: submission.student.name,
-        Email: submission.student.email,
-        RegisterId: submission.student.batchId,
-        Institution: submission.student.instituteId,
-        "Batch Year": submission.student.batch?.batchEndYear,
-        Batch: submission.student.batch?.batchname ?? "",
-        Status: submission.isSubmitted ? "SUBMITTED" : "NOT_SUBMITTED",
-        TotalScore: submission.totalMarks ?? 0,
-        TotalQuestionsSolved: solved,
-        TotalQuestionsPartiallySolved: partiallySolved,
-        TotalQuestionsNotSolved: notSolved,
-        TotalPercentage: totalPercentage.toFixed(2),
-        OverallQualifingStatus:
-          totalPercentage >= 40 ? "QUALIFIED" : "NOT_QUALIFIED",
-        OverallTimeSpent: timeSpent,
-        TabSwitchCount:
-          submission.tabSwitchCount > 0
-            ? submission.tabSwitchCount === 3
-              ? "MALPRACTICE"
-              : "SUSPICIOUS"
-            : "CLEAN",
-        ProctorMonitor: submission.proctoringStatus,
-        Attemptedon: submission.startedAt,
-        "IP Address": submission.studentIp,
-      });
+        rows.push({
+          Name: submission.student.name,
+          Email: submission.student.email,
+          BatchId: submission.student.batchId,
+          Institution: submission.student.instituteId,
+          "Batch Year": submission.student.batch?.batchEndYear,
+          Batch: submission.student.batch?.batchname ?? "",
+          Status: "SUBMITTED",
+          TotalScore: totalMarks,
+          Correct: correct,
+          Incorrect: incorrect,
+          TotalQuestionsNotSolved:
+            assessmentTotalQuestions - correct - incorrect,
+          TotalPercentage: Number(totalPercentage.toFixed(2)),
+          OverallQualifingStatus:
+            totalPercentage >= 40 ? "QUALIFIED" : "NOT_QUALIFIED",
+          OverallTimeSpent: totalTimeSpent,
+          TabSwitchCount: submission.tabSwitchCount,
+          ProctorMonitor: submission.proctoringStatus,
+          Attemptedon: submission.submittedAt,
+          "IP Address": submission.studentIp,
+        });
+      }
+
+      lastId = submissions[submissions.length - 1].id;
+
+      const delay = Math.floor(Math.random() * 6000) + 5000;
+      console.log(
+        `Processed ${rows.length} records. Sleeping ${delay / 1000}s…`,
+      );
+
+      await sleep(delay);
     }
 
-    lastId = submissions[submissions.length - 1].id;
+    rows.sort((a, b) => (b.TotalScore ?? 0) - (a.TotalScore ?? 0));
+    rows.forEach((row, index) => {
+      row.Ranking = index + 1;
+    });
 
-    // 💤 Sleep 5–10 seconds after each batch
-    const delay = Math.floor(Math.random() * (10_000 - 5_000 + 1)) + 5_000;
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Assessment Results");
 
-    console.log(`Processed ${rows.length} records. Sleeping ${delay / 1000}s…`);
-    await sleep(delay);
+    const filePath = path.join(
+      process.cwd(),
+      `assessment_${assessment.id}.xlsx`,
+    );
+
+    XLSX.writeFile(workbook, filePath);
+
+    const uploadData = await uploadToCloudinary(filePath);
+
+    await prismaClient.assessment.update({
+      where: { id: assessment.id },
+      data: {
+        report: uploadData.url,
+        reportStatus: "PROCESSED",
+      },
+    });
+
+    await fs.unlink(
+      path.join(process.cwd(), `assessment_${assessment.id}.xlsx`),
+    );
+    console.log("Assessment report generated successfully");
+    return filePath;
+  } catch (error) {
+    console.error("Assessment processing failed:", error);
+    await fs.unlink(
+      path.join(process.cwd(), `assessment_${assessment.id}.xlsx`),
+    );
+    throw error;
   }
-
-  rows.sort((a, b) => (b.TotalScore ?? 0) - (a.TotalScore ?? 0));
-  rows.forEach((row, index) => {
-    row.Ranking = index + 1;
-  });
-
-  const worksheet = XLSX.utils.json_to_sheet(rows);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Assessment Results");
-
-  const filePath = path.join(process.cwd(), `assessment_${payload.id}.xlsx`);
-
-  XLSX.writeFile(workbook, filePath);
-
-  console.log("Excel file created:", filePath);
-  const uploadData = await uploadToCloudinary(filePath);
-
-  await prismaClient.assessment.update({
-    where: { id: payload.id },
-    data: {
-      report: uploadData.url,
-      reportStatus: "PROCESSED",
-    },
-  });
-
-  return filePath;
 }

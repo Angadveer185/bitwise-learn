@@ -20,7 +20,7 @@ export async function GET(
     const cookieHeader = req.headers.get("cookie");
 
     const response = await axios.get(
-      `${backendUrl}/api/v1/reports/assessment-report/${id}`,
+      `${backendUrl}/api/v1/reports/full-assessment-report/${id}`,
       {
         headers: {
           Cookie: cookieHeader || "",

@@ -4,6 +4,7 @@ import prismaClient from "../utils/prisma";
 import * as XLSX from "xlsx";
 import { generatePassword } from "../utils/nodemailer/GeneratePass";
 import { hashPassword } from "../utils/password";
+import { password } from "bun";
 
 interface CSVBatch {
   batchname: string;
@@ -140,7 +141,6 @@ class CSVUploader {
       if (!createdStudent || createdStudent.count === 0) {
         throw new Error("batches couldn't be updated");
       }
-
       return res
         .status(200)
         .json(apiResponse(200, "students uploaded", createdStudent));

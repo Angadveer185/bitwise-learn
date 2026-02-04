@@ -1060,7 +1060,10 @@ const AssessmentBuilderV1 = ({ assessmentId }: BuilderProps) => {
                             className={`text-sm font-medium ${Colors.text.primary}`}
                           >
                             {i + 1}.{" "}
-                            {q.question || q.problem?.name || "Code Question"}
+                            {q &&
+                              (q.question ||
+                                q.problem?.name ||
+                                "Code Question")}
                           </p>
                           <div className="flex gap-2">
                             <button
@@ -1091,30 +1094,31 @@ const AssessmentBuilderV1 = ({ assessmentId }: BuilderProps) => {
 
                         {/* Options */}
                         <div className="grid grid-cols-2 gap-2">
-                          {q.options.map((opt, idx) => {
-                            const isCorrect = idx === q.correctOption;
+                          {q &&
+                            q.options.map((opt, idx) => {
+                              const isCorrect = idx === q.correctOption;
 
-                            return (
-                              <div
-                                key={idx}
-                                className={`rounded-lg border px-3 py-2 text-xs flex items-center justify-between
+                              return (
+                                <div
+                                  key={idx}
+                                  className={`rounded-lg border px-3 py-2 text-xs flex items-center justify-between
 
                                   ${
                                     isCorrect
                                       ? "border-green-500 bg-green-500/10 text-green-400"
                                       : `${Colors.border.defaultThin} ${Colors.text.primary} ${Colors.background.secondary}`
                                   }`}
-                              >
-                                <span>{opt}</span>
+                                >
+                                  <span>{opt}</span>
 
-                                {isCorrect && (
-                                  <span className="ml-2 text-[10px] uppercase tracking-wide">
-                                    correct
-                                  </span>
-                                )}
-                              </div>
-                            );
-                          })}
+                                  {isCorrect && (
+                                    <span className="ml-2 text-[10px] uppercase tracking-wide">
+                                      correct
+                                    </span>
+                                  )}
+                                </div>
+                              );
+                            })}
                         </div>
 
                         <p className={`text-xs ${Colors.text.secondary}`}>

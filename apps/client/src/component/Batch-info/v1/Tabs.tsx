@@ -91,6 +91,7 @@ export const Tabs = ({
 
       await uploadBatches(batchId as string, file, "STUDENT", null);
 
+      window.location.reload();
       toast.success("Students uploaded successfully", {
         id: "bulk-upload",
       });
