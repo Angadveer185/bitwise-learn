@@ -35,7 +35,7 @@ export default function TestCaseForm({
 
     const payload = {
       testType: testCaseType,
-      input: JSON.stringify(parsedInput),
+      input: parsedInput,
       output,
     };
 

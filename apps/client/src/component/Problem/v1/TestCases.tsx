@@ -129,24 +129,11 @@ function TestCases({
                     className={`
                       rounded-lg p-3 space-y-1 font-mono text-sm
                       ${Colors.background.primary}
+                      ${Colors.text.primary}
                       ${Colors.border.fadedThin}
                     `}
                   >
-                    {Object.entries(parseInput(currentTest.input)).map(
-                      ([key, value], idx) => (
-                        <div key={idx}>
-                          <span className={`${Colors.text.primary}`}>
-                            {key}
-                          </span>
-                          {" : "}
-                          <span className={Colors.text.special}>
-                            {Array.isArray(value)
-                              ? JSON.stringify(value)
-                              : String(value)}
-                          </span>
-                        </div>
-                      ),
-                    )}
+                    {currentTest.input}
                   </div>
                 </div>
 
@@ -205,7 +192,7 @@ function TestCases({
                 {output[activeCase] &&
                   (() => {
                     const o = output[activeCase];
-                    const parsedInput = parseInput(o.input);
+                    const parsedInput = o.input;
 
                     return (
                       <div
@@ -241,24 +228,11 @@ function TestCases({
                             className={`
                             rounded-md p-2 font-mono text-sm
                             ${Colors.background.secondary}
+                            ${Colors.text.primary}
                             ${Colors.border.fadedThin}
                           `}
                           >
-                            {Object.entries(parsedInput).map(
-                              ([key, value], i) => (
-                                <div key={i}>
-                                  <span className={Colors.text.primary}>
-                                    {key}
-                                  </span>
-                                  {" : "}
-                                  <span className={Colors.text.special}>
-                                    {Array.isArray(value)
-                                      ? JSON.stringify(value)
-                                      : String(value)}
-                                  </span>
-                                </div>
-                              ),
-                            )}
+                            {parsedInput}
                           </div>
                         </div>
 
