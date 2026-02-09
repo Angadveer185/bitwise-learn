@@ -143,7 +143,7 @@ const RightSection = () => {
   return (
     <>
       {CourseFormModal}
-      {!loading && courses.length === 0 ? (
+      {!loading && courses && courses.length === 0 ? (
         <section className="flex h-full w-full flex-col items-center justify-center gap-6 p-6 text-center">
           {/* Text Above */}
           <motion.p

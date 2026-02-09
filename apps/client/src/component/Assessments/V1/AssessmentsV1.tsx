@@ -332,7 +332,7 @@ const AddAssessmentModal = ({
             <div className="grid grid-cols-3 gap-2 mt-1">
               <input
                 type="date"
-                className={`${inputBase} mt-0 col-span-2 startTime",
+                className={`${inputBase} ${Colors.text.primary} mt-0 col-span-2 startTime",
                 )}`}
                 value={startDate}
                 onChange={(e) => {
@@ -342,7 +342,7 @@ const AddAssessmentModal = ({
               />
               <input
                 type="time"
-                className={`${inputBase} mt-0 `}
+                className={`${inputBase} mt-0 ${Colors.text.primary} `}
                 value={startClock}
                 onChange={(e) => {
                   setStartClock(e.target.value);
@@ -369,7 +369,7 @@ const AddAssessmentModal = ({
               />
               <input
                 type="time"
-                className={`${inputBase} mt-0 `}
+                className={`${inputBase} mt-0 ${Colors.text.primary} `}
                 value={endClock}
                 onChange={(e) => {
                   setEndClock(e.target.value);
@@ -524,7 +524,7 @@ const AssessmentsV1 = () => {
       if (!instituteInfo?.data.id && !adminInfo?.data.id) return;
 
       let res: any;
-      if (logsRole === 0) {
+      if (logsRole && logsRole < 2) {
         res = await getAllAssessments();
         setAssessments(res.data || []);
       } else {
@@ -541,6 +541,7 @@ const AssessmentsV1 = () => {
   };
 
   useEffect(() => {
+    if (logsRole === null) return;
     fetchAssessments();
   }, [logsLoading, logsRole]);
 

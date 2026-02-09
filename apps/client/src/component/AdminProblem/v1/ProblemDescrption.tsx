@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { ChevronRight } from "lucide-react";
 import TestCaseSection from "@/component/Problem/v1/TestcaseSection";
 import MarkdownEditor, { THEME_MAP } from "@/component/ui/MarkDownEditor";
-import { changeStatus } from "@/api/problems/change-status";
+import { changeStatus, deleteStatus } from "@/api/problems/change-status";
 import { useColors } from "@/component/general/(Color Manager)/useColors";
 import { useTheme } from "@/component/general/(Color Manager)/ThemeController";
+import useLogs from "@/lib/useLogs";
 
 function ProblemDescrption({
   data,
@@ -20,10 +21,18 @@ function ProblemDescrption({
   if (!data) return null;
 
   const { name, description, hints, testCases, problemTopics } = data;
-
+  const { loading, role } = useLogs();
   const [width, setWidth] = useState(420); // initial width in px
+  const [showButton, setShowButton] = useState(false);
   const isResizing = useRef(false);
   const Colors = useColors();
+  useEffect(() => {
+    if (role && role < 2) {
+      setShowButton(true);
+    } else {
+      setShowButton(false);
+    }
+  }, [role]);
 
   const startResizing = () => {
     isResizing.current = true;
@@ -49,9 +58,12 @@ function ProblemDescrption({
     document.removeEventListener("mouseup", stopResizing);
   };
   const handlePublish = async (id: string) => {
-    console.log("problem is + ", id);
     await changeStatus(id);
     data.problem = "LISTED";
+    window.location.reload();
+  };
+  const handleDelete = async (id: string) => {
+    await deleteStatus(id);
     window.location.reload();
   };
   return (
@@ -71,19 +83,29 @@ function ProblemDescrption({
         className="absolute top-0 right-0 h-full w-1 cursor-col-resize bg-transparent hover:bg-blue-500/30"
       />
       <div className="flex space-x-3 mx-auto items-center justify-between mb-4">
-        <button
-          onClick={() => handlePublish(data.id)}
-          className={` px-2 py-2 text-white font-medium rounded-lg transition-colors cursor-pointer
+        {showButton && (
+          <button
+            onClick={() => handleDelete(data.id)}
+            className={` px-2 py-2 text-white font-medium rounded-lg transition-colors cursor-pointer bg-red-600 hover:bg-red-700`}
+          >
+            Delete Question
+          </button>
+        )}
+        {showButton && (
+          <button
+            onClick={() => handlePublish(data.id)}
+            className={` px-2 py-2 text-white font-medium rounded-lg transition-colors cursor-pointer
     ${
       data.published === "NOT_LISTED"
         ? "bg-blue-600 hover:bg-blue-700"
         : "bg-red-600 hover:bg-red-700"
     }`}
-        >
-          {data.published === "NOT_LISTED"
-            ? "List Question"
-            : "Remove Question"}
-        </button>
+          >
+            {data.published === "NOT_LISTED"
+              ? "List Question"
+              : "unList Question"}
+          </button>
+        )}
         <label className="items-center gap-2 cursor-pointer">
           <input
             type="checkbox"

@@ -181,7 +181,11 @@ class CSVUploader {
         raw: false,
       });
       batchArray = batchArray.map((batch: CSVTestCase) => {
-        return { ...batch, problemId: dbProblem.id };
+        return {
+          ...batch,
+          input: batch.input.toString(),
+          problemId: dbProblem.id,
+        };
       });
 
       const createdTestCase = await prismaClient.problemTestCase.createMany({

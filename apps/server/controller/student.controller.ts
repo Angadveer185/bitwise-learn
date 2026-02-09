@@ -73,7 +73,7 @@ class StudentController {
 
       if (!studentId) throw new Error("student id is required");
 
-      if (req.user.type !== "INSTITUTION") {
+      if (req.user.type === "STUDENT") {
         throw new Error("only institution can update students");
       }
 
@@ -81,11 +81,6 @@ class StudentController {
         where: { id: studentId as string },
       });
       if (!student) throw new Error("student not found");
-
-      // Check if student belongs to the institute
-      if (req.user.type === "INSTITUTION" && student.instituteId !== userId) {
-        throw new Error("student does not belongs to your institution");
-      }
 
       const updatedStudent = await prismaClient.student.update({
         where: { id: studentId as string },
@@ -136,7 +131,7 @@ class StudentController {
 
       if (!studentId) throw new Error("student id is required");
 
-      if (req.user.type !== "INSTITUTION") {
+      if (req.user.type === "STUDENT") {
         throw new Error("only institution can delete students");
       }
 
@@ -144,12 +139,6 @@ class StudentController {
         where: { id: studentId as string },
       });
       if (!student) throw new Error("student not found");
-
-      // Code to be debugged
-
-      if (req.user.type === "INSTITUTION" && student.instituteId !== userId) {
-        throw new Error("student does not belongs to this institution");
-      }
 
       const deletedStudent = await prismaClient.student.delete({
         where: { id: studentId as string },
@@ -176,12 +165,7 @@ class StudentController {
         whereClause = { institutionId: userId };
       }
 
-      if (
-        req.user.type !== "SUPERADMIN" &&
-        req.user.type !== "ADMIN" &&
-        req.user.type !== "INSTITUTION" &&
-        req.user.type !== "VENDOR"
-      ) {
+      if (req.user.type === "STUDENT") {
         throw new Error("not authorized to view students");
       }
 
@@ -225,10 +209,6 @@ class StudentController {
         where: { id: studentId as string },
       });
       if (!student) throw new Error("student not found");
-
-      if (req.user.type === "INSTITUTION" && student.instituteId !== userId) {
-        throw new Error("not authorized to view this student");
-      }
 
       if (
         req.user.type !== "SUPERADMIN" &&
@@ -279,9 +259,7 @@ class StudentController {
       //     throw new Error("not authorized to view this student");
       // }
 
-      if (
-        req.user.type === "STUDENT"
-      ) {
+      if (req.user.type === "STUDENT") {
         throw new Error("not authorized");
       }
 

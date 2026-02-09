@@ -31,7 +31,11 @@ class InstitutionController {
 
       if (!dbAdmin) throw new Error("no such admin found!");
 
-      if (userType !== "ADMIN" && userType !== "SUPERADMIN" && userType !== "VENDOR") {
+      if (
+        userType !== "ADMIN" &&
+        userType !== "SUPERADMIN" &&
+        userType !== "VENDOR"
+      ) {
         throw new Error("only admin/superadmin can view institutions");
       }
       const existingInstitute = await prismaClient.institution.findFirst({
@@ -89,7 +93,11 @@ class InstitutionController {
 
       if (!dbAdmin) throw new Error("no such user found!");
 
-      if (dbAdmin.ROLE !== "ADMIN" && dbAdmin.ROLE !== "SUPERADMIN") {
+      if (
+        dbAdmin.ROLE !== "ADMIN" &&
+        dbAdmin.ROLE !== "SUPERADMIN" &&
+        dbAdmin.ROLE !== "VENDOR"
+      ) {
         throw new Error("only admin or superadmin can update institutions");
       }
 
@@ -162,7 +170,11 @@ class InstitutionController {
 
       if (!dbAdmin) throw new Error("no such user found!");
 
-      if (dbAdmin.ROLE !== "ADMIN" && dbAdmin.ROLE !== "SUPERADMIN") {
+      if (
+        dbAdmin.ROLE !== "ADMIN" &&
+        dbAdmin.ROLE !== "SUPERADMIN" &&
+        dbAdmin.ROLE !== "VENDOR"
+      ) {
         throw new Error("only admin/superadmin can view institutions");
       }
 
@@ -241,7 +253,7 @@ class InstitutionController {
 
       if (!institutionId) throw new Error("institution id is required");
 
-           let dbAdmin;
+      let dbAdmin;
       let userType = req.user?.type;
       if (userType === "ADMIN" || userType === "SUPERADMIN") {
         dbAdmin = await prismaClient.user.findUnique({
@@ -255,7 +267,11 @@ class InstitutionController {
 
       if (!dbAdmin) throw new Error("no such admin found!");
 
-      if (userType !== "ADMIN" && userType !== "SUPERADMIN" && userType !== "VENDOR") {
+      if (
+        userType !== "ADMIN" &&
+        userType !== "SUPERADMIN" &&
+        userType !== "VENDOR"
+      ) {
         throw new Error("only admin/superadmin can view institutions");
       }
 

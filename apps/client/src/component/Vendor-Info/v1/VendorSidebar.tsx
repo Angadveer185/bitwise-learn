@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Pencil, Save, X, Trash } from "lucide-react";
 import InfoBlock from "./InfoBlock";
 import { deleteEntity, updateEntity } from "@/api/institutions/entity";
+import { useRouter } from "next/navigation";
 
 type VendorSidebarProps = {
   vendor: any;
@@ -57,6 +58,7 @@ const InputField = ({
 const VendorSidebar = ({ vendor, onUpdate, onDelete }: VendorSidebarProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(vendor);
+  const router = useRouter();
   useEffect(() => {
     setFormData(vendor);
   }, [vendor]);
@@ -79,6 +81,7 @@ const VendorSidebar = ({ vendor, onUpdate, onDelete }: VendorSidebarProps) => {
       },
       null,
     );
+    window.location.reload();
     setIsEditing(false);
   };
 
@@ -92,6 +95,7 @@ const VendorSidebar = ({ vendor, onUpdate, onDelete }: VendorSidebarProps) => {
         },
         null,
       );
+      router.push("/admin-dashboard/vendors");
     }
   };
 

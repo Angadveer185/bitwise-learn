@@ -31,6 +31,7 @@ const getUrl = (id: string, entity: string, operation: string) => {
 export const updateEntity = async (id: string, data: any, stateFn: any) => {
   const toastId = toast.loading("Saving Changes...");
   try {
+    console.log(getUrl(id, data.entity, "update"));
     const updatedData = await axiosInstance.post(
       getUrl(id, data.entity, "update"),
       data,
@@ -44,6 +45,7 @@ export const updateEntity = async (id: string, data: any, stateFn: any) => {
   }
 };
 export const deleteEntity = async (id: string, data: any, stateFn: any) => {
+  // console.log("hello inside the function");
   const toastId = toast.loading("Deleting...");
   try {
     const deleteData = await axiosInstance.post(
@@ -52,5 +54,7 @@ export const deleteEntity = async (id: string, data: any, stateFn: any) => {
     );
     toast.success("Deleted Entity...", { id: toastId });
     stateFn(deleteData.data);
-  } catch (error) {}
+  } catch (error) {
+    console.error("Delete failed:", error);
+  }
 };

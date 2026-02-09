@@ -11,3 +11,13 @@ export async function changeStatus(problemId: string) {
     toast.error("failed to get change status");
   }
 }
+export async function deleteStatus(problemId: string) {
+  try {
+    const response = await axiosInstance.delete(
+      "/api/admin/delete-problem/" + problemId,
+    );
+    return response.data;
+  } catch (error) {
+    toast.error("failed to get change status");
+  }
+}

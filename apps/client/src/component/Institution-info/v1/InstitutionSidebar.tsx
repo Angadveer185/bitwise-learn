@@ -3,6 +3,7 @@ import { Pencil, Save, X, Trash } from "lucide-react";
 import InfoBlock from "./InfoBlock";
 import { deleteEntity, updateEntity } from "@/api/institutions/entity";
 import { useColors } from "@/component/general/(Color Manager)/useColors";
+import { useRouter } from "next/navigation";
 
 type InstitutionSidebarProps = {
   institution: any;
@@ -62,6 +63,7 @@ const InstitutionSidebar = ({
   onUpdate,
   onDelete,
 }: InstitutionSidebarProps) => {
+  const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(institution);
   useEffect(() => {
@@ -101,6 +103,8 @@ const InstitutionSidebar = ({
         },
         null,
       );
+
+      router.push("/admin-dashboard/institutions");
     }
   };
 

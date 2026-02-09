@@ -81,6 +81,7 @@ export default function HeroSection() {
 
 /* ---------------- ENTITY TABS ---------------- */
 import { School, Handshake, ShieldCheck } from "lucide-react";
+import useLogs from "@/lib/useLogs";
 
 const ENTITY_META: Record<
   string,
@@ -113,7 +114,7 @@ const ENTITY_META: Record<
 
 function EntityTabs({ fields, data }: EntityTabsProps) {
   const Colors = useColors();
-
+  const { loading, role } = useLogs();
   if (!fields.length) {
     return <p className="text-white/60 text-center mt-6">Loading dashboard…</p>;
   }
@@ -126,7 +127,9 @@ function EntityTabs({ fields, data }: EntityTabsProps) {
         if (!meta || !href) return null;
 
         const Icon = meta.icon;
-
+        if (field === "admins" && role && role !== 0) {
+          return;
+        }
         return (
           <Link
             key={field}

@@ -4,17 +4,27 @@ import { useEffect, useState, useMemo } from "react";
 import { Pencil, Trash2, X } from "lucide-react";
 import { getStudentsByBatch } from "@/api/students/get-students-by-batch";
 import { getTeachersByBatch } from "@/api/teachers/get-teachers-by-batch";
-import { deleteEntity, updateEntity } from "@/api/institutions/entity";
 import { getCourseEnrollments } from "@/api/courses/course/enrollments/get-all-enrollment";
 import { allBatchCourses } from "@/api/courses/course/enrollments/get-all-batch-courses";
 import { getAssessmentsByBatch } from "@/api/assessments/get-assessments-by-batch";
 // import { getAllAssessments } from "@/api/vendors/get-all-vendors";
 import { useColors } from "@/component/general/(Color Manager)/useColors";
+import { deleteEntity, updateEntity } from "@/api/institutions/entity";
 
 type EntityListProps = {
   type: string;
   batchId?: string;
 };
+export const ENTITY_URL_MAP: Record<string, string> = {
+  Students: "student",
+  Teachers: "teacher",
+  Courses: "courses",
+  Assessments: "assessment",
+  Institutions: "institution",
+  Vendors: "vendor",
+  Admins: "admin",
+  Batches: "batch",
+} as const;
 
 export const EntityList = ({ type, batchId }: EntityListProps) => {
   const [entities, setEntities] = useState<any[]>([]);
@@ -41,12 +51,13 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
   const handleSave = async () => {
     try {
       // TODO: UPDATE STUDENT API CALL GOES HERE
+      console.log("----updating----");
       await updateEntity(
         editedEntity.id || editedEntity._id,
-        { data: editedEntity, entity: type },
+        { data: editedEntity, entity: ENTITY_URL_MAP[type] },
         null,
       );
-
+      window.location.reload();
       setIsEditing(false);
       setSelectedEntity(editedEntity); // update UI after success
     } catch (error) {
@@ -56,18 +67,19 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
 
   const handleDelete = async () => {
     try {
-      // TODO:  DELETE STUDENT API CALL GOES HERE
-      // await deleteStudentApi(selectedEntity.id || selectedEntity._id)
-      await deleteEntity(
-        editedEntity.id || editedEntity._id,
-        { data: "", entity: type },
+      const res = await deleteEntity(
+        selectedEntity.id || selectedEntity._id,
+        { data: "", entity: ENTITY_URL_MAP[type] },
         null,
       );
       setShowDeleteConfirm(false);
       setSelectedEntity(null);
+      window.location.reload();
     } catch (error) {
       // console.error("Delete failed", error);
     }
+    setShowDeleteConfirm(false);
+    setSelectedEntity(null);
   };
 
   useEffect(() => {
@@ -279,10 +291,14 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
               : `No ${type.toLowerCase()} available`}
           </div>
         ) : (
-          <div className={`w-full overflow-x-auto border ${Colors.border.defaultThick} ${Colors.background.primary} shadow-lg rounded-lg`}>
+          <div
+            className={`w-full overflow-x-auto border ${Colors.border.defaultThick} ${Colors.background.primary} shadow-lg rounded-lg`}
+          >
             <table className="w-full border-collapse">
               <thead className={`${Colors.background.secondary}`}>
-                <tr className={`text-left text-[11px] font-semibold uppercase tracking-wide ${Colors.text.secondary}`}>
+                <tr
+                  className={`text-left text-[11px] font-semibold uppercase tracking-wide ${Colors.text.secondary}`}
+                >
                   {getTableHeaders().map((header) => (
                     <th key={header} className="px-6 py-4">
                       {header}
@@ -337,10 +353,12 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
         <>
           {/* Details Modal */}
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-            <div className={`relative w-full max-w-xl rounded-2xl ${Colors.background.secondary} ${Colors.border.specialThin} p-6 shadow-2xl`}>
+            <div
+              className={`relative w-full max-w-xl rounded-2xl ${Colors.background.secondary} ${Colors.border.specialThin} p-6 shadow-2xl`}
+            >
               {/* Top Right Action Buttons */}
               <div className="absolute right-4 top-4 flex items-center gap-3">
-                {!isEditing && (
+                {!isEditing && type !== "Courses" && (
                   <button
                     onClick={() => {
                       setEditedEntity({ ...selectedEntity });
@@ -366,12 +384,9 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
                     <button
                       onClick={async () => {
                         try {
-                          // TODO: UPDATE STUDENT API CALL GOES HERE
-                          // await updateStudentApi(
-                          //     editedEntity.id || editedEntity._id,
-                          //     editedEntity
-                          // )
-
+                          handleSave()
+                            .then(() => {})
+                            .catch(() => {});
                           setSelectedEntity(editedEntity);
                           setIsEditing(false);
                           setEditedEntity(null);
@@ -432,7 +447,9 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
                   )
                   .map(([key, value]) => (
                     <div key={key}>
-                      <p className={`my-3 text-[11px] uppercase tracking-wide ${Colors.text.special}`}>
+                      <p
+                        className={`my-3 text-[11px] uppercase tracking-wide ${Colors.text.special}`}
+                      >
                         {key.replace(/_/g, " ")}
                       </p>
 
@@ -448,7 +465,9 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
                           className={`w-full rounded-md ${Colors.background.primary} px-2 py-1 text-sm ${Colors.text.primary} outline-none focus:ring-1 focus:ring-primaryBlue`}
                         />
                       ) : (
-                        <p className={`break-words text-sm ${Colors.text.primary}`}>
+                        <p
+                          className={`break-words text-sm ${Colors.text.primary}`}
+                        >
                           {formatValue(value)}
                         </p>
                       )}
@@ -461,8 +480,12 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
           {/* Delete Confirmation Modal */}
           {showDeleteConfirm && (
             <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70">
-              <div className={`w-full max-w-sm rounded-xl ${Colors.background.secondary} p-6 text-center`}>
-                <h3 className={`mb-2 text-lg font-semibold ${Colors.text.primary}`}>
+              <div
+                className={`w-full max-w-sm rounded-xl ${Colors.background.secondary} p-6 text-center`}
+              >
+                <h3
+                  className={`mb-2 text-lg font-semibold ${Colors.text.primary}`}
+                >
                   Confirm Delete
                 </h3>
                 <p className={`mb-6 text-sm ${Colors.text.secondary}`}>
@@ -478,19 +501,7 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
                   </button>
 
                   <button
-                    onClick={async () => {
-                      try {
-                        // TODO: DELETE STUDENT API CALL GOES HERE
-                        // await deleteStudentApi(
-                        //     selectedEntity.id || selectedEntity._id
-                        // )
-
-                        setShowDeleteConfirm(false);
-                        setSelectedEntity(null);
-                      } catch (err) {
-                        // console.error("Delete failed", err);
-                      }
-                    }}
+                    onClick={handleDelete}
                     className="rounded-md bg-red-500 px-4 py-2 text-white cursor-pointer hover:bg-red-600 active:scale-95"
                   >
                     Delete

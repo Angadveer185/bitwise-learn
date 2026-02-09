@@ -116,9 +116,9 @@ model Institution {
   phoneNumber          String             @unique
   secondaryPhoneNumber String?
   createdBy            String             @db.ObjectId
-  creator              User               @relation(references: [id], fields: [createdBy])
+  creator              User               @relation(references: [id], fields: [createdBy], onDelete: Cascade)
   createdByVendorId    String?            @db.ObjectId
-  createdByVendor      Vendor?            @relation("VendorCreatedInstitutions", fields: [createdByVendorId], references: [id])
+  createdByVendor      Vendor?            @relation("VendorCreatedInstitutions", fields: [createdByVendorId], references: [id], onDelete: Cascade)
   batches              Batch[]
   teachers             Teacher[]
   students             Student[]
@@ -148,7 +148,7 @@ model Batch {
   branch            String
   batchEndYear      String
   institutionId     String             @db.ObjectId
-  institution       Institution        @relation(references: [id], fields: [institutionId])
+  institution       Institution        @relation(references: [id], fields: [institutionId], onDelete: Cascade)
   teachers          Teacher[]
   students          Student[]
   assessments       Assessment[]
@@ -165,9 +165,9 @@ model Teacher {
   loginPassword String
   vendorId      String?
   instituteId   String       @db.ObjectId
-  institution   Institution  @relation(references: [id], fields: [instituteId])
+  institution   Institution  @relation(references: [id], fields: [instituteId], onDelete: Cascade)
   batchId       String       @db.ObjectId
-  batch         Batch        @relation(references: [id], fields: [batchId])
+  batch         Batch        @relation(references: [id], fields: [batchId], onDelete: Cascade)
   assessments   Assessment[]
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
@@ -184,9 +184,9 @@ model Student {
   cloudpass                     String?                        @default("")
   cloudurl                      String?                        @default("")
   batchId                       String                         @db.ObjectId
-  batch                         Batch                          @relation(references: [id], fields: [batchId])
+  batch                         Batch                          @relation(references: [id], fields: [batchId], onDelete: Cascade)
   instituteId                   String                         @db.ObjectId
-  insitution                    Institution                    @relation(references: [id], fields: [instituteId])
+  insitution                    Institution                    @relation(references: [id], fields: [instituteId], onDelete: Cascade)
   courseProgresses              CourseProgress[]
   courseAssignemntSubmissions   CourseAssignemntSubmission[]
   problemSubmissions            ProblemSubmission[]
@@ -208,7 +208,7 @@ model Course {
   certificate       String?
   isPublished       COURSE_STATUS      @default(NOT_PUBLISHED)
   createdBy         String             @db.ObjectId
-  creator           User               @relation(fields: [createdBy], references: [id])
+  creator           User               @relation(fields: [createdBy], references: [id], onDelete: Cascade)
   courseSections    CourseSections[]
   courseEnrollments CourseEnrollment[]
   createdAt         DateTime           @default(now())
@@ -219,9 +219,9 @@ model CourseSections {
   id                     String                  @id @default(auto()) @map("_id") @db.ObjectId
   name                   String
   creatorId              String                  @db.ObjectId
-  creator                User                    @relation(references: [id], fields: [creatorId])
+  creator                User                    @relation(references: [id], fields: [creatorId], onDelete: Cascade)
   courseId               String                  @db.ObjectId
-  course                 Course                  @relation(references: [id], fields: [courseId])
+  course                 Course                  @relation(references: [id], fields: [courseId], onDelete: Cascade)
   courseLearningContents CourseLearningContent[]
   courseAssignemnts      CourseAssignemnt[]
   problems               Problem[]
@@ -248,9 +248,9 @@ model CourseLearningContent {
 model CourseProgress {
   id        String                @id @default(auto()) @map("_id") @db.ObjectId
   studentId String                @db.ObjectId
-  student   Student               @relation(references: [id], fields: [studentId])
+  student   Student               @relation(references: [id], fields: [studentId], onDelete: Cascade)
   contentId String                @db.ObjectId
-  content   CourseLearningContent @relation(references: [id], fields: [contentId])
+  content   CourseLearningContent @relation(references: [id], fields: [contentId], onDelete: Cascade)
   createdAt DateTime              @default(now())
   updatedAt DateTime              @updatedAt
 
@@ -264,7 +264,7 @@ model CourseAssignemnt {
   instruction                 String
   marksPerQuestion            Int
   sectionId                   String                       @db.ObjectId
-  section                     CourseSections               @relation(fields: [sectionId], references: [id])
+  section                     CourseSections               @relation(fields: [sectionId], references: [id], onDelete: Cascade)
   courseAssignemntQuestions   CourseAssignemntQuestion[]
   createdAt                   DateTime                     @default(now())
   updatedAt                   DateTime                     @updatedAt
@@ -289,7 +289,7 @@ model CourseAssignemntSubmission {
   questionId    String                   @db.ObjectId
   question      CourseAssignemntQuestion @relation(references: [id], fields: [questionId], onDelete: Cascade)
   studentId     String                   @db.ObjectId
-  student       Student                  @relation(fields: [studentId], references: [id])
+  student       Student                  @relation(fields: [studentId], references: [id], onDelete: Cascade)
   answer        String[]
   assignmentId  String                   @db.ObjectId
   assignment    CourseAssignemnt         @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
@@ -303,13 +303,13 @@ model CourseAssignemntSubmission {
 model CourseEnrollment {
   id            String       @id @default(auto()) @map("_id") @db.ObjectId
   courseId      String       @db.ObjectId
-  course        Course       @relation(fields: [courseId], references: [id])
+  course        Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
   batchId       String       @db.ObjectId
-  batch         Batch        @relation(fields: [batchId], references: [id])
+  batch         Batch        @relation(fields: [batchId], references: [id], onDelete: Cascade)
   enrolledAt    DateTime     @default(now())
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
-  institution   Institution? @relation(fields: [institutionId], references: [id])
+  institution   Institution? @relation(fields: [institutionId], references: [id], onDelete: Cascade)
   institutionId String?      @db.ObjectId
 
   @@unique([courseId, batchId])
@@ -342,7 +342,7 @@ model Problem {
 model ProblemTopic {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   problemId String   @db.ObjectId
-  problem   Problem  @relation(references: [id], fields: [problemId])
+  problem   Problem  @relation(references: [id], fields: [problemId], onDelete: Cascade)
   tagName   String[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -351,7 +351,7 @@ model ProblemTopic {
 model ProblemTemplate {
   id           String    @id @default(auto()) @map("_id") @db.ObjectId
   problemId    String    @db.ObjectId
-  problem      Problem   @relation(references: [id], fields: [problemId])
+  problem      Problem   @relation(references: [id], fields: [problemId], onDelete: Cascade)
   functionBody String
   defaultCode  String
   language     LANGUAGES
@@ -367,7 +367,7 @@ model ProblemTestCase {
   input     String
   output    String
   problemId String        @db.ObjectId
-  problem   Problem       @relation(fields: [problemId], references: [id])
+  problem   Problem       @relation(fields: [problemId], references: [id], onDelete: Cascade)
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
 }
@@ -377,7 +377,7 @@ model ProblemSolution {
   solution      String
   videoSolution String?
   problemId     String   @unique @db.ObjectId
-  problem       Problem  @relation(fields: [problemId], references: [id])
+  problem       Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
@@ -390,7 +390,7 @@ model ProblemSubmission {
   status         PROBLEM_STATUS
   failedTestCase String?
   studentId      String         @db.ObjectId
-  student        Student        @relation(fields: [studentId], references: [id])
+  student        Student        @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   problemId String  @db.ObjectId
   problem   Problem @relation(fields: [problemId], references: [id])
@@ -415,13 +415,13 @@ model Assessment {
   creatorType                String            @default("ADMIN")
   autoSubmit                 Boolean           @default(true)
   batchId                    String            @db.ObjectId
-  batch                      Batch             @relation(fields: [batchId], references: [id])
+  batch                      Batch             @relation(fields: [batchId], references: [id], onDelete: Cascade)
 
   sections                      AssessmentSection[]
   submissions                   AssessmentSubmission[]
   createdAt                     DateTime                       @default(now())
   updatedAt                     DateTime                       @updatedAt
-  teacher                       Teacher?                       @relation(fields: [teacherId], references: [id])
+  teacher                       Teacher?                       @relation(fields: [teacherId], references: [id], onDelete: Cascade)
   teacherId                     String?                        @db.ObjectId
   assessmentQuestionSubmissions AssessmentQuestionSubmission[]
 }
@@ -464,7 +464,7 @@ model AssessmentSubmission {
   assessment                    Assessment                     @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
   tabSwitchCount                Int                            @default(0)
   studentId                     String                         @db.ObjectId
-  student                       Student                        @relation(fields: [studentId], references: [id])
+  student                       Student                        @relation(fields: [studentId], references: [id], onDelete: Cascade)
   studentIp                     String
   proctoringStatus              PROCTOR                        @default(NOT_CHEATED)
   startedAt                     DateTime                       @default(now())
@@ -493,6 +493,6 @@ model AssessmentQuestionSubmission {
   marksObtained          Int                   @default(0)
   createdAt              DateTime              @default(now())
   updatedAt              DateTime              @updatedAt
-  assessmentSubmission   AssessmentSubmission? @relation(fields: [assessmentSubmissionId], references: [id])
+  assessmentSubmission   AssessmentSubmission? @relation(fields: [assessmentSubmissionId], references: [id], onDelete: Cascade)
   assessmentSubmissionId String?               @db.ObjectId
 }
