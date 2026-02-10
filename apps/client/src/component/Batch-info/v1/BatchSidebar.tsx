@@ -63,6 +63,7 @@ const InputField = ({
 const BatchSidebar = ({ batch }: BatchSidebarProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(batch);
+  const [isVisible, setIsVisible] = useState(false);
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { loading: logsLoading, role: logRole } = useLogs();
@@ -92,6 +93,12 @@ const BatchSidebar = ({ batch }: BatchSidebarProps) => {
       }
     }
   };
+  useEffect(() => {
+    if (logRole === null) return;
+    if (logRole < 4) {
+      setIsVisible(true);
+    }
+  }, [logRole]);
   useEffect(() => {
     setFormData(batch);
   }, [batch]);
@@ -136,7 +143,9 @@ const BatchSidebar = ({ batch }: BatchSidebarProps) => {
   };
 
   return (
-    <aside className={`w-[320px] ${Colors.background.secondary} ${Colors.text.primary} p-6 rounded-xl min-h-[93vh]`}>
+    <aside
+      className={`w-[320px] ${Colors.background.secondary} ${Colors.text.primary} p-6 rounded-xl min-h-[93vh]`}
+    >
       <input
         type="file"
         accept=".csv,.xlsx"
@@ -200,7 +209,7 @@ const BatchSidebar = ({ batch }: BatchSidebarProps) => {
       </div>
 
       {/* Actions */}
-      {!logsLoading && logRole && logRole < 4 && (
+      {!logsLoading && isVisible && (
         <>
           <div className="mt-8 flex gap-3">
             {isEditing ? (

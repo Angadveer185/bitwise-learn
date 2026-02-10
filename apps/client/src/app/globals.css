@@ -5,6 +5,12 @@
     --color-bg: #121313;
     --color-primaryBlue: #64ACFF;
 }
+.date-white::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+.date-black::-webkit-calendar-picker-indicator {
+  filter: invert(0);
+}
 
 :root {
   /* -------- BACKGROUND -------- */

@@ -320,13 +320,15 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
                       {cells.map((cell, index) => (
                         <td
                           key={index}
-                          className={`px-6 py-4 ${index === 0 ? "font-medium" : ""
-                            } ${index === cells.length - 1
+                          className={`px-6 py-4 ${
+                            index === 0 ? "font-medium" : ""
+                          } ${
+                            index === cells.length - 1
                               ? `${Colors.text.secondary}`
                               : index === 0
                                 ? ""
                                 : `${Colors.text.secondary} truncate`
-                            }`}
+                          }`}
                         >
                           {cell}
                         </td>
@@ -358,7 +360,7 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
             >
               {/* Top Right Action Buttons */}
               <div className="absolute right-4 top-4 flex items-center gap-3">
-                {!isEditing && type !== "Courses" && (
+                {!isEditing && type !== "Courses" && type !== "Assessments" && (
                   <button
                     onClick={() => {
                       setEditedEntity({ ...selectedEntity });
@@ -370,7 +372,7 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
                   </button>
                 )}
 
-                {!isEditing && (
+                {!isEditing && type !== "Assessments" && (
                   <button
                     onClick={() => setShowDeleteConfirm(true)}
                     className={`${Colors.text.secondary} transition hover:text-red-500 cursor-pointer active:scale-95`}
@@ -385,8 +387,8 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
                       onClick={async () => {
                         try {
                           handleSave()
-                            .then(() => { })
-                            .catch(() => { });
+                            .then(() => {})
+                            .catch(() => {});
                           setSelectedEntity(editedEntity);
                           setIsEditing(false);
                           setEditedEntity(null);

@@ -132,12 +132,12 @@ const AddAssessmentModal = ({
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-
+  const { loading, role } = useLogs();
   const [startDate, setStartDate] = useState("");
   const [startClock, setStartClock] = useState("");
   const [endDate, setEndDate] = useState("");
   const [endClock, setEndClock] = useState("");
-
+  const { info: institutionInfo } = useInstitution();
   const [institutes, setInstitutes] = useState<{ id: string; name: string }[]>(
     [],
   );
@@ -147,17 +147,31 @@ const AddAssessmentModal = ({
     { id: string; batchname: string; branch: string; batchEndYear: string }[]
   >([]);
 
-  useEffect(() => {
-    const fetchInstitutes = async () => {
-      try {
+  const fetchInstitutes = async () => {
+    try {
+      if (role === null) return;
+      console.log(role);
+      if (role === 0 || role == 1 || role == 2) {
+        console.log(role);
         await getAllInstitutions(setInstitutes);
-      } catch (err) {
-        // console.error("Failed to load institutes", err);
+      } else {
+        setInstitutes([
+          {
+            id: institutionInfo?.data.id || "",
+            name: institutionInfo?.data.name || "",
+          },
+        ]);
       }
-    };
-
+    } catch (err) {
+      // console.error("Failed to load institutes", err);
+    }
+  };
+  useEffect(() => {
     fetchInstitutes();
   }, []);
+  useEffect(() => {
+    fetchInstitutes();
+  }, [role]);
 
   useEffect(() => {
     if (!selectedInstitute) {
@@ -332,7 +346,7 @@ const AddAssessmentModal = ({
             <div className="grid grid-cols-3 gap-2 mt-1">
               <input
                 type="date"
-                className={`${inputBase} ${Colors.text.primary} mt-0 col-span-2 startTime",
+                className={`${inputBase} date-white ${Colors.text.primary} mt-0 col-span-2  startTime",
                 )}`}
                 value={startDate}
                 onChange={(e) => {
@@ -342,7 +356,7 @@ const AddAssessmentModal = ({
               />
               <input
                 type="time"
-                className={`${inputBase} mt-0 ${Colors.text.primary} `}
+                className={`${inputBase} date-white mt-0 ${Colors.text.primary} `}
                 value={startClock}
                 onChange={(e) => {
                   setStartClock(e.target.value);
@@ -390,11 +404,12 @@ const AddAssessmentModal = ({
             className={`${inputBase}`}
           >
             <option value="">Select institute</option>
-            {institutes.map((institute) => (
-              <option key={institute.id} value={institute.id}>
-                {institute.name}
-              </option>
-            ))}
+            {institutes &&
+              institutes.map((institute) => (
+                <option key={institute.id} value={institute.id}>
+                  {institute.name}
+                </option>
+              ))}
           </select>
         </div>
 
@@ -520,11 +535,10 @@ const AssessmentsV1 = () => {
   const fetchAssessments = async () => {
     try {
       setLoading(true);
-      // console.log(instituteInfo?.data.id);
       if (!instituteInfo?.data.id && !adminInfo?.data.id) return;
 
       let res: any;
-      if (logsRole && logsRole < 2) {
+      if (logsRole != null && logsRole < 3) {
         res = await getAllAssessments();
         setAssessments(res.data || []);
       } else {
