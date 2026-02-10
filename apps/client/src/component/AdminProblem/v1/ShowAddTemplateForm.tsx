@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Editor } from "@monaco-editor/react";
 import { X } from "lucide-react";
 import { useColors } from "@/component/general/(Color Manager)/useColors";
@@ -14,6 +14,60 @@ const LANGUAGE_MAP: Record<string, string> = {
   C: "c",
 };
 
+const DEFAULT_CODE_MAP: Record<string, string> = {
+  PYTHON: "class Solution:\n" + "    pass",
+
+  JAVA: "class Solution {\n" + "    \n" + "}",
+
+  CPP:
+    "#include <bits/stdc++.h>\n" +
+    "using namespace std;\n\n" +
+    "class Solution {\n" +
+    "public:\n" +
+    "    \n" +
+    "};",
+
+  JAVASCRIPT: "class Solution {\n" + "    \n" + "}",
+
+  C: "#include <stdio.h>\n\n" + "int main() {\n" + "    return 0;\n" + "}",
+};
+
+const FUNCTONBODY_MAP: Record<string, string> = {
+  PYTHON: "_solution_\n\n" + "def main():\n" + "    pass\n\n" + "main()",
+
+  JAVA:
+    "import java.util.*;\n\n" +
+    "class CodeRunner {\n" +
+    "    public static void main(String args[]) {\n" +
+    "        Solution obj = new Solution();\n" +
+    "        Scanner sc = new Scanner(System.in);\n" +
+    "        \n" +
+    "    }\n" +
+    "}\n\n" +
+    "_solution_",
+
+  CPP:
+    "#include <bits/stdc++.h>\n" +
+    "using namespace std;\n\n" +
+    "_solution_ \n" +
+    "int main() {\n" +
+    "    Solution obj;\n" +
+    "    \n" +
+    "    return 0;\n" +
+    "}\n\n",
+
+  JAVASCRIPT:
+    "_solution_\n\n" + "function main() {\n" + "    \n" + "}\n\n" + "main();",
+
+  C:
+    "#include <stdio.h>\n\n" +
+    "_solution_ \n" +
+    "int main() {\n" +
+    "    \n" +
+    "    return 0;\n" +
+    "}\n\n",
+};
+
 type Props = {
   onClose: () => void;
   onSave?: (data: {
@@ -25,12 +79,17 @@ type Props = {
 
 function ShowAddTemplateForm({ onClose, onSave }: Props) {
   const [language, setLanguage] = useState("PYTHON");
-  const [defaultCode, setDefaultCode] = useState("");
-  const [functionBody, setFunctionBody] = useState("");
+  const [defaultCode, setDefaultCode] = useState(DEFAULT_CODE_MAP[language]);
+  const [functionBody, setFunctionBody] = useState(FUNCTONBODY_MAP[language]);
   const Colors = useColors();
   const [activeTab, setActiveTab] = useState<"defaultCode" | "functionBody">(
     "defaultCode",
   );
+
+  useEffect(() => {
+    setDefaultCode(DEFAULT_CODE_MAP[language]);
+    setFunctionBody(FUNCTONBODY_MAP[language]);
+  }, [language]);
 
   const monacoLanguage = LANGUAGE_MAP[language] || "plaintext";
 
@@ -49,11 +108,18 @@ function ShowAddTemplateForm({ onClose, onSave }: Props) {
 
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-start">
-      <div className={` w-full max-w-5xl mt-10 rounded-lg shadow-xl ${Colors.border.defaultThin} flex flex-col ${Colors.background.secondary}`}>
+      <div
+        className={` w-full max-w-5xl mt-10 rounded-lg shadow-xl ${Colors.border.defaultThin} flex flex-col ${Colors.background.secondary}`}
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3">
-          <h2 className={`font-semibold ${Colors.text.primary}`}>Add New Template</h2>
-          <button onClick={onClose} className={`hover:text-red-500 ${Colors.text.primary} cursor-pointer active:scale-95 transition-all`}>
+          <h2 className={`font-semibold ${Colors.text.primary}`}>
+            Add New Template
+          </h2>
+          <button
+            onClick={onClose}
+            className={`hover:text-red-500 ${Colors.text.primary} cursor-pointer active:scale-95 transition-all`}
+          >
             <X size={20} />
           </button>
         </div>
