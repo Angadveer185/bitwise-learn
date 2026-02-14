@@ -1,15 +1,33 @@
+"use client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/component/ui/tabs";
 import AllTestCases from "./AllTestCases";
 import Solution from "./Solution";
 import Submissions from "./Submissions";
 import Templates from "./Templates";
 import { useColors } from "@/component/general/(Color Manager)/useColors";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 function ProblemInfo({ content }: any) {
   const Colors = useColors();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const activeTab = searchParams.get("tab") || "solution";
+
+  const handleTabChange = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", value);
+    const next = params.toString();
+    router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false });
+  };
+
   return (
     <div className={`w-full ${Colors.background.primary}`}>
-      <Tabs defaultValue="solution" className="flex flex-col h-full">
+      <Tabs
+        value={activeTab}
+        onValueChange={handleTabChange}
+        className="flex flex-col h-full"
+      >
         <TabsList
           className={` w-full ${Colors.border.defaultThin} ${Colors.background.secondary} ${Colors.text.primary} px-4`}
         >

@@ -208,14 +208,31 @@ function EditableTestCaseSidebar({
   const [isSaving, setIsSaving] = useState(false);
   const Colors = useColors();
 
+  const [testType, setTestType] = useState(testCase.testType);
   const [input, setInput] = useState(testCase.input);
   const [output, setOutput] = useState(testCase.output);
+  const [errors, setErrors] = useState<{ input?: string; output?: string }>(
+    {}
+  );
 
   const handleSave = async () => {
+    const nextErrors: { input?: string; output?: string } = {};
+    if (!input.trim()) {
+      nextErrors.input = "Input is required.";
+    }
+    if (!output.trim()) {
+      nextErrors.output = "Output is required.";
+    }
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) {
+      return;
+    }
+
     setIsSaving(true);
 
     onSaved({
       ...testCase,
+      testType,
       input,
       output,
     });
@@ -240,6 +257,22 @@ function EditableTestCaseSidebar({
 
       {/* Body */}
       <div className="p-4 space-y-4 overflow-y-auto">
+        {/* Test Type */}
+        <div>
+          <label className={`block mb-1 text-xs ${Colors.text.secondary}`}>
+            Test Case Type
+          </label>
+          <select
+            disabled={!isEditing}
+            value={testType}
+            onChange={(e) => setTestType(e.target.value)}
+            className={`w-full px-3 py-2 rounded-md text-xs ${Colors.background.secondary} ${Colors.text.primary} cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed`}
+          >
+            <option value="EXAMPLE">EXAMPLE</option>
+            <option value="HIDDEN">HIDDEN</option>
+          </select>
+        </div>
+
         {/* Input */}
         <div>
           <label className={`block mb-1 text-xs ${Colors.text.secondary}`}>
@@ -250,8 +283,16 @@ function EditableTestCaseSidebar({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             rows={4}
-            className={`w-full font-mono text-xs ${Colors.background.secondary} p-2 rounded ${Colors.text.primary}`}
+            aria-invalid={Boolean(errors.input)}
+            aria-describedby={errors.input ? "sidebar-input-error" : undefined}
+            className={`w-full font-mono text-xs ${Colors.background.secondary} p-2 rounded ${Colors.text.primary} border ${errors.input ? "border-red-500/70" : "border-transparent"
+              }`}
           />
+          {errors.input && (
+            <p id="sidebar-input-error" className="text-xs text-red-400 mt-1">
+              {errors.input}
+            </p>
+          )}
         </div>
 
         {/* Output */}
@@ -264,8 +305,16 @@ function EditableTestCaseSidebar({
             value={output}
             onChange={(e) => setOutput(e.target.value)}
             rows={3}
-            className={`w-full font-mono text-xs ${Colors.background.secondary} p-2 rounded ${Colors.text.primary}`}
+            aria-invalid={Boolean(errors.output)}
+            aria-describedby={errors.output ? "sidebar-output-error" : undefined}
+            className={`w-full font-mono text-xs ${Colors.background.secondary} p-2 rounded ${Colors.text.primary} border ${errors.output ? "border-red-500/70" : "border-transparent"
+              }`}
           />
+          {errors.output && (
+            <p id="sidebar-output-error" className="text-xs text-red-400 mt-1">
+              {errors.output}
+            </p>
+          )}
         </div>
       </div>
 

@@ -21,6 +21,9 @@ Output:
 \`\`\`
 `);
   const [hints, setHints] = useState<string[]>([""]);
+  const [errors, setErrors] = useState<{ name?: string; description?: string }>(
+    {}
+  );
 
   const addHint = () => setHints([...hints, ""]);
   const updateHint = (i: number, v: string) => {
@@ -32,6 +35,19 @@ Output:
     setHints(hints.filter((_, idx) => idx !== i));
 
   const handleSubmit = async () => {
+    const nextErrors: { name?: string; description?: string } = {};
+    if (!name.trim()) {
+      nextErrors.name = "Problem name is required.";
+    }
+    if (!description.trim()) {
+      nextErrors.description = "Problem description is required.";
+    }
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) {
+      toast.error("Please fix the highlighted fields.");
+      return;
+    }
+
     const toastId = toast.loading("Creating Problem...");
     try {
       await createProblem({
@@ -94,8 +110,16 @@ Output:
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Two Sum"
-              className={`w-full rounded-md ${Colors.background.primary} border border-white/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primaryBlue`}
+              aria-invalid={Boolean(errors.name)}
+              aria-describedby={errors.name ? "problem-name-error" : undefined}
+              className={`w-full rounded-md ${Colors.background.primary} border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primaryBlue ${errors.name ? "border-red-500/70" : "border-white/10"
+                }`}
             />
+            {errors.name && (
+              <p id="problem-name-error" className="text-xs text-red-400">
+                {errors.name}
+              </p>
+            )}
           </div>
 
           {/* Description */}
@@ -104,7 +128,12 @@ Output:
               Problem Description
             </label>
             <div
-              className={`rounded-md border border-white/10 ${Colors.background.secondary}`}
+              className={`rounded-md border ${Colors.background.secondary} ${errors.description ? "border-red-500/70" : "border-white/10"
+                }`}
+              aria-invalid={Boolean(errors.description)}
+              aria-describedby={
+                errors.description ? "problem-description-error" : undefined
+              }
             >
               <MarkdownEditor
                 value={description}
@@ -114,6 +143,14 @@ Output:
                 hideToolbar={false}
               />
             </div>
+            {errors.description && (
+              <p
+                id="problem-description-error"
+                className="text-xs text-red-400"
+              >
+                {errors.description}
+              </p>
+            )}
           </div>
 
           {/* Hints */}
