@@ -240,7 +240,18 @@ export const EntityList = ({ type, institutionId }: EntityListProps) => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto">
               {Object.entries(isEditing ? editData : selectedEntity)
-                .filter(([key]) => !["_id", "id", "createdAt"].includes(key))
+                .filter(
+                  ([key]) =>
+                    ![
+                      "_id",
+                      "id",
+                      "teacherId",
+                      "batchId",
+                      "institutionId",
+                      "vendorId",
+                      "instituteId",
+                    ].includes(key),
+                )
                 .map(([key, value]) => (
                   <div key={key}>
                     <p

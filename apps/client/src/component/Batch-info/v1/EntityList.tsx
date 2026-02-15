@@ -320,15 +320,13 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
                       {cells.map((cell, index) => (
                         <td
                           key={index}
-                          className={`px-6 py-4 ${
-                            index === 0 ? "font-medium" : ""
-                          } ${
-                            index === cells.length - 1
+                          className={`px-6 py-4 ${index === 0 ? "font-medium" : ""
+                            } ${index === cells.length - 1
                               ? `${Colors.text.secondary}`
                               : index === 0
                                 ? ""
                                 : `${Colors.text.secondary} truncate`
-                          }`}
+                            }`}
                         >
                           {cell}
                         </td>
@@ -387,8 +385,8 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
                       onClick={async () => {
                         try {
                           handleSave()
-                            .then(() => {})
-                            .catch(() => {});
+                            .then(() => { })
+                            .catch(() => { });
                           setSelectedEntity(editedEntity);
                           setIsEditing(false);
                           setEditedEntity(null);
@@ -430,9 +428,7 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
                 <h2 className={`text-xl font-semibold ${Colors.text.primary}`}>
                   {type} Details
                 </h2>
-                <p className={`mt-1 text-sm ${Colors.text.secondary}`}>
-                  ID: {selectedEntity.id || selectedEntity._id || "N/A"}
-                </p>
+
               </div>
 
               {/* Content */}
@@ -440,12 +436,15 @@ export const EntityList = ({ type, batchId }: EntityListProps) => {
                 {Object.entries(isEditing ? editedEntity : selectedEntity)
                   .filter(
                     ([key]) =>
-                      key !== "id" &&
-                      key !== "_id" &&
-                      key != "thumbnail" &&
-                      key != "certificate" &&
-                      key != "createdBy" &&
-                      key != "section",
+                      ![
+                        "_id",
+                        "id",
+                        "teacherId",
+                        "batchId",
+                        "institutionId",
+                        "vendorId",
+                        "instituteId",
+                      ].includes(key),
                   )
                   .map(([key, value]) => (
                     <div key={key}>
