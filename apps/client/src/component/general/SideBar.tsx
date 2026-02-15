@@ -83,15 +83,16 @@ export default function SideBar() {
     );
   }
 
-  return (
+return (
+  <>
     <aside
       ref={sidebarRef}
       style={{ width }}
-      className={`relative shrink-0 h-full
+      className={`fixed top-0 left-0 h-screen
         ${Colors.border.fadedRight}
         ${Colors.background.primary}
         ${Colors.text.primary}
-        flex flex-col`}
+        flex flex-col z-40`}
     >
       {/* Logo */}
       <div className="px-4 py-6 flex justify-center">
@@ -113,36 +114,42 @@ export default function SideBar() {
           label="Dashboard"
           collapsed={isCollapsed}
         />
-        {!logsLoading && logRole != null && logRole < 2 && <NavLink
-          href={`/admin-dashboard/courses`}
-          icon={<NotebookPen size={20} />}
-          label="Courses"
-          collapsed={isCollapsed}
-        />}
-        {<NavLink
+        {!logsLoading && logRole != null && logRole < 2 && (
+          <NavLink
+            href={`/admin-dashboard/courses`}
+            icon={<NotebookPen size={20} />}
+            label="Courses"
+            collapsed={isCollapsed}
+          />
+        )}
+        <NavLink
           href={`/admin-dashboard/problems`}
           icon={<Code2 size={20} />}
           label="Problems"
           collapsed={isCollapsed}
-        />}
-        {!logsLoading && logRole != null && logRole <= 3 && <NavLink
-          href={`/admin-dashboard/reports`}
-          icon={<ClipboardCheck size={20} />}
-          label="Reports"
-          collapsed={isCollapsed}
-        />}
-        {!logsLoading && logRole != null && logRole < 4 && logRole !== 2 && <NavLink
-          href={`/admin-dashboard/assessments`}
-          icon={<LibraryBig size={20} />}
-          label="Assessments"
-          collapsed={isCollapsed}
-        />}
-        {<NavLink
+        />
+        {!logsLoading && logRole != null && logRole <= 3 && (
+          <NavLink
+            href={`/admin-dashboard/reports`}
+            icon={<ClipboardCheck size={20} />}
+            label="Reports"
+            collapsed={isCollapsed}
+          />
+        )}
+        {!logsLoading && logRole != null && logRole < 4 && logRole !== 2 && (
+          <NavLink
+            href={`/admin-dashboard/assessments`}
+            icon={<LibraryBig size={20} />}
+            label="Assessments"
+            collapsed={isCollapsed}
+          />
+        )}
+        <NavLink
           href={`/admin-dashboard/compiler`}
           icon={<Terminal size={20} />}
           label="Compiler"
           collapsed={isCollapsed}
-        />}
+        />
       </nav>
 
       {/* Footer */}
@@ -151,17 +158,17 @@ export default function SideBar() {
         <button
           onClick={handleLogout}
           className={`
-    w-full flex items-center
-    ${isCollapsed ? "justify-center px-2" : "gap-3 px-4"}
-    py-2.5 rounded-lg
-    text-sm font-medium
-    ${Colors.text.secondary}
-    hover:text-red-400
-    hover:bg-red-500/10
-    transition-all
-    cursor-pointer
-    active:scale-95
-  `}
+            w-full flex items-center
+            ${isCollapsed ? "justify-center px-2" : "gap-3 px-4"}
+            py-2.5 rounded-lg
+            text-sm font-medium
+            ${Colors.text.secondary}
+            hover:text-red-400
+            hover:bg-red-500/10
+            transition-all
+            cursor-pointer
+            active:scale-95
+          `}
         >
           <LogOut size={18} />
           {!isCollapsed && <span>Log out</span>}
@@ -174,8 +181,12 @@ export default function SideBar() {
         className="absolute top-0 right-0 h-full w-1 cursor-col-resize hover:bg-primaryBlue/40"
       />
     </aside>
-  );
-}
+
+    {/* THIS is the spacer that pushes content */}
+    <div style={{ width }} className="shrink-0" />
+  </>
+);
+
 
 function NavLink({
   href,
@@ -205,4 +216,4 @@ function NavLink({
       </div>
     </Link>
   );
-}
+}}

@@ -73,14 +73,16 @@ export default function StudentSideBar() {
   };
 
   return (
+    <>
     <aside
       ref={sidebarRef}
       style={{ width }}
       className={`
-        relative shrink-0 h-full
+        fixed top-0 left-0 h-screen
         ${Colors.border.fadedRight}
-        ${Colors.background.primary} ${Colors.text.primary}
-        flex flex-col`}
+        ${Colors.background.primary}
+        ${Colors.text.primary}
+        flex flex-col z-40`}
     >
       {/* PROFILE */}
       <div className={`px-4 pt-6 pb-4 flex flex-col items-center ${Colors.text.primary}`}>
@@ -171,6 +173,9 @@ export default function StudentSideBar() {
         "
       />
     </aside>
+        {/* Spacer */}
+    <div style={{ width }} className="shrink-0" />
+  </>
   );
 }
 

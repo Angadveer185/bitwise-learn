@@ -304,7 +304,7 @@ const UpdateTopicModal = ({
           <div className="col-span-2 flex justify-between items-center">
             <div>
               <label className={`text-sm ${Colors.text.secondary}`}>
-                Upload File
+                Upload File (MAX:10MB)
               </label>
               <input
                 type="file"
