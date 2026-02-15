@@ -2,11 +2,12 @@ import type { Request, Response } from "express";
 import CodeExecution from "../service/piston.service";
 import apiResponse from "../utils/apiResponse";
 import prismaClient from "../utils/prisma";
+
 function normalizeOutput(output: any): string {
   if (output === null || output === undefined) return "";
-
-  return output.toString().trim().replace(/\s+/g, ""); // removes extra spaces & newlines
+  return output.toString().trim().replace(/\s+/g, "");
 }
+
 function classifyExecutionResult(result: any): {
   verdict: string;
   message: string;
@@ -36,10 +37,12 @@ function classifyExecutionResult(result: any): {
 
   return { verdict: "SUCCESS", message: "Success" };
 }
+
 class CodeRunnerController {
   async runCode(req: Request, res: Response) {
     try {
       const { language, code, questionId } = req.body;
+
       if (!language || !code || !questionId) {
         throw new Error("missing required field");
       }
@@ -58,44 +61,32 @@ class CodeRunnerController {
 
       const dbTemplate = await prismaClient.problemTemplate.findFirst({
         where: {
-          language: language.toUpperCase(),
+          language: language.toUpperCase() as any,
           problemId: dbProblem.id,
         },
       });
       if (!dbTemplate) throw new Error("template not supported yet");
 
-      let executionCode = dbTemplate.functionBody.replace("_solution_", code);
+      const executionCode = dbTemplate.functionBody.replace("_solution_", code);
 
       const outputArray: any[] = [];
       let allPassed = true;
 
       for (const testcase of exampleTestCases) {
-        let testrun = executionCode;
-        const input = testcase.input;
-
         const result = await CodeExecution.compileDsaProblem(
-          testrun,
+          executionCode,
           language,
-          input,
+          testcase.input,
         );
-        console.log(result);
-        const hasRuntimeError =
-          result?.run?.stderr && result.run.stderr.length > 0;
 
-        const actualOutput = normalizeOutput(result?.run?.output);
+        const execStatus = classifyExecutionResult(result);
+        const actualOutput = normalizeOutput(result?.run?.stdout);
         const expectedOutput = normalizeOutput(testcase.output);
 
-        const isCorrect = !hasRuntimeError && actualOutput === expectedOutput;
+        const isCorrect =
+          execStatus.verdict === "SUCCESS" && actualOutput === expectedOutput;
 
         if (!isCorrect) allPassed = false;
-
-        console.log({
-          input: testcase.input,
-          expectedOutput: testcase.output,
-          actualOutput: result?.run?.stdout || "",
-          stderr: result?.run?.stderr || "",
-          isCorrect,
-        });
 
         outputArray.push({
           input: testcase.input,
@@ -117,6 +108,7 @@ class CodeRunnerController {
       return res.status(500).json(apiResponse(500, error.message, null));
     }
   }
+
   async submitCode(req: Request, res: Response) {
     try {
       const { language, code, questionId } = req.body;
@@ -125,6 +117,7 @@ class CodeRunnerController {
       if (!language || !code || !questionId) {
         throw new Error("missing required field");
       }
+
       if (!userId) throw new Error("no user id found");
 
       const dbUser = await prismaClient.student.findUnique({
@@ -147,30 +140,33 @@ class CodeRunnerController {
 
       const executionCode = dbTemplate.functionBody.replace("_solution_", code);
 
-      const exampleTestCases = await prismaClient.problemTestCase.findMany({
-        where: { problemId: dbProblem.id, testType: "EXAMPLE" },
+      const allTestCases = await prismaClient.problemTestCase.findMany({
+        where: { problemId: dbProblem.id },
       });
 
-      const hiddenTestCases = await prismaClient.problemTestCase.findMany({
-        where: { problemId: dbProblem.id, testType: "HIDDEN" },
+      const submission = await prismaClient.problemSubmission.create({
+        data: {
+          problemId: dbProblem.id,
+          studentId: dbUser.id,
+          code,
+          status: "SUCCESS",
+        },
       });
 
-      const outputArray: any[] = [];
       let finalVerdict: "SUCCESS" | "FAILED" = "SUCCESS";
       let verdictMessage = "All test cases passed";
-      let maxRuntime = 0; // seconds
-      let maxMemory = 0; // bytes
+      let maxRuntime = 0;
+      let maxMemory = 0;
 
-      // ---- Run Example Testcases (for feedback)
-      for (const testcase of exampleTestCases) {
-        let testrun = executionCode;
-        const input = testcase.input;
+      const outputArray: any[] = [];
 
+      for (const testcase of allTestCases) {
         const result = await CodeExecution.compileDsaProblem(
-          testrun,
+          executionCode,
           language,
-          input,
+          testcase.input,
         );
+
         const runtime = result?.run?.time ?? 0;
         const memory = result?.run?.memory ?? 0;
 
@@ -178,63 +174,62 @@ class CodeRunnerController {
         maxMemory = Math.max(maxMemory, memory);
 
         const execStatus = classifyExecutionResult(result);
-
         const actualOutput = normalizeOutput(result?.run?.stdout);
         const expectedOutput = normalizeOutput(testcase.output);
 
-        const isCorrect =
+        const passed =
           execStatus.verdict === "SUCCESS" && actualOutput === expectedOutput;
 
-        outputArray.push({
-          input: testcase.input,
-          expectedOutput: testcase.output,
-          actualOutput: result?.run?.stdout || "",
-          stderr: result?.run?.stderr || "",
-          isCorrect,
-        });
-      }
-      let wrongTestCase: any;
-      // ---- Run Hidden Testcases (for verdict)
-      for (const testcase of hiddenTestCases) {
-        let testrun = executionCode;
-        const input = JSON.parse(testcase.input as string);
-
-        Object.keys(input).forEach((key) => {
-          testrun = testrun.replace(`input_${key}`, `${input[key]}`);
-        });
-
-        const result = await CodeExecution.compileCode(testrun, language);
-        const execStatus = classifyExecutionResult(result);
-
-        if (execStatus.verdict !== "SUCCESS") {
+        if (!passed) {
           finalVerdict = "FAILED";
-          verdictMessage = execStatus.message;
-          break;
+          verdictMessage =
+            execStatus.verdict === "SUCCESS"
+              ? "Wrong Answer"
+              : execStatus.message;
+
+          await prismaClient.problemSubmission.update({
+            where: { id: submission.id },
+            data: {
+              failedTestCase: JSON.stringify({
+                input: testcase.input,
+                output: testcase.output,
+                yourOutput: result?.run?.stdout || "",
+                stderr: result?.run?.stderr || "",
+              }),
+            },
+          });
+
+          break; // stop at first failure
         }
 
-        const actualOutput = normalizeOutput(result?.run?.stdout);
-        const expectedOutput = normalizeOutput(testcase.output);
+        await prismaClient.problemSubmissionTestCase.create({
+          data: {
+            submissionId: submission.id,
+            testCaseId: testcase.id,
+            passed,
+            actualOutput: result?.run?.stdout || "",
+            runtime: `${Math.round(runtime * 1000)} ms`,
+            memory: `${(memory / (1024 * 1024)).toFixed(2)} MB`,
+          },
+        });
 
-        if (actualOutput !== expectedOutput) {
-          finalVerdict = "FAILED";
-          verdictMessage = "Wrong Answer";
-          wrongTestCase = { ...testcase, yourOutput: actualOutput };
-          break;
+        if (testcase.testType === "EXAMPLE") {
+          outputArray.push({
+            input: testcase.input,
+            expectedOutput: testcase.output,
+            actualOutput: result?.run?.stdout || "",
+            stderr: result?.run?.stderr || "",
+            isCorrect: passed,
+          });
         }
       }
-      const runtimeMs = Math.round(maxRuntime * 1000);
-      const memoryMb = (maxMemory / (1024 * 1024)).toFixed(2);
 
-      // ---- Store Submission (ALWAYS)
-      await prismaClient.problemSubmission.create({
+      await prismaClient.problemSubmission.update({
+        where: { id: submission.id },
         data: {
-          problemId: dbProblem.id,
-          studentId: dbUser.id,
-          code,
           status: finalVerdict,
-          failedTestCase: JSON.stringify(wrongTestCase),
-          runtime: `${runtimeMs} ms`,
-          memory: `${memoryMb} MB`,
+          runtime: `${Math.round(maxRuntime * 1000)} ms`,
+          memory: `${(maxMemory / (1024 * 1024)).toFixed(2)} MB`,
         },
       });
 
@@ -250,13 +245,15 @@ class CodeRunnerController {
       return res.status(500).json(apiResponse(500, error.message, null));
     }
   }
+
   async compileCode(req: Request, res: Response) {
     try {
       const { language, code, input } = req.body;
+
       if (!language || !code) {
         throw new Error("missing required field");
       }
-      console.log(input);
+
       const result = await CodeExecution.compileCompilerCode(
         code,
         language,
@@ -269,16 +266,15 @@ class CodeRunnerController {
       return res.status(500).json(apiResponse(500, error.message, null));
     }
   }
+
   async runTestCode(id: string, code: string, language: string) {
     try {
-      const questionId = id;
-
-      if (!language || !code || !questionId) {
+      if (!language || !code || !id) {
         throw new Error("missing required field");
       }
 
       const dbProblem = await prismaClient.problem.findUnique({
-        where: { id: questionId },
+        where: { id },
       });
       if (!dbProblem) throw new Error("no such problem found");
 
@@ -301,59 +297,42 @@ class CodeRunnerController {
       });
 
       let correct = 0;
-      let wrong = 0;
 
-      // ---- Run Example Testcases (for feedback)
       for (const testcase of exampleTestCases) {
-        let testrun = executionCode;
-        const input = testcase.input;
-
         const result = await CodeExecution.compileDsaProblem(
-          testrun,
+          executionCode,
           language,
-          input,
+          testcase.input,
         );
 
         const execStatus = classifyExecutionResult(result);
-
         const actualOutput = normalizeOutput(result?.run?.stdout);
         const expectedOutput = normalizeOutput(testcase.output);
 
-        const isCorrect =
-          execStatus.verdict === "SUCCESS" && actualOutput === expectedOutput;
-
-        if (isCorrect) {
+        if (
+          execStatus.verdict === "SUCCESS" &&
+          actualOutput === expectedOutput
+        ) {
           correct++;
-        } else {
-          wrong++;
         }
       }
-      let wrongTestCase: any;
-      // ---- Run Hidden Testcases (for verdict)
+
       for (const testcase of hiddenTestCases) {
-        let testrun = executionCode;
-        const input = JSON.parse(testcase.input as string);
+        const result = await CodeExecution.compileDsaProblem(
+          executionCode,
+          language,
+          testcase.input,
+        );
 
-        Object.keys(input).forEach((key) => {
-          testrun = testrun.replace(`input_${key}`, `${input[key]}`);
-        });
-
-        const result = await CodeExecution.compileCode(testrun, language);
         const execStatus = classifyExecutionResult(result);
-
-        if (execStatus.verdict !== "SUCCESS") {
-          break;
-        }
+        if (execStatus.verdict !== "SUCCESS") break;
 
         const actualOutput = normalizeOutput(result?.run?.stdout);
         const expectedOutput = normalizeOutput(testcase.output);
 
-        if (actualOutput !== expectedOutput) {
-          wrongTestCase = { ...testcase, yourOutput: actualOutput };
-          break;
-        } else {
-          correct++;
-        }
+        if (actualOutput !== expectedOutput) break;
+
+        correct++;
       }
 
       return {

@@ -2,7 +2,17 @@
 
 // imports -----------------------------------------------------------------
 import { use, useEffect, useState } from "react";
-import { Search, ClipboardList, Clock } from "lucide-react";
+import {
+  Search,
+  ClipboardList,
+  Clock,
+  ChevronDown,
+  ChevronUp,
+  Circle,
+  Radio,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import { createAssessments } from "@/api/assessments/create-assessments";
 import { getAllAssessments } from "@/api/assessments/get-all-assessments";
@@ -534,6 +544,11 @@ const AssessmentsV1 = () => {
   const [loading, setLoading] = useState(true);
   const [openCreateAssessment, setOpenCreateAssessment] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [statusFilter, setStatusFilter] = useState<
+    "ALL" | "UPCOMING" | "LIVE" | "ENDED"
+  >("ALL");
+  const [filterOpen, setFilterOpen] = useState(false);
+
   const { info: instituteInfo } = useInstitution();
   const { info: adminInfo } = useAdmin();
   const { loading: logsLoading, role: logsRole } = useLogs();
@@ -565,45 +580,149 @@ const AssessmentsV1 = () => {
   }, [logsLoading, logsRole]);
 
   const filteredAssessments = assessments.filter((assessment) => {
-    if (!searchText.trim()) return true;
+    const matchesSearch = searchText.trim()
+      ? assessment.name.toLowerCase().includes(searchText.toLowerCase()) ||
+        assessment.description.toLowerCase().includes(searchText.toLowerCase())
+      : true;
 
-    const query = searchText.toLowerCase();
+    const matchesStatus =
+      statusFilter === "ALL" ? true : assessment.status === statusFilter;
 
-    return (
-      assessment.name.toLowerCase().includes(query) ||
-      assessment.description.toLowerCase().includes(query)
-    );
+    return matchesSearch && matchesStatus;
   });
 
   return (
     <section className="flex w-full flex-col gap-6 p-4">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative w-full sm:w-96">
-          <Search
-            size={18}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary-font"
-          />
-          <input
-            type="text"
-            placeholder="Search assessments..."
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            className={`
-              w-full rounded-md pl-10 pr-4 py-2 text-sm
-              ${Colors.background.secondary} ${Colors.text.primary}
-              outline-none border border-white/10
-              focus:border-white/20 transition
-            `}
-          />
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-3">
+          {/* Search */}
+          <div className="relative w-full sm:w-80">
+            <Search
+              size={18}
+              className={`absolute left-3 top-1/2 -translate-y-1/2 ${Colors.text.secondary}`}
+            />
+            <input
+              type="text"
+              placeholder="Search assessments..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              className={`
+        w-full rounded-xl pl-10 pr-4 py-2.5 text-sm
+        ${Colors.background.secondary}
+        ${Colors.text.primary}
+        ${Colors.border.fadedThin}
+        outline-none
+        focus:ring-2 focus:ring-(--accent-primary)/30
+        transition
+      `}
+            />
+          </div>
+
+          {/* Status Filter */}
+          <div className="relative w-full sm:w-48">
+            <div className="relative">
+              <button
+                onClick={() => setFilterOpen((prev) => !prev)}
+                className={`
+          flex items-center gap-2
+          px-4 py-2.5 rounded-xl text-sm
+          ${Colors.background.secondary}
+          ${Colors.text.primary}
+          ${Colors.border.fadedThin}
+          ${Colors.hover.special}
+          transition cursor-pointer
+        `}
+              >
+                {statusFilter === "ALL" ? "All Status" : statusFilter}
+
+                {filterOpen ? (
+                  <ChevronUp size={16} className={Colors.text.secondary} />
+                ) : (
+                  <ChevronDown size={16} className={Colors.text.secondary} />
+                )}
+              </button>
+
+              {filterOpen && (
+                <div
+                  className={`
+            absolute right-0 mt-2 w-48
+            ${Colors.background.secondary}
+            ${Colors.border.fadedThin}
+            rounded-xl
+            shadow-xl backdrop-blur-md
+            overflow-hidden z-50
+          `}
+                >
+                  {["ALL", "UPCOMING", "LIVE", "ENDED"].map((status) => {
+                    const isActive = statusFilter === status;
+
+                    return (
+                      <button
+                        key={status}
+                        onClick={() => {
+                          setStatusFilter(
+                            status as "ALL" | "UPCOMING" | "LIVE" | "ENDED",
+                          );
+                          setFilterOpen(false);
+                        }}
+                        className={`
+                  w-full flex items-center justify-between
+                  px-4 py-2.5 text-sm
+                  ${Colors.text.primary}
+                  ${Colors.hover.textSpecial}
+                  transition cursor-pointer
+                  ${isActive ? Colors.background.primary : ""}
+                `}
+                      >
+                        <div className="flex items-center gap-2">
+                          {status === "LIVE" && (
+                            <Radio size={14} className={Colors.text.special} />
+                          )}
+                          {status === "ENDED" && (
+                            <XCircle
+                              size={14}
+                              className={Colors.text.special}
+                            />
+                          )}
+                          {status === "UPCOMING" && (
+                            <Clock size={14} className={Colors.text.special} />
+                          )}
+                          {status === "ALL" && (
+                            <Circle
+                              size={14}
+                              className={Colors.text.secondary}
+                            />
+                          )}
+
+                          <span>
+                            {status === "ALL" ? "All Status" : status}
+                          </span>
+                        </div>
+
+                        {isActive && (
+                          <CheckCircle2
+                            size={14}
+                            className={Colors.text.special}
+                          />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         <button
           className={`
-            rounded-md px-4 py-2 text-sm font-medium
-            ${Colors.background.special} ${Colors.text.primary}
-            hover:opacity-90 transition
-          `}
+    rounded-md px-4 py-2 text-sm font-medium
+    ${Colors.background.special}
+    ${Colors.text.primary}
+    ${Colors.hover.special}
+    transition
+  `}
           onClick={() => {
             setOpenCreateAssessment(true);
           }}

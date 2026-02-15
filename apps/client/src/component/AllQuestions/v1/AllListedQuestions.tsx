@@ -43,7 +43,7 @@ function AllListedQuestions() {
   }, [questions, query, difficulty, status]);
 
   return (
-    <div>
+    <div className="overflow-y-auto">
       <Filter
         query={query}
         setQuery={setQuery}
@@ -53,7 +53,7 @@ function AllListedQuestions() {
         setStatus={setStatus}
       />
 
-      <div className="w-full">
+      <div className="w-full overflow-y-auto">
         {filteredQuestions.length === 0 && (
           <p className={`text-center ${Colors.text.secondary} py-10`}>No questions found</p>
         )}

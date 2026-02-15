@@ -51,15 +51,6 @@ function Submission({ id }: SubmissionProps) {
     }
   };
 
-  const parseInputString = (input?: string) => {
-    if (!input) return null;
-    try {
-      return JSON.parse(input);
-    } catch {
-      return null;
-    }
-  };
-
   if (content.length === 0) {
     return (
       <div
@@ -142,7 +133,7 @@ function Submission({ id }: SubmissionProps) {
                   className={`flex justify-between text-xs ${Colors.text.secondary} mt-2`}
                 >
                   <span>{item.runtime || "--"}</span>
-                  <span>{item.memory.replace("MB","KB") || "--"}</span>
+                  <span>{item.memory.replace("MB", "KB") || "--"}</span>
                 </div>
               </li>
             );
@@ -189,10 +180,11 @@ function Submission({ id }: SubmissionProps) {
                 className={`inline-flex items-center gap-1.5 ${Colors.text.secondary}`}
               >
                 <MemoryStick size={14} />
-                {selectedSubmission.memory.replace("MB","KB") ?? "--"}
+                {selectedSubmission.memory.replace("MB", "KB") ?? "--"}
               </span>
             </div>
 
+            {/* Failed test case */}
             {/* Failed test case */}
             {selectedSubmission.status === "FAILED" &&
               (() => {
@@ -203,48 +195,31 @@ function Submission({ id }: SubmissionProps) {
                 return (
                   <div
                     className={`
-        mx-4 mt-4 rounded-xl p-4 space-y-4
-        border border-red-500/30
-        bg-red-500/5
-      `}
+          mx-4 mt-4 rounded-xl p-4 space-y-4
+          border border-red-500/30
+          bg-red-500/5
+        `}
                   >
                     <div className="flex items-center gap-2 text-red-400 font-semibold">
                       <XCircle size={16} />
                       Failed Test Case
                     </div>
 
-                    {failed?.input &&
-                      (() => {
-                        const parsedInput = parseInputString(failed.input);
-
-                        return parsedInput ? (
-                          <div>
-                            <p className="text-xs text-red-300 mb-1">Input</p>
-                            <div className="rounded-md bg-black/30 p-2 text-xs font-mono text-red-200 space-y-1">
-                              {Object.entries(parsedInput).map(
-                                ([key, value]) => (
-                                  <div key={key}>
-                                    <span className="text-red-300">{key}</span>
-                                    {" : "}
-                                    <span className="text-red-200">
-                                      {Array.isArray(value)
-                                        ? JSON.stringify(value)
-                                        : String(value)}
-                                    </span>
-                                  </div>
-                                ),
-                              )}
-                            </div>
-                          </div>
-                        ) : null;
-                      })()}
+                    {failed?.input && (
+                      <div>
+                        <p className="text-xs text-red-300 mb-1">Input</p>
+                        <pre className="rounded-md bg-black/30 p-2 text-xs font-mono text-red-200 whitespace-pre-wrap">
+                          {failed.input}
+                        </pre>
+                      </div>
+                    )}
 
                     {failed?.output && (
                       <div>
                         <p className="text-xs text-red-300 mb-1">
                           Expected Output
                         </p>
-                        <pre className="rounded-md bg-black/30 p-2 text-xs font-mono text-green-300">
+                        <pre className="rounded-md bg-black/30 p-2 text-xs font-mono text-green-300 whitespace-pre-wrap">
                           {failed.output}
                         </pre>
                       </div>
@@ -253,7 +228,7 @@ function Submission({ id }: SubmissionProps) {
                     {failed?.yourOutput && (
                       <div>
                         <p className="text-xs text-red-300 mb-1">Your Output</p>
-                        <pre className="rounded-md bg-black/30 p-2 text-xs font-mono text-red-300">
+                        <pre className="rounded-md bg-black/30 p-2 text-xs font-mono text-red-300 whitespace-pre-wrap">
                           {failed.yourOutput}
                         </pre>
                       </div>
@@ -262,7 +237,7 @@ function Submission({ id }: SubmissionProps) {
                     {failed?.stderr && (
                       <div>
                         <p className="text-xs text-red-400 mb-1">Error</p>
-                        <pre className="rounded-md bg-red-950/40 p-2 text-xs font-mono text-red-400">
+                        <pre className="rounded-md bg-red-950/40 p-2 text-xs font-mono text-red-400 whitespace-pre-wrap">
                           {failed.stderr}
                         </pre>
                       </div>

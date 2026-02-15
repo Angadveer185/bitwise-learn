@@ -362,14 +362,15 @@ model ProblemTemplate {
 }
 
 model ProblemTestCase {
-  id        String        @id @default(auto()) @map("_id") @db.ObjectId
-  testType  TESTCASE_TYPE
-  input     String
-  output    String
-  problemId String        @db.ObjectId
-  problem   Problem       @relation(fields: [problemId], references: [id], onDelete: Cascade)
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  id                         String                      @id @default(auto()) @map("_id") @db.ObjectId
+  testType                   TESTCASE_TYPE
+  input                      String
+  output                     String
+  problemId                  String                      @db.ObjectId
+  problem                    Problem                     @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  createdAt                  DateTime                    @default(now())
+  updatedAt                  DateTime                    @updatedAt
+  problemSubmissionTestCases ProblemSubmissionTestCase[]
 }
 
 model ProblemSolution {
@@ -383,21 +384,39 @@ model ProblemSolution {
 }
 
 model ProblemSubmission {
-  id             String         @id @default(auto()) @map("_id") @db.ObjectId
-  code           String
-  runtime        String?
-  memory         String?
-  status         PROBLEM_STATUS
-  failedTestCase String?
-  studentId      String         @db.ObjectId
-  student        Student        @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  id              String                      @id @default(auto()) @map("_id") @db.ObjectId
+  code            String
+  runtime         String?
+  memory          String?
+  status          PROBLEM_STATUS
+  testCaseResults ProblemSubmissionTestCase[]
+  studentId       String                      @db.ObjectId
+  student         Student                     @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   problemId String  @db.ObjectId
   problem   Problem @relation(fields: [problemId], references: [id])
+  failedTestCase  String?
 
   submittedAt DateTime @default(now())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model ProblemSubmissionTestCase {
+  id           String            @id @default(auto()) @map("_id") @db.ObjectId
+  submissionId String            @db.ObjectId
+  submission   ProblemSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  testCaseId String          @db.ObjectId
+  testCase   ProblemTestCase @relation(fields: [testCaseId], references: [id], onDelete: Cascade)
+
+  passed       Boolean
+  actualOutput String?
+  runtime      String?
+  memory       String?
+
+  createdAt DateTime @default(now())
+  @@unique([submissionId, testCaseId])
 }
 
 model Assessment {
