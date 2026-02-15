@@ -40,7 +40,6 @@ type UpdateContentPayload = {
   transcript?: File | null;
   videoUrl?: string;
 };
-const Colors = useColors();
 
 // ------------------------ Add Topic Modal --------------------------
 interface AddTopicModalProps {
@@ -50,6 +49,7 @@ interface AddTopicModalProps {
 }
 
 const AddTopicModal = ({ open, onClose, onSubmit }: AddTopicModalProps) => {
+  const Colors = useColors();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
@@ -148,6 +148,7 @@ const ConfirmDeleteSectionModal = ({
   onClose: () => void;
   onConfirm: () => void;
 }) => {
+  const Colors = useColors();
   if (!open) return null;
 
   return (
@@ -214,6 +215,7 @@ const UpdateTopicModal = ({
   const [videoUrl, setVideoUrl] = useState(initialData.videoUrl || "");
   const [transcriptText, setTranscriptText] = useState("");
   const [transcriptFile, setTranscriptFile] = useState<File | null>(null);
+  const Colors = useColors();
 
   useEffect(() => {
     if (open) {
@@ -402,6 +404,7 @@ const EditAssignmentModal = ({
   const [marks, setMarks] = useState<number | "">(initialData.marksPerQuestion);
   const [instruction, setInstruction] = useState(initialData.instruction);
   const [saving, setSaving] = useState(false);
+  const Colors = useColors();
 
   useEffect(() => {
     if (open) {
@@ -524,6 +527,7 @@ const ConfirmDeleteAssignmentModal = ({
   onConfirm: () => void;
   loading: boolean;
 }) => {
+  const Colors = useColors();
   if (!open) return null;
 
   return (
@@ -627,6 +631,7 @@ const AddSectionV2 = ({
   );
   const [deletingAssignment, setDeletingAssignment] = useState(false);
   const [assignmentRefetchKey, setAssignmentRefetchKey] = useState(0);
+  const Colors = useColors();
 
   const handleDeleteTopic = async () => {
     if (!topicToDelete) return;

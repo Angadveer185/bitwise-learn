@@ -2,8 +2,6 @@
 
 import { useColors } from "@/component/general/(Color Manager)/useColors";
 
-
-
 export default function AssignmentInfo({
   assignment,
   setAssignment,
@@ -38,11 +36,13 @@ export default function AssignmentInfo({
 
       {/* Title */}
       <div className="flex flex-col gap-1">
-        <label className={`text-sm ${Colors.text.primary}`}>Assignment Title</label>
+        <label className={`text-sm ${Colors.text.primary}`}>
+          Assignment Title
+        </label>
         <input
           value={assignment.title}
           placeholder="Enter assignment title"
-            className={`
+          className={`
               mt-2 w-full rounded-lg
               ${Colors.background.primary} ${Colors.border.defaultThin}
               px-3 py-2 text-sm ${Colors.text.secondary}
@@ -59,7 +59,7 @@ export default function AssignmentInfo({
         <textarea
           value={assignment.description}
           placeholder="Brief description of the assignment"
-            className={`
+          className={`
               mt-2 w-full rounded-lg
               ${Colors.background.primary} ${Colors.border.defaultThin}
               px-3 py-2 text-sm ${Colors.text.secondary}
@@ -78,38 +78,44 @@ export default function AssignmentInfo({
         <textarea
           value={assignment.instructions}
           placeholder="Rules, guidelines, or hints for students"
-            className={`
+          className={`
               mt-2 w-full rounded-lg
               ${Colors.background.primary} ${Colors.border.defaultThin}
               px-3 py-2 text-sm ${Colors.text.secondary}
               placeholder:text-neutral-500
               focus:outline-none focus:border-sky-500
             `}
-          
           onChange={(e) => update("instructions", e.target.value)}
         />
       </div>
 
       {/* Marks */}
       <div className="flex flex-col gap-1 w-1/5">
-        <label className="text-sm text-white/70">Marks per question</label>
+       <label className={`text-sm ${Colors.text.secondary}`}>Marks per question</label>
         <input
           type="number"
+          min={0}
+          step={1}
           value={assignment.marksPerQuestion}
           placeholder="e.g. 2"
-            className={`
+          className={`
               mt-2 w-full rounded-lg
               ${Colors.background.primary} ${Colors.border.defaultThin}
               px-3 py-2 text-sm ${Colors.text.secondary}
               placeholder:text-neutral-500
               focus:outline-none focus:border-sky-500
             `}
-          onChange={(e) =>
-            update(
-              "marksPerQuestion",
-              e.target.value === "" ? "" : Number(e.target.value),
-            )
-          }
+          onChange={(e) => {
+            const value = e.target.value;
+
+            if (value === "") {
+              update("marksPerQuestion", "");
+              return;
+            }
+
+            const num = Math.max(0, Number(value));
+            update("marksPerQuestion", num);
+          }}
         />
       </div>
 
@@ -117,7 +123,7 @@ export default function AssignmentInfo({
       <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
         <button
           onClick={onClose}
-            className={`px-4 py-2 rounded-lg ${Colors.background.primary} ${Colors.border.defaultThick} ${Colors.hover.special} ${Colors.text.primary} transition cursor-pointer`}
+          className={`px-4 py-2 rounded-lg ${Colors.background.primary} ${Colors.border.defaultThick} ${Colors.hover.special} ${Colors.text.primary} transition cursor-pointer`}
         >
           Cancel
         </button>
@@ -125,7 +131,7 @@ export default function AssignmentInfo({
         <button
           onClick={onSubmit}
           disabled={loading}
-            className={`text-sm ${Colors.background.special} ${Colors.hover.special} p-3 rounded-md text-wrapped text-white font-semibold transition cursor-pointer`} 
+          className={`text-sm ${Colors.background.special} ${Colors.hover.special} p-3 rounded-md text-wrapped text-white font-semibold transition cursor-pointer`}
         >
           {loading ? "Creating Assignment..." : "Create Assignment"}
         </button>

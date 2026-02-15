@@ -17,9 +17,9 @@ function Description({ content }: { content: any }) {
   return (
     <div className={`flex flex-col gap-8 ${colors.text.secondary}`}>
       {/* Title */}
-      <div className={`pb-4 ${colors.border.default}`}>
+      <div className={`${colors.border.default}`}>
         <h1
-          className={`text-2xl font-semibold tracking-tight ${colors.text.primary}`}
+          className={`text-2xl mt-4 font-semibold tracking-tight ${colors.text.primary}`}
         >
           {name}
         </h1>
@@ -47,7 +47,7 @@ function Description({ content }: { content: any }) {
           <div className="flex items-center gap-3">
             <span className="h-6 w-1 rounded-full bg-(--accent-primary)" />
             <h2
-              className={`text-sm font-semibold tracking-wide ${colors.text.primary}`}
+              className={`text-lg font-semibold tracking-wide ${colors.text.primary}`}
             >
               Problem Description
             </h2>
@@ -56,14 +56,6 @@ function Description({ content }: { content: any }) {
 
         {/* Content */}
         <div className="p-5">
-          <div
-            className={`
-              rounded-xl
-              p-4
-              ${colors.background.secondary}
-              ${colors.border.defaultThin}
-            `}
-          >
             <MarkdownEditor
               height={500}
               value={description}
@@ -71,7 +63,6 @@ function Description({ content }: { content: any }) {
               hideToolbar={true}
               theme={theme.theme === "Dark"?"dark":"light"}
             />
-          </div>
         </div>
       </section>
 

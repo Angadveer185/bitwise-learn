@@ -81,7 +81,7 @@ function TestCases({
             {mode === tab && (
               <span
                 className={`
-                  absolute left-0 -bottom-[9px] h-[2px] w-full
+                  absolute left-0 -bottom-2.25 h-0.5 w-full
                   ${Colors.background.heroPrimary}
                 `}
               />
@@ -197,21 +197,28 @@ function TestCases({
                     return (
                       <div
                         className={`
-                        rounded-xl p-4 space-y-4
-                        ${Colors.background.primary}
-                        ${Colors.border.fadedThin}
-                      `}
+    rounded-xl p-4 space-y-4 border
+    transition-all duration-300
+    ${
+      o.isCorrect
+        ? "bg-green-500/5 border-green-500/40 shadow-[0_0_20px_rgba(34,197,94,0.15)]"
+        : "bg-red-500/5 border-red-500/40 shadow-[0_0_20px_rgba(239,68,68,0.15)]"
+    }
+  `}
                       >
                         <div className="flex justify-between items-center">
                           <span className={`text-xs ${Colors.text.secondary}`}>
                             Testcase {activeCase + 1}
                           </span>
                           <span
-                            className={`text-xs font-semibold ${
-                              o.isCorrect
-                                ? Colors.text.special
-                                : Colors.text.secondary
-                            }`}
+                            className={`
+    text-xs font-semibold px-2 py-1 rounded-full
+    ${
+      o.isCorrect
+        ? "bg-green-500/20 text-green-400"
+        : "bg-red-500/20 text-red-400"
+    }
+  `}
                           >
                             {o.isCorrect ? "Passed" : "Failed"}
                           </span>
@@ -267,7 +274,7 @@ function TestCases({
                             rounded-md p-2 font-mono text-sm
                             ${Colors.background.secondary}
                             ${Colors.border.fadedThin}
-                            ${o.isCorrect ? Colors.text.special : Colors.text.secondary}
+${o.isCorrect ? "text-green-400" : "text-red-400"}
                           `}
                           >
                             {o.actualOutput || "—"}
